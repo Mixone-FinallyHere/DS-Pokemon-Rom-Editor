@@ -21,6 +21,141 @@ namespace DSPRE {
             //parent = (this.Parent as MainProgram);
         }
 
+        public void SetupEventEditor(MainProgram main) {
+            parent = main;
+            /* Extract essential NARCs sub-archives*/
+
+            parent.statusLabelMessage("Attempting to unpack Event Editor NARCs... Please wait. This might take a while");
+
+            DSUtils.TryUnpackNarcs(new List<DirNames> { DirNames.matrices,
+                DirNames.maps,
+                DirNames.exteriorBuildingModels,
+                DirNames.buildingConfigFiles,
+                DirNames.buildingTextures,
+                DirNames.mapTextures,
+                DirNames.areaData,
+
+                DirNames.eventFiles,
+                DirNames.trainerProperties,
+                DirNames.OWSprites,
+
+                DirNames.scripts,
+            });
+
+            RomInfo.SetOWtable();
+            RomInfo.Set3DOverworldsDict();
+
+            if (RomInfo.gameFamily == gFamEnum.HGSS) {
+                DSUtils.TryUnpackNarcs(new List<DirNames> { DirNames.interiorBuildingModels });
+            }
+
+            parent.disableHandlers = true;
+            if (File.Exists(RomInfo.OWtablePath)) {
+                switch (RomInfo.gameFamily) {
+                    case gFamEnum.DP:
+                    case gFamEnum.Plat:
+                        break;
+
+                    default:
+                        // HGSS Overlay 1 must be decompressed in order to read the overworld table
+                        if (DSUtils.CheckOverlayHasCompressionFlag(1)) {
+                            if (DSUtils.OverlayIsCompressed(1)) {
+                                if (DSUtils.DecompressOverlay(1) < 0) {
+                                    MessageBox.Show("Overlay 1 couldn't be decompressed.\nOverworld sprites in the Event Editor will be " +
+                                "displayed incorrectly or not displayed at all.", "Unexpected EOF", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
+                            }
+                        }
+
+                        break;
+                }
+            }
+
+            /* Add event file numbers to box */
+            parent.statusLabelMessage("Loading Events... Please wait.");
+            Update();
+
+            int eventCount = RomInfo.GetEventFileCount();
+            RomInfo.ReadOWTable();
+
+            eventEditorWarpHeaderListBox.Items.Clear();
+            eventEditorWarpHeaderListBox.Items.AddRange(parent.headerListBoxNames.ToArray());
+            eventEditorHeaderLocationNameLabel.Text = "";
+
+            string[] trainerNames = parent.GetTrainerNames();
+            parent.StartProgress(0, (int)(eventCount + RomInfo.OverworldTable.Keys.Max() + trainerNames.Length));
+
+            /* Add event list to event combobox */
+            selectEventComboBox.Items.Clear();
+            for (int i = 0; i < eventCount; i++) {
+                selectEventComboBox.Items.Add("Event File " + i);
+                parent.IncreaseProgress();
+            }
+
+            /* Add sprite list to ow sprite box */
+            owSpriteComboBox.Items.Clear();
+            foreach (ushort key in RomInfo.OverworldTable.Keys) {
+                owSpriteComboBox.Items.Add("OW Entry " + key);
+                parent.IncreaseProgress();
+            }
+
+            /* Add trainer list to ow trainer box */
+            owTrainerComboBox.Items.Clear();
+            owTrainerComboBox.Items.AddRange(trainerNames);
+
+            /* Add item list to ow item box */
+            string[] itemNames = RomInfo.GetItemNames();
+            if (ROMToolboxDialog.CheckScriptsStandardizedItemNumbers()) {
+                UpdateItemComboBox(itemNames);
+            } else {
+                ScriptFile itemScript = new ScriptFile(RomInfo.itemScriptFileNumber);
+                owItemComboBox.Items.Clear();
+                foreach (CommandContainer cont in itemScript.allScripts) {
+                    if (cont.commands.Count > 4) {
+                        continue;
+                    }
+                    owItemComboBox.Items.Add(BitConverter.ToUInt16(cont.commands[1].cmdParams[1], 0) + "x " + itemNames[BitConverter.ToUInt16(cont.commands[0].cmdParams[1], 0)]);
+                }
+            }
+
+            /* Add ow movement list to box */
+            owMovementComboBox.Items.Clear();
+            spawnableDirComboBox.Items.Clear();
+            spawnableTypeComboBox.Items.Clear();
+            owMovementComboBox.Items.AddRange(PokeDatabase.EventEditor.Overworlds.movementsArray);
+            spawnableDirComboBox.Items.AddRange(PokeDatabase.EventEditor.Spawnables.orientationsArray);
+            spawnableTypeComboBox.Items.AddRange(PokeDatabase.EventEditor.Spawnables.typesArray);
+
+            /* Draw matrix 0 in matrix navigator */
+            eventMatrix = new GameMatrix(0);
+
+            showSpawnablesCheckBox.Checked = Properties.Settings.Default.renderSpawnables;
+            showOwsCheckBox.Checked = Properties.Settings.Default.renderOverworlds;
+            showWarpsCheckBox.Checked = Properties.Settings.Default.renderWarps;
+            showTriggersCheckBox.Checked = Properties.Settings.Default.renderTriggers;
+
+            if (owOrientationComboBox.SelectedIndex < 0 && overworldsListBox.Items.Count <= 0) {
+                owOrientationComboBox.SelectedIndex = 2;
+            }
+
+            if (owMovementComboBox.SelectedIndex < 0 && overworldsListBox.Items.Count <= 0) {
+                owOrientationComboBox.SelectedIndex = 1;
+            }
+
+            eventMatrixUpDown.Maximum = parent.GetRomInfo().GetMatrixCount() - 1;
+            eventAreaDataUpDown.Maximum = parent.GetRomInfo().GetAreaDataCount() - 1;
+
+            parent.disableHandlers = false;
+
+            selectEventComboBox.SelectedIndex = 0;
+            owItemComboBox.SelectedIndex = 0;
+            owTrainerComboBox.SelectedIndex = 0;
+
+            parent.FinishProgress();
+
+            parent.statusLabelMessage();
+        }
+
         #region Variables
 
         public const byte tileSize = 16;
@@ -41,12 +176,12 @@ namespace DSPRE {
 
         #region Subroutines
 
-        public void Modify_eventMatrixUpDown_Max(bool increase) {
-            if (increase) {
-                eventMatrixUpDown.Maximum++;
-            } else {
-                eventMatrixUpDown.Maximum--;
-            }
+        public string GetCurrentEventFileName() {
+            return selectEventComboBox.SelectedIndex.ToString("D4");
+        }
+
+        public void InitOpenGL() {
+            eventOpenGlControl.InitializeContexts();
         }
 
         public void Modify_eventAreaUpDown_Max(bool increase) {
@@ -57,10 +192,13 @@ namespace DSPRE {
             }
         }
 
-        public void InitOpenGL() {
-            eventOpenGlControl.InitializeContexts();
+        public void Modify_eventMatrixUpDown_Max(bool increase) {
+            if (increase) {
+                eventMatrixUpDown.Maximum++;
+            } else {
+                eventMatrixUpDown.Maximum--;
+            }
         }
-
         public void ObtainOpenGL() {
             eventOpenGlControl.MakeCurrent();
         }
@@ -68,17 +206,8 @@ namespace DSPRE {
         public void StopOpenGL() {
             eventOpenGlControl.Invalidate();
         }
-
-        public string GetCurrentEventFileName() {
-            return selectEventComboBox.SelectedIndex.ToString("D4");
-        }
-
-        public void UpdateTrainerName(int index, string name) {
-            owTrainerComboBox.Items[index] = name;
-        }
-
-        public void UpdateHeaderWarpName(int index, string name) {
-            eventEditorWarpHeaderListBox.Items[index] = name;
+        public void TriggerEventChange() {
+            selectEventComboBox_SelectedIndexChanged(null, null);
         }
 
         public void UpdateFromHeaderTab(decimal matrix, int eventID, decimal area) {
@@ -92,6 +221,25 @@ namespace DSPRE {
             eventMatrixUpDown_ValueChanged(null, null);
         }
 
+        public void UpdateHeaderWarpName(int index, string name) {
+            eventEditorWarpHeaderListBox.Items[index] = name;
+        }
+
+        public void UpdateItemComboBox(string[] itemNames) {
+            if (itemComboboxIsUpToDate) {
+                return;
+            }
+            itemsSelectorHelpBtn.Visible = false;
+            owItemComboBox.Size = new Size(new Point(owItemComboBox.Size.Width + 30, owItemComboBox.Size.Height));
+            owItemComboBox.Items.Clear();
+            owItemComboBox.Items.AddRange(itemNames);
+            OWTypeChanged(null, null);
+            itemComboboxIsUpToDate = true;
+        }
+
+        public void UpdateTrainerName(int index, string name) {
+            owTrainerComboBox.Items[index] = name;
+        }
         private void CenterEventViewOnEntities() {
             int destX = 0;
             int destY = 0;
@@ -542,13 +690,6 @@ namespace DSPRE {
             return false;
         }
 
-        private void itemsSelectorHelpBtn_Click(object sender, EventArgs e) {
-            MessageBox.Show("This selector allows you to pick a preset Ground Item script from the game data.\n" +
-                "Unlike in previous DSPRE versions, you can now change the Ground Item to be obtained even if you decided not to apply the Standardize Items patch from the Rom ToolBox.\n\n" +
-                "However, some items are unavailable by default. The aforementioned patch can neutralize this limitation.\n\n",
-                "About Ground Items", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
         private void MarkActiveCell(int xPosition, int yPosition) {
             /*  Redraw the matrix to avoid multiple green cells  */
             DrawEventMatrix();
@@ -592,159 +733,41 @@ namespace DSPRE {
             }
             eventMatrixPictureBox.Invalidate();
         }
-
-        public void UpdateItemComboBox(string[] itemNames) {
-            if (itemComboboxIsUpToDate) {
+        private void updateSelectedOverworldName() {
+            int index = overworldsListBox.SelectedIndex;
+            if (index < 0) {
                 return;
             }
-            itemsSelectorHelpBtn.Visible = false;
-            owItemComboBox.Size = new Size(new Point(owItemComboBox.Size.Width + 30, owItemComboBox.Size.Height));
-            owItemComboBox.Items.Clear();
-            owItemComboBox.Items.AddRange(itemNames);
-            OWTypeChanged(null, null);
-            itemComboboxIsUpToDate = true;
+            overworldsListBox.Items[index] = index.ToString("D" + Math.Max(0, overworldsListBox.Items.Count - 1).ToString().Length) + ": " + (selectedEvent as Overworld).ToString();
         }
 
-        public void TriggerEventChange() {
-            selectEventComboBox_SelectedIndexChanged(null, null);
+        private void updateSelectedSpawnableName() {
+            int index = spawnablesListBox.SelectedIndex;
+            if (index < 0) {
+                return;
+            }
+            spawnablesListBox.Items[index] = index.ToString("D" + Math.Max(0, spawnablesListBox.Items.Count - 1).ToString().Length) + ": " + (selectedEvent as Spawnable).ToString();
+        }
+
+        private void updateSelectedTriggerName() {
+            int index = triggersListBox.SelectedIndex;
+            if (index < 0) {
+                return;
+            }
+            triggersListBox.Items[index] = index.ToString("D" + Math.Max(0, triggersListBox.Items.Count - 1).ToString().Length) + ": " + (selectedEvent as Trigger).ToString();
+        }
+
+        private void updateSelectedWarpName() {
+            int index = warpsListBox.SelectedIndex;
+            if (index < 0) {
+                return;
+            }
+            warpsListBox.Items[index] = index.ToString("D" + Math.Max(0, warpsListBox.Items.Count - 1).ToString().Length) + ": " + (selectedEvent as Warp).ToString();
         }
 
         #endregion Subroutines
 
-        public void SetupEventEditor(MainProgram main) {
-            parent = main;
-            /* Extract essential NARCs sub-archives*/
-
-            parent.statusLabelMessage("Attempting to unpack Event Editor NARCs... Please wait. This might take a while");
-
-            DSUtils.TryUnpackNarcs(new List<DirNames> { DirNames.matrices,
-                DirNames.maps,
-                DirNames.exteriorBuildingModels,
-                DirNames.buildingConfigFiles,
-                DirNames.buildingTextures,
-                DirNames.mapTextures,
-                DirNames.areaData,
-
-                DirNames.eventFiles,
-                DirNames.trainerProperties,
-                DirNames.OWSprites,
-
-                DirNames.scripts,
-            });
-
-            RomInfo.SetOWtable();
-            RomInfo.Set3DOverworldsDict();
-
-            if (RomInfo.gameFamily == gFamEnum.HGSS) {
-                DSUtils.TryUnpackNarcs(new List<DirNames> { DirNames.interiorBuildingModels });
-            }
-
-            parent.disableHandlers = true;
-            if (File.Exists(RomInfo.OWtablePath)) {
-                switch (RomInfo.gameFamily) {
-                    case gFamEnum.DP:
-                    case gFamEnum.Plat:
-                        break;
-
-                    default:
-                        // HGSS Overlay 1 must be decompressed in order to read the overworld table
-                        if (DSUtils.CheckOverlayHasCompressionFlag(1)) {
-                            if (DSUtils.OverlayIsCompressed(1)) {
-                                if (DSUtils.DecompressOverlay(1) < 0) {
-                                    MessageBox.Show("Overlay 1 couldn't be decompressed.\nOverworld sprites in the Event Editor will be " +
-                                "displayed incorrectly or not displayed at all.", "Unexpected EOF", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                }
-                            }
-                        }
-
-                        break;
-                }
-            }
-
-            /* Add event file numbers to box */
-            parent.statusLabelMessage("Loading Events... Please wait.");
-            Update();
-
-            int eventCount = RomInfo.GetEventFileCount();
-            RomInfo.ReadOWTable();
-
-            eventEditorWarpHeaderListBox.Items.Clear();
-            eventEditorWarpHeaderListBox.Items.AddRange(parent.headerListBoxNames.ToArray());
-            eventEditorHeaderLocationNameLabel.Text = "";
-
-            string[] trainerNames = parent.GetTrainerNames();
-            parent.StartProgress(0, (int)(eventCount + RomInfo.OverworldTable.Keys.Max() + trainerNames.Length));
-
-            /* Add event list to event combobox */
-            selectEventComboBox.Items.Clear();
-            for (int i = 0; i < eventCount; i++) {
-                selectEventComboBox.Items.Add("Event File " + i);
-                parent.IncreaseProgress();
-            }
-
-            /* Add sprite list to ow sprite box */
-            owSpriteComboBox.Items.Clear();
-            foreach (ushort key in RomInfo.OverworldTable.Keys) {
-                owSpriteComboBox.Items.Add("OW Entry " + key);
-                parent.IncreaseProgress();
-            }
-
-            /* Add trainer list to ow trainer box */
-            owTrainerComboBox.Items.Clear();
-            owTrainerComboBox.Items.AddRange(trainerNames);
-
-            /* Add item list to ow item box */
-            string[] itemNames = RomInfo.GetItemNames();
-            if (ROMToolboxDialog.CheckScriptsStandardizedItemNumbers()) {
-                UpdateItemComboBox(itemNames);
-            } else {
-                ScriptFile itemScript = new ScriptFile(RomInfo.itemScriptFileNumber);
-                owItemComboBox.Items.Clear();
-                foreach (CommandContainer cont in itemScript.allScripts) {
-                    if (cont.commands.Count > 4) {
-                        continue;
-                    }
-                    owItemComboBox.Items.Add(BitConverter.ToUInt16(cont.commands[1].cmdParams[1], 0) + "x " + itemNames[BitConverter.ToUInt16(cont.commands[0].cmdParams[1], 0)]);
-                }
-            }
-
-            /* Add ow movement list to box */
-            owMovementComboBox.Items.Clear();
-            spawnableDirComboBox.Items.Clear();
-            spawnableTypeComboBox.Items.Clear();
-            owMovementComboBox.Items.AddRange(PokeDatabase.EventEditor.Overworlds.movementsArray);
-            spawnableDirComboBox.Items.AddRange(PokeDatabase.EventEditor.Spawnables.orientationsArray);
-            spawnableTypeComboBox.Items.AddRange(PokeDatabase.EventEditor.Spawnables.typesArray);
-
-            /* Draw matrix 0 in matrix navigator */
-            eventMatrix = new GameMatrix(0);
-
-            showSpawnablesCheckBox.Checked = Properties.Settings.Default.renderSpawnables;
-            showOwsCheckBox.Checked = Properties.Settings.Default.renderOverworlds;
-            showWarpsCheckBox.Checked = Properties.Settings.Default.renderWarps;
-            showTriggersCheckBox.Checked = Properties.Settings.Default.renderTriggers;
-
-            if (owOrientationComboBox.SelectedIndex < 0 && overworldsListBox.Items.Count <= 0) {
-                owOrientationComboBox.SelectedIndex = 2;
-            }
-
-            if (owMovementComboBox.SelectedIndex < 0 && overworldsListBox.Items.Count <= 0) {
-                owOrientationComboBox.SelectedIndex = 1;
-            }
-
-            eventMatrixUpDown.Maximum = parent.GetRomInfo().GetMatrixCount() - 1;
-            eventAreaDataUpDown.Maximum = parent.GetRomInfo().GetAreaDataCount() - 1;
-
-            parent.disableHandlers = false;
-
-            selectEventComboBox.SelectedIndex = 0;
-            owItemComboBox.SelectedIndex = 0;
-            owTrainerComboBox.SelectedIndex = 0;
-
-            parent.FinishProgress();
-
-            parent.statusLabelMessage();
-        }
+        #region EventHandlers
 
         private void addEventFileButton_Click(object sender, EventArgs e) {
             /* Add copy of event 0 to event folder */
@@ -946,6 +969,42 @@ namespace DSPRE {
             }
         }
 
+        private void eventsTabControl_SelectedIndexChanged(object sender, EventArgs e) {
+            if (eventsTabControl.SelectedTab == signsTabPage) {
+                int spawnablesCount = spawnablesListBox.Items.Count;
+
+                if (spawnablesCount > 0) {
+                    spawnablesListBox.SelectedIndex = 0;
+                }
+            } else if (eventsTabControl.SelectedTab == overworldsTabPage) {
+                int overworldsCount = overworldsListBox.Items.Count;
+
+                int selected = 0;
+
+                if (overworldsCount > 0) {
+                    if (selectedEvent is Overworld) {
+                        int owId = (selectedEvent as Overworld).owID;
+                        if (owId < overworldsCount) {
+                            selected = owId;
+                        }
+                    }
+                    overworldsListBox.SelectedIndex = selected;
+                }
+            } else if (eventsTabControl.SelectedTab == warpsTabPage) {
+                int warpsCount = warpsListBox.Items.Count;
+
+                if (warpsCount > 0) {
+                    warpsListBox.SelectedIndex = 0;
+                }
+            } else if (eventsTabControl.SelectedTab == triggersTabPage) {
+                int triggersCount = triggersListBox.Items.Count;
+
+                if (triggersCount > 0) {
+                    triggersListBox.SelectedIndex = 0;
+                }
+            }
+        }
+
         private void exportEventFileButton_Click(object sender, EventArgs e) {
             currentEvFile.SaveToFileExplorePath("Event File " + selectEventComboBox.SelectedIndex);
         }
@@ -1049,6 +1108,12 @@ namespace DSPRE {
             }
         }
 
+        private void itemsSelectorHelpBtn_Click(object sender, EventArgs e) {
+            MessageBox.Show("This selector allows you to pick a preset Ground Item script from the game data.\n" +
+                "Unlike in previous DSPRE versions, you can now change the Ground Item to be obtained even if you decided not to apply the Standardize Items patch from the Rom ToolBox.\n\n" +
+                "However, some items are unavailable by default. The aforementioned patch can neutralize this limitation.\n\n",
+                "About Ground Items", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
         private void removeEventFileButton_Click(object sender, EventArgs e) {
             DialogResult d = MessageBox.Show("Are you sure you want to delete the last Event File?", "Confirm deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (d.Equals(DialogResult.Yes)) {
@@ -1115,43 +1180,6 @@ namespace DSPRE {
             Properties.Settings.Default.renderWarps = showWarpsCheckBox.Checked;
             Properties.Settings.Default.renderTriggers = showTriggersCheckBox.Checked;
         }
-
-        private void eventsTabControl_SelectedIndexChanged(object sender, EventArgs e) {
-            if (eventsTabControl.SelectedTab == signsTabPage) {
-                int spawnablesCount = spawnablesListBox.Items.Count;
-
-                if (spawnablesCount > 0) {
-                    spawnablesListBox.SelectedIndex = 0;
-                }
-            } else if (eventsTabControl.SelectedTab == overworldsTabPage) {
-                int overworldsCount = overworldsListBox.Items.Count;
-
-                int selected = 0;
-
-                if (overworldsCount > 0) {
-                    if (selectedEvent is Overworld) {
-                        int owId = (selectedEvent as Overworld).owID;
-                        if (owId < overworldsCount) {
-                            selected = owId;
-                        }
-                    }
-                    overworldsListBox.SelectedIndex = selected;
-                }
-            } else if (eventsTabControl.SelectedTab == warpsTabPage) {
-                int warpsCount = warpsListBox.Items.Count;
-
-                if (warpsCount > 0) {
-                    warpsListBox.SelectedIndex = 0;
-                }
-            } else if (eventsTabControl.SelectedTab == triggersTabPage) {
-                int triggersCount = triggersListBox.Items.Count;
-
-                if (triggersCount > 0) {
-                    triggersListBox.SelectedIndex = 0;
-                }
-            }
-        }
-
         #region Spawnables Tab
 
         private void addSpawnableButton_Click(object sender, EventArgs e) {
@@ -1851,38 +1879,6 @@ namespace DSPRE {
             }
         }
 
-        private void updateSelectedOverworldName() {
-            int index = overworldsListBox.SelectedIndex;
-            if (index < 0) {
-                return;
-            }
-            overworldsListBox.Items[index] = index.ToString("D" + Math.Max(0, overworldsListBox.Items.Count - 1).ToString().Length) + ": " + (selectedEvent as Overworld).ToString();
-        }
-
-        private void updateSelectedSpawnableName() {
-            int index = spawnablesListBox.SelectedIndex;
-            if (index < 0) {
-                return;
-            }
-            spawnablesListBox.Items[index] = index.ToString("D" + Math.Max(0, spawnablesListBox.Items.Count - 1).ToString().Length) + ": " + (selectedEvent as Spawnable).ToString();
-        }
-
-        private void updateSelectedTriggerName() {
-            int index = triggersListBox.SelectedIndex;
-            if (index < 0) {
-                return;
-            }
-            triggersListBox.Items[index] = index.ToString("D" + Math.Max(0, triggersListBox.Items.Count - 1).ToString().Length) + ": " + (selectedEvent as Trigger).ToString();
-        }
-
-        private void updateSelectedWarpName() {
-            int index = warpsListBox.SelectedIndex;
-            if (index < 0) {
-                return;
-            }
-            warpsListBox.Items[index] = index.ToString("D" + Math.Max(0, warpsListBox.Items.Count - 1).ToString().Length) + ": " + (selectedEvent as Warp).ToString();
-        }
-
         private void warpAnchorUpDown_ValueChanged(object sender, EventArgs e) {
             if (parent.disableHandlers || warpsListBox.SelectedIndex < 0) {
                 return;
@@ -2145,5 +2141,7 @@ namespace DSPRE {
         }
 
         #endregion Triggers Tab
+
+        #endregion EventHandlers
     }
 }

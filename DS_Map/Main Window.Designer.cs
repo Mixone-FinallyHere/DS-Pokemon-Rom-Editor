@@ -8120,7 +8120,7 @@
             this.openROMToolStripMenuItem.Image = global::DSPRE.Properties.Resources.open_rom;
             this.openROMToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.openROMToolStripMenuItem.Name = "openROMToolStripMenuItem";
-            this.openROMToolStripMenuItem.Size = new System.Drawing.Size(155, 38);
+            this.openROMToolStripMenuItem.Size = new System.Drawing.Size(196, 38);
             this.openROMToolStripMenuItem.Text = "Open ROM";
             this.openROMToolStripMenuItem.Click += new System.EventHandler(this.loadRom_Click);
             // 
@@ -8129,7 +8129,7 @@
             this.openFolderToolStripMenuItem.Image = global::DSPRE.Properties.Resources.open_file;
             this.openFolderToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
-            this.openFolderToolStripMenuItem.Size = new System.Drawing.Size(155, 38);
+            this.openFolderToolStripMenuItem.Size = new System.Drawing.Size(196, 38);
             this.openFolderToolStripMenuItem.Text = "Open Folder";
             this.openFolderToolStripMenuItem.Click += new System.EventHandler(this.readDataFromFolderButton_Click);
             // 
@@ -8139,7 +8139,7 @@
             this.saveROMToolStripMenuItem.Image = global::DSPRE.Properties.Resources.save_rom;
             this.saveROMToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.saveROMToolStripMenuItem.Name = "saveROMToolStripMenuItem";
-            this.saveROMToolStripMenuItem.Size = new System.Drawing.Size(155, 38);
+            this.saveROMToolStripMenuItem.Size = new System.Drawing.Size(196, 38);
             this.saveROMToolStripMenuItem.Text = "Save ROM";
             this.saveROMToolStripMenuItem.Click += new System.EventHandler(this.saveRom_Click);
             // 
@@ -8783,6 +8783,7 @@
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1214, 761);
             this.Controls.Add(this.versionLabel);
             this.Controls.Add(this.languageLabel);

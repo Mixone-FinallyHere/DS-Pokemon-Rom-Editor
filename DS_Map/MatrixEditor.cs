@@ -19,26 +19,29 @@ namespace DSPRE {
             //parent = (Parent as MainProgram);
         }
 
-        #region Subroutines
+        public void SetupMatrixEditor(MainProgram main) {
+            parent = main;
+            DSUtils.TryUnpackNarcs(new List<DirNames> { DirNames.matrices });
 
-        private void ClearMatrixTables() {
-            headersGridView.Rows.Clear();
-            headersGridView.Columns.Clear();
-            heightsGridView.Rows.Clear();
-            heightsGridView.Columns.Clear();
-            mapFilesGridView.Rows.Clear();
-            mapFilesGridView.Columns.Clear();
-            matrixTabControl.TabPages.Remove(headersTabPage);
-            matrixTabControl.TabPages.Remove(heightsTabPage);
-        }
+            parent.disableHandlers = true;
 
-        private (Color background, Color foreground) FormatMapCell(uint cellValue) {
-            foreach (KeyValuePair<List<uint>, (Color background, Color foreground)> entry in parent.GetRomInfo().MapCellsColorDictionary) {
-                if (entry.Key.Contains(cellValue))
-                    return entry.Value;
+            /* Add matrix entries to ComboBox */
+            selectMatrixComboBox.Items.Clear();
+            selectMatrixComboBox.Items.Add("Matrix 0 - Main");
+            for (int i = 1; i < parent.GetRomInfo().GetMatrixCount(); i++) {
+                selectMatrixComboBox.Items.Add(new GameMatrix(i));
             }
-            return (Color.White, Color.Black);
+
+            if (!ReadColorTable(Properties.Settings.Default.lastColorTablePath, silent: true)) {
+                parent.GetRomInfo().ResetMapCellsColorDictionary();
+            }
+            RomInfo.SetupSpawnSettings();
+
+            parent.disableHandlers = false;
+            selectMatrixComboBox.SelectedIndex = 0;
         }
+
+        #region Subroutines
 
         public string GetCurrentMatrixName() {
             return selectMatrixComboBox.SelectedIndex.ToString("D4");
@@ -62,6 +65,36 @@ namespace DSPRE {
             }
         }
 
+        public void Swap(ref uint a, ref uint b) {
+            uint temp = a;
+            a = b;
+            b = temp;
+        }
+
+        private void ClearMatrixTables() {
+            headersGridView.Rows.Clear();
+            headersGridView.Columns.Clear();
+            heightsGridView.Rows.Clear();
+            heightsGridView.Columns.Clear();
+            mapFilesGridView.Rows.Clear();
+            mapFilesGridView.Columns.Clear();
+            matrixTabControl.TabPages.Remove(headersTabPage);
+            matrixTabControl.TabPages.Remove(heightsTabPage);
+        }
+
+        private void DisplaySelection(DataGridViewSelectedCellCollection selectedCells) {
+            if (selectedCells.Count > 0) {
+                parent.statusLabelMessage("Selection:   " + selectedCells[0].ColumnIndex + ", " + selectedCells[0].RowIndex);
+            }
+        }
+
+        private (Color background, Color foreground) FormatMapCell(uint cellValue) {
+            foreach (KeyValuePair<List<uint>, (Color background, Color foreground)> entry in parent.GetRomInfo().MapCellsColorDictionary) {
+                if (entry.Key.Contains(cellValue))
+                    return entry.Value;
+            }
+            return (Color.White, Color.Black);
+        }
         private void GenerateMatrixTables() {
             /* Generate table columns */
             if (currentMatrix is null) {
@@ -113,28 +146,6 @@ namespace DSPRE {
             if (currentMatrix.hasHeightsSection) {
                 matrixTabControl.TabPages.Add(heightsTabPage);
             }
-        }
-
-        public void SetupMatrixEditor(MainProgram main) {
-            parent = main;
-            DSUtils.TryUnpackNarcs(new List<DirNames> { DirNames.matrices });
-
-            parent.disableHandlers = true;
-
-            /* Add matrix entries to ComboBox */
-            selectMatrixComboBox.Items.Clear();
-            selectMatrixComboBox.Items.Add("Matrix 0 - Main");
-            for (int i = 1; i < parent.GetRomInfo().GetMatrixCount(); i++) {
-                selectMatrixComboBox.Items.Add(new GameMatrix(i));
-            }
-
-            if (!ReadColorTable(Properties.Settings.Default.lastColorTablePath, silent: true)) {
-                parent.GetRomInfo().ResetMapCellsColorDictionary();
-            }
-            RomInfo.SetupSpawnSettings();
-
-            parent.disableHandlers = false;
-            selectMatrixComboBox.SelectedIndex = 0;
         }
 
         private bool ReadColorTable(string fileName, bool silent) {
@@ -257,14 +268,9 @@ namespace DSPRE {
                 return false;
             }
         }
-
-        public void Swap(ref uint a, ref uint b) {
-            uint temp = a;
-            a = b;
-            b = temp;
-        }
-
         #endregion Subroutines
+
+        #region EventHandlers
 
         private void addHeaderSectionButton_Click(object sender, EventArgs e) {
             if (!currentMatrix.hasHeadersSection) {
@@ -299,29 +305,28 @@ namespace DSPRE {
             currentMatrix.SaveToFileExplorePath("Matrix " + selectMatrixComboBox.SelectedIndex);
         }
 
-        private void saveMatrixButton_Click(object sender, EventArgs e) {
-            currentMatrix.SaveToFileDefaultDir(selectMatrixComboBox.SelectedIndex);
-            GameMatrix saved = new GameMatrix(selectMatrixComboBox.SelectedIndex);
-            selectMatrixComboBox.Items[selectMatrixComboBox.SelectedIndex] = saved.ToString();
-            (parent.GetEditor("Event") as EventEditor).eventMatrix = saved; // TODO: Replace with EventEditor.cs control
-        }
-
-        private void headersGridView_SelectionChanged(object sender, EventArgs e) {
-            DisplaySelection(headersGridView.SelectedCells);
-        }
-
-        private void heightsGridView_SelectionChanged(object sender, EventArgs e) {
-            DisplaySelection(heightsGridView.SelectedCells);
-        }
-
-        private void mapFilesGridView_SelectionChanged(object sender, EventArgs e) {
-            DisplaySelection(mapFilesGridView.SelectedCells);
-        }
-
-        private void DisplaySelection(DataGridViewSelectedCellCollection selectedCells) {
-            if (selectedCells.Count > 0) {
-                parent.statusLabelMessage("Selection:   " + selectedCells[0].ColumnIndex + ", " + selectedCells[0].RowIndex);
+        private void headersGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) {
+            if (e.Value is null) {
+                return;
             }
+
+            parent.disableHandlers = true;
+
+            /* Format table cells corresponding to border maps or void */
+            if (!ushort.TryParse(mapFilesGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString(), out ushort colorValue)) {
+                colorValue = GameMatrix.EMPTY;
+            }
+
+            (Color back, Color fore) = FormatMapCell(colorValue);
+            e.CellStyle.BackColor = back;
+            e.CellStyle.ForeColor = fore;
+
+            /* If invalid input is entered, show 00 */
+            if (!ushort.TryParse(headersGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString(), out _)) {
+                e.Value = 0;
+            }
+
+            parent.disableHandlers = false;
         }
 
         private void headersGridView_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e) {
@@ -355,7 +360,11 @@ namespace DSPRE {
             }
         }
 
-        private void headersGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) {
+        private void headersGridView_SelectionChanged(object sender, EventArgs e) {
+            DisplaySelection(headersGridView.SelectedCells);
+        }
+
+        private void heightsGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) {
             if (e.Value is null) {
                 return;
             }
@@ -363,19 +372,22 @@ namespace DSPRE {
             parent.disableHandlers = true;
 
             /* Format table cells corresponding to border maps or void */
-            if (!ushort.TryParse(mapFilesGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString(), out ushort colorValue)) {
-                colorValue = GameMatrix.EMPTY;
-            }
+            ushort colorValue = 0;
+            try {
+                colorValue = ushort.Parse(mapFilesGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString());
+            } catch { }
 
             (Color back, Color fore) = FormatMapCell(colorValue);
             e.CellStyle.BackColor = back;
             e.CellStyle.ForeColor = fore;
 
             /* If invalid input is entered, show 00 */
-            if (!ushort.TryParse(headersGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString(), out _)) {
-                e.Value = 0;
-            }
+            byte cellValue = 0;
+            try {
+                cellValue = byte.Parse(heightsGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString());
+            } catch { }
 
+            e.Value = cellValue;
             parent.disableHandlers = false;
         }
 
@@ -395,43 +407,8 @@ namespace DSPRE {
             }
         }
 
-        private void widthUpDown_ValueChanged(object sender, EventArgs e) {
-            if (parent.disableHandlers) {
-                return;
-            }
-            parent.disableHandlers = true;
-
-            /* Add or remove rows in DataGridView control */
-            int delta = (int)widthUpDown.Value - currentMatrix.width;
-            for (int i = 0; i < Math.Abs(delta); i++) {
-                if (delta < 0) {
-                    headersGridView.Columns.RemoveAt(currentMatrix.width - 1 - i);
-                    heightsGridView.Columns.RemoveAt(currentMatrix.width - 1 - i);
-                    mapFilesGridView.Columns.RemoveAt(currentMatrix.width - 1 - i);
-                } else {
-                    /* Add columns */
-                    int index = currentMatrix.width + i;
-                    headersGridView.Columns.Add(" ", (index).ToString());
-                    heightsGridView.Columns.Add(" ", (index).ToString());
-                    mapFilesGridView.Columns.Add(" ", (index).ToString());
-
-                    /* Adjust column width */
-                    headersGridView.Columns[index].Width = 34;
-                    heightsGridView.Columns[index].Width = 22;
-                    mapFilesGridView.Columns[index].Width = 34;
-
-                    /* Fill new rows */
-                    for (int j = 0; j < currentMatrix.height; j++) {
-                        headersGridView.Rows[j].Cells[index].Value = 0;
-                        heightsGridView.Rows[j].Cells[index].Value = 0;
-                        mapFilesGridView.Rows[j].Cells[index].Value = GameMatrix.EMPTY;
-                    }
-                }
-            }
-
-            /* Modify matrix object */
-            currentMatrix.ResizeMatrix((int)heightUpDown.Value, (int)widthUpDown.Value);
-            parent.disableHandlers = false;
+        private void heightsGridView_SelectionChanged(object sender, EventArgs e) {
+            DisplaySelection(heightsGridView.SelectedCells);
         }
 
         private void heightUpDown_ValueChanged(object sender, EventArgs e) {
@@ -472,31 +449,15 @@ namespace DSPRE {
             parent.disableHandlers = false;
         }
 
-        private void heightsGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) {
-            if (e.Value is null) {
+        private void importColorTableButton_Click(object sender, EventArgs e) {
+            OpenFileDialog of = new OpenFileDialog {
+                Filter = "DSPRE Color Table File (*.ctb)|*.ctb"
+            };
+            if (of.ShowDialog(this) != DialogResult.OK) {
                 return;
             }
 
-            parent.disableHandlers = true;
-
-            /* Format table cells corresponding to border maps or void */
-            ushort colorValue = 0;
-            try {
-                colorValue = ushort.Parse(mapFilesGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString());
-            } catch { }
-
-            (Color back, Color fore) = FormatMapCell(colorValue);
-            e.CellStyle.BackColor = back;
-            e.CellStyle.ForeColor = fore;
-
-            /* If invalid input is entered, show 00 */
-            byte cellValue = 0;
-            try {
-                cellValue = byte.Parse(heightsGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString());
-            } catch { }
-
-            e.Value = cellValue;
-            parent.disableHandlers = false;
+            ReadColorTable(of.FileName, silent: false);
         }
 
         private void importMatrixButton_Click(object sender, EventArgs e) {
@@ -535,6 +496,25 @@ namespace DSPRE {
             /* Display success message */
             MessageBox.Show("Matrix imported successfully!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
             parent.statusLabelMessage();
+        }
+
+        private void mapFilesGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) {
+            parent.disableHandlers = true;
+
+            /* Format table cells corresponding to border maps or void */
+            ushort colorValue = GameMatrix.EMPTY;
+            try {
+                colorValue = ushort.Parse(mapFilesGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString());
+            } catch { }
+
+            (Color backColor, Color foreColor) cellColors = FormatMapCell(colorValue);
+            e.CellStyle.BackColor = cellColors.backColor;
+            e.CellStyle.ForeColor = cellColors.foreColor;
+
+            if (colorValue == GameMatrix.EMPTY)
+                e.Value = '-';
+
+            parent.disableHandlers = false;
         }
 
         private void mapFilesGridView_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e) {
@@ -664,23 +644,8 @@ namespace DSPRE {
             }
         }
 
-        private void mapFilesGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) {
-            parent.disableHandlers = true;
-
-            /* Format table cells corresponding to border maps or void */
-            ushort colorValue = GameMatrix.EMPTY;
-            try {
-                colorValue = ushort.Parse(mapFilesGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString());
-            } catch { }
-
-            (Color backColor, Color foreColor) cellColors = FormatMapCell(colorValue);
-            e.CellStyle.BackColor = cellColors.backColor;
-            e.CellStyle.ForeColor = cellColors.foreColor;
-
-            if (colorValue == GameMatrix.EMPTY)
-                e.Value = '-';
-
-            parent.disableHandlers = false;
+        private void mapFilesGridView_SelectionChanged(object sender, EventArgs e) {
+            DisplaySelection(mapFilesGridView.SelectedCells);
         }
 
         private void matrixNameTextBox_TextChanged(object sender, EventArgs e) {
@@ -725,6 +690,36 @@ namespace DSPRE {
             } else {
                 MessageBox.Show("At least one matrix must be kept.", "Can't delete Matrix", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+        }
+
+        private void resetColorTableButton_Click(object sender, EventArgs e) {
+            parent.GetRomInfo().ResetMapCellsColorDictionary();
+            ClearMatrixTables();
+            GenerateMatrixTables();
+
+            Properties.Settings.Default.lastColorTablePath = "";
+        }
+
+        private void saveMatrixButton_Click(object sender, EventArgs e) {
+            currentMatrix.SaveToFileDefaultDir(selectMatrixComboBox.SelectedIndex);
+            GameMatrix saved = new GameMatrix(selectMatrixComboBox.SelectedIndex);
+            selectMatrixComboBox.Items[selectMatrixComboBox.SelectedIndex] = saved.ToString();
+            (parent.GetEditor("Event") as EventEditor).eventMatrix = saved; // TODO: Replace with EventEditor.cs control
+        }
+        private void selectMatrixComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+            if (parent.disableHandlers) {
+                return;
+            }
+            ClearMatrixTables();
+            currentMatrix = new GameMatrix(selectMatrixComboBox.SelectedIndex);
+            GenerateMatrixTables();
+
+            /* Setup matrix editor controls */
+            parent.disableHandlers = true;
+            matrixNameTextBox.Text = currentMatrix.name;
+            widthUpDown.Value = currentMatrix.width;
+            heightUpDown.Value = currentMatrix.height;
+            parent.disableHandlers = false;
         }
 
         private void setSpawnPointButton_Click(object sender, EventArgs e) {
@@ -777,41 +772,44 @@ namespace DSPRE {
             }
         }
 
-        private void selectMatrixComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+        private void widthUpDown_ValueChanged(object sender, EventArgs e) {
             if (parent.disableHandlers) {
                 return;
             }
-            ClearMatrixTables();
-            currentMatrix = new GameMatrix(selectMatrixComboBox.SelectedIndex);
-            GenerateMatrixTables();
-
-            /* Setup matrix editor controls */
             parent.disableHandlers = true;
-            matrixNameTextBox.Text = currentMatrix.name;
-            widthUpDown.Value = currentMatrix.width;
-            heightUpDown.Value = currentMatrix.height;
-            parent.disableHandlers = false;
-        }
 
-        private void importColorTableButton_Click(object sender, EventArgs e) {
-            OpenFileDialog of = new OpenFileDialog {
-                Filter = "DSPRE Color Table File (*.ctb)|*.ctb"
-            };
-            if (of.ShowDialog(this) != DialogResult.OK) {
-                return;
+            /* Add or remove rows in DataGridView control */
+            int delta = (int)widthUpDown.Value - currentMatrix.width;
+            for (int i = 0; i < Math.Abs(delta); i++) {
+                if (delta < 0) {
+                    headersGridView.Columns.RemoveAt(currentMatrix.width - 1 - i);
+                    heightsGridView.Columns.RemoveAt(currentMatrix.width - 1 - i);
+                    mapFilesGridView.Columns.RemoveAt(currentMatrix.width - 1 - i);
+                } else {
+                    /* Add columns */
+                    int index = currentMatrix.width + i;
+                    headersGridView.Columns.Add(" ", (index).ToString());
+                    heightsGridView.Columns.Add(" ", (index).ToString());
+                    mapFilesGridView.Columns.Add(" ", (index).ToString());
+
+                    /* Adjust column width */
+                    headersGridView.Columns[index].Width = 34;
+                    heightsGridView.Columns[index].Width = 22;
+                    mapFilesGridView.Columns[index].Width = 34;
+
+                    /* Fill new rows */
+                    for (int j = 0; j < currentMatrix.height; j++) {
+                        headersGridView.Rows[j].Cells[index].Value = 0;
+                        heightsGridView.Rows[j].Cells[index].Value = 0;
+                        mapFilesGridView.Rows[j].Cells[index].Value = GameMatrix.EMPTY;
+                    }
+                }
             }
 
-            ReadColorTable(of.FileName, silent: false);
+            /* Modify matrix object */
+            currentMatrix.ResizeMatrix((int)heightUpDown.Value, (int)widthUpDown.Value);
+            parent.disableHandlers = false;
         }
-
-        private void resetColorTableButton_Click(object sender, EventArgs e) {
-            parent.GetRomInfo().ResetMapCellsColorDictionary();
-            ClearMatrixTables();
-            GenerateMatrixTables();
-
-            Properties.Settings.Default.lastColorTablePath = "";
-        }
-
         /*
         private void ExportAllMovePermissionsInMatrix(object sender, EventArgs e) {
             CommonOpenFileDialog romFolder = new CommonOpenFileDialog();
@@ -833,5 +831,7 @@ namespace DSPRE {
             }
         }
         */
+
+        #endregion EventHandlers
     }
 }
