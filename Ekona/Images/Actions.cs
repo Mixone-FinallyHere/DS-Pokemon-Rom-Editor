@@ -12,26 +12,25 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * By: pleoNeX
- * 
+ *
  */
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace Ekona.Images
-{
-    public enum TileForm
-    {
+namespace Ekona.Images {
+
+    public enum TileForm {
         Lineal,
         Horizontal,
         Vertical
     }
 
-    public enum ColorFormat : byte
-    {
+    public enum ColorFormat : byte {
         A3I5 = 1,           // 8 bits-> 0-4: index; 5-7: alpha
         colors4 = 2,        // 2 bits for 4 colors
         colors16 = 3,       // 4 bits for 16 colors
@@ -45,23 +44,22 @@ namespace Ekona.Images
         ABGR32 = 11
     }
 
-    public enum ColorEncoding : byte
-    {
+    public enum ColorEncoding : byte {
         BGR555 = 1,
         BGR = 2,
         RGB = 3
     }
 
-    public static class Actions
-    {
+    public static class Actions {
+
         #region Palette
+
         /// <summary>
         /// Convert bytes encoding with BGR555 to colors
         /// </summary>
         /// <param name="bytes">Bytes encoded with BGR555</param>
         /// <returns>Colors</returns>
-        public static Color[] BGR555ToColor(byte[] bytes)
-        {
+        public static Color[] BGR555ToColor(byte[] bytes) {
             Color[] colors = new Color[bytes.Length / 2];
 
             for (int i = 0; i < bytes.Length / 2; i++)
@@ -69,11 +67,11 @@ namespace Ekona.Images
 
             return colors;
         }
+
         /// <summary>
         /// Convert two bytes encoded with BGR555 to a color
         /// </summary>
-        public static Color BGR555ToColor(byte byte1, byte byte2)
-        {
+        public static Color BGR555ToColor(byte byte1, byte byte2) {
             int r, b, g;
             short bgr = BitConverter.ToInt16(new Byte[] { byte1, byte2 }, 0);
 
@@ -83,17 +81,16 @@ namespace Ekona.Images
 
             return Color.FromArgb(r, g, b);
         }
+
         /// <summary>
         /// Convert colors to byte with BGR555 encoding
         /// </summary>
         /// <param name="colores">Colors to convert</param>
         /// <returns>Bytes converted</returns>
-        public static Byte[] ColorToBGR555(Color[] colors)
-        {
+        public static Byte[] ColorToBGR555(Color[] colors) {
             byte[] data = new byte[colors.Length * 2];
 
-            for (int i = 0; i < colors.Length; i++)
-            {
+            for (int i = 0; i < colors.Length; i++) {
                 byte[] bgr = ColorToBGR555(colors[i]);
                 data[i * 2] = bgr[0];
                 data[i * 2 + 1] = bgr[1];
@@ -101,8 +98,8 @@ namespace Ekona.Images
 
             return data;
         }
-        public static Byte[] ColorToBGRA555(Color color)
-        {
+
+        public static Byte[] ColorToBGRA555(Color color) {
             byte[] d = new byte[2];
 
             int r = color.R / 8;
@@ -115,8 +112,8 @@ namespace Ekona.Images
 
             return d;
         }
-        public static Byte[] ColorToBGR555(Color color)
-        {
+
+        public static Byte[] ColorToBGR555(Color color) {
             byte[] d = new byte[2];
 
             int r = color.R / 8;
@@ -129,8 +126,7 @@ namespace Ekona.Images
             return d;
         }
 
-        public static Bitmap Get_Image(Color[] colors)
-        {
+        public static Bitmap Get_Image(Color[] colors) {
             int height = (colors.Length / 0x10);
             if (colors.Length % 0x10 != 0)
                 height++;
@@ -138,12 +134,9 @@ namespace Ekona.Images
             Bitmap palette = new Bitmap(160, height * 10);
 
             bool end = false;
-            for (int i = 0; i < 16 & !end; i++)
-            {
-                for (int j = 0; j < 16; j++)
-                {
-                    if (colors.Length <= j + 16 * i)
-                    {
+            for (int i = 0; i < 16 & !end; i++) {
+                for (int j = 0; j < 16; j++) {
+                    if (colors.Length <= j + 16 * i) {
                         end = true;
                         break;
                     }
@@ -157,8 +150,7 @@ namespace Ekona.Images
             return palette;
         }
 
-        public static Color[][] Palette_16To256(Color[][] palette)
-        {
+        public static Color[][] Palette_16To256(Color[][] palette) {
             // Get the colours of all the palettes in BGR555 encoding
             List<Color> paletteColor = new List<Color>();
             for (int i = 0; i < palette.Length; i++)
@@ -170,26 +162,21 @@ namespace Ekona.Images
 
             return newPal;
         }
-        public static Color[][] Palette_256To16(Color[][] palette)
-        {
+
+        public static Color[][] Palette_256To16(Color[][] palette) {
             Color[][] newPal;
 
             int isExact = (int)palette[0].Length % 0x10;
 
-            if (isExact == 0)
-            {
+            if (isExact == 0) {
                 newPal = new Color[palette[0].Length / 0x10][];
-                for (int i = 0; i < newPal.Length; i++)
-                {
+                for (int i = 0; i < newPal.Length; i++) {
                     newPal[i] = new Color[0x10];
                     Array.Copy(palette[0], i * 0x10, newPal[i], 0, 0x10);
                 }
-            }
-            else
-            {
+            } else {
                 newPal = new Color[(palette[0].Length / 0x10) + 1][];
-                for (int i = 0; i < newPal.Length - 1; i++)
-                {
+                for (int i = 0; i < newPal.Length - 1; i++) {
                     newPal[i] = new Color[0x10];
                     Array.Copy(palette[0], i * 0x10, newPal[i], 0, 0x10);
                 }
@@ -200,18 +187,17 @@ namespace Ekona.Images
 
             return newPal;
         }
-        #endregion
+
+        #endregion Palette
 
         #region Tiles
-        public static Byte[] AlphaIndexTo32ARGB(Color[] palette, byte[] data, ColorFormat format)
-        {
+
+        public static Byte[] AlphaIndexTo32ARGB(Color[] palette, byte[] data, ColorFormat format) {
             Byte[] direct = new byte[data.Length * 4];
 
-            for (int i = 0; i < data.Length; i++)
-            {
+            for (int i = 0; i < data.Length; i++) {
                 Color color = Color.Transparent;
-                if (format == ColorFormat.A3I5)
-                {
+                if (format == ColorFormat.A3I5) {
                     int colorIndex = data[i] & 0x1F;
                     int alpha = (data[i] >> 5);
                     alpha = ((alpha * 4) + (alpha / 2)) * 8;
@@ -219,9 +205,7 @@ namespace Ekona.Images
                         palette[colorIndex].R,
                         palette[colorIndex].G,
                         palette[colorIndex].B);
-                }
-                else if (format == ColorFormat.A5I3)
-                {
+                } else if (format == ColorFormat.A5I3) {
                     int colorIndex = data[i] & 0x7;
                     int alpha = (data[i] >> 3);
                     alpha *= 8;
@@ -237,12 +221,11 @@ namespace Ekona.Images
 
             return direct;
         }
-        public static Byte[] Bpp2ToBpp4(byte[] data)
-        {
+
+        public static Byte[] Bpp2ToBpp4(byte[] data) {
             Byte[] bpp4 = new byte[data.Length * 2];
 
-            for (int i = 0; i < data.Length; i++)
-            {
+            for (int i = 0; i < data.Length; i++) {
                 byte b1 = (byte)(data[i] & 0x3);
                 b1 += (byte)(((data[i] >> 2) & 0x3) << 4);
 
@@ -257,18 +240,15 @@ namespace Ekona.Images
         }
 
         public static Bitmap Get_Image(Byte[] tiles, Byte[] tile_pal, Color[][] palette, ColorFormat format,
-            int width, int height, int start = 0)
-        {
+            int width, int height, int start = 0) {
             if (tiles.Length == 0)
                 return new Bitmap(1, 1);
 
             Bitmap image = new Bitmap(width, height);
 
             int pos = start;
-            for (int h = 0; h < height; h++)
-            {
-                for (int w = 0; w < width; w++)
-                {
+            for (int h = 0; h < height; h++) {
+                for (int w = 0; w < width; w++) {
                     int num_pal = 0;
                     if (tile_pal.Length <= w + h * width)
                         num_pal = 0;
@@ -286,13 +266,11 @@ namespace Ekona.Images
             return image;
         }
 
-        public static Color Get_Color(Byte[] data, Color[] palette, ColorFormat format, ref int pos)
-        {
+        public static Color Get_Color(Byte[] data, Color[] palette, ColorFormat format, ref int pos) {
             Color color = Color.Transparent;
             int alpha, index;
 
-            switch (format)
-            {
+            switch (format) {
                 case ColorFormat.A3I5:
                     if (data.Length <= pos) break;
                     index = data[pos] & 0x1F;
@@ -306,6 +284,7 @@ namespace Ekona.Images
 
                     pos++;
                     break;
+
                 case ColorFormat.A4I4:
                     if (data.Length <= pos) break;
                     index = data[pos] & 0xF;
@@ -319,6 +298,7 @@ namespace Ekona.Images
 
                     pos++;
                     break;
+
                 case ColorFormat.A5I3:
                     if (data.Length <= pos) break;
                     index = data[pos] & 0x7;
@@ -341,6 +321,7 @@ namespace Ekona.Images
                         color = palette[index];
                     pos++;
                     break;
+
                 case ColorFormat.colors4:
                     if (data.Length <= (pos / 4)) break;
                     byte bit2 = data[pos / 4];
@@ -349,6 +330,7 @@ namespace Ekona.Images
                         color = palette[index];
                     pos++;
                     break;
+
                 case ColorFormat.colors16:
                     if (data.Length <= (pos / 2)) break;
                     byte bit4 = data[pos / 2];
@@ -357,6 +339,7 @@ namespace Ekona.Images
                         color = palette[index];
                     pos++;
                     break;
+
                 case ColorFormat.colors256:
                     if (data.Length > pos && palette.Length > data[pos])
                         color = palette[data[pos]];
@@ -380,7 +363,7 @@ namespace Ekona.Images
                     if (pos + 4 >= data.Length)
                         break;
 
-                    color = Color.FromArgb(data[pos+3], data[pos+0], data[pos+1], data[pos+2]);
+                    color = Color.FromArgb(data[pos + 3], data[pos + 0], data[pos + 1], data[pos + 2]);
                     pos += 4;
                     break;
 
@@ -388,7 +371,7 @@ namespace Ekona.Images
                     if (pos + 4 >= data.Length)
                         break;
 
-                    color = Color.FromArgb(data[pos+0], data[pos+1], data[pos+2], data[pos+3]);
+                    color = Color.FromArgb(data[pos + 0], data[pos + 1], data[pos + 2], data[pos + 3]);
                     pos += 4;
                     break;
 
@@ -401,8 +384,7 @@ namespace Ekona.Images
             return color;
         }
 
-        public static byte[] HorizontalToLineal(byte[] horizontal, int width, int height, int bpp, int tile_size)
-        {
+        public static byte[] HorizontalToLineal(byte[] horizontal, int width, int height, int bpp, int tile_size) {
             Byte[] lineal = new byte[horizontal.Length];
             int tile_width = tile_size * bpp / 8;   // Calculate the number of byte per line in the tile
             // pixels per line * bits per pixel / 8 bits per byte
@@ -410,15 +392,11 @@ namespace Ekona.Images
             int tilesY = height / tile_size;
 
             int pos = 0;
-            for (int ht = 0; ht < tilesY; ht++)
-            {
-                for (int wt = 0; wt < tilesX; wt++)
-                {
+            for (int ht = 0; ht < tilesY; ht++) {
+                for (int wt = 0; wt < tilesX; wt++) {
                     // Get the tile data
-                    for (int h = 0; h < tile_size; h++)
-                    {
-                        for (int w = 0; w < tile_width; w++)
-                        {
+                    for (int h = 0; h < tile_size; h++) {
+                        for (int w = 0; w < tile_width; w++) {
                             if ((w + h * tile_width * tilesX) + wt * tile_width + ht * tilesX * tile_size * tile_width >= lineal.Length)
                                 continue;
                             if (pos >= lineal.Length)
@@ -432,8 +410,8 @@ namespace Ekona.Images
 
             return lineal;
         }
-        public static byte[] LinealToHorizontal(byte[] lineal, int width, int height, int bpp, int tile_size)
-        {
+
+        public static byte[] LinealToHorizontal(byte[] lineal, int width, int height, int bpp, int tile_size) {
             byte[] horizontal = new byte[lineal.Length];
             int tile_width = tile_size * bpp / 8;   // Calculate the number of byte per line in the tile
             // pixels per line * bits per pixel / 8 bits per byte
@@ -441,15 +419,11 @@ namespace Ekona.Images
             int tilesY = height / tile_size;
 
             int pos = 0;
-            for (int ht = 0; ht < tilesY; ht++)
-            {
-                for (int wt = 0; wt < tilesX; wt++)
-                {
+            for (int ht = 0; ht < tilesY; ht++) {
+                for (int wt = 0; wt < tilesX; wt++) {
                     // Get the tile data
-                    for (int h = 0; h < tile_size; h++)
-                    {
-                        for (int w = 0; w < tile_width; w++)
-                        {
+                    for (int h = 0; h < tile_size; h++) {
+                        for (int w = 0; w < tile_width; w++) {
                             if ((w + h * tile_width * tilesX) + wt * tile_width + ht * tilesX * tile_size * tile_width >= lineal.Length)
                                 continue;
                             if (pos >= lineal.Length)
@@ -464,13 +438,11 @@ namespace Ekona.Images
             return horizontal;
         }
 
-        public static int Remove_DuplicatedColors(ref Color[] palette, ref byte[] tiles)
-        {
+        public static int Remove_DuplicatedColors(ref Color[] palette, ref byte[] tiles) {
             List<Color> colors = new List<Color>();
             int first_duplicated_color = -1;
 
-            for (int i = 0; i < palette.Length; i++)
-            {
+            for (int i = 0; i < palette.Length; i++) {
                 if (!colors.Contains(palette[i]))
                     colors.Add(palette[i]);
                 else        // The color is duplicated
@@ -487,8 +459,8 @@ namespace Ekona.Images
             palette = colors.ToArray();
             return first_duplicated_color;
         }
-        public static int Remove_NotUsedColors(ref Color[] palette, ref byte[] tiles)
-        {
+
+        public static int Remove_NotUsedColors(ref Color[] palette, ref byte[] tiles) {
             int first_notUsed_color = -1;
 
             bool[] colors = new bool[palette.Length];
@@ -504,15 +476,14 @@ namespace Ekona.Images
 
             return first_notUsed_color;
         }
-        public static void Change_Color(ref byte[] tiles, int oldIndex, int newIndex, ColorFormat format)
-        {
+
+        public static void Change_Color(ref byte[] tiles, int oldIndex, int newIndex, ColorFormat format) {
             if (format == ColorFormat.colors16) // Yeah, I should improve it
                 tiles = Helper.BitsConverter.BytesToBit4(tiles);
             else if (format != ColorFormat.colors256)
                 throw new NotSupportedException("Only supported 4bpp and 8bpp images.");
 
-            for (int i = 0; i < tiles.Length; i++)
-            {
+            for (int i = 0; i < tiles.Length; i++) {
                 if (tiles[i] == oldIndex)
                     tiles[i] = (byte)newIndex;
                 else if (tiles[i] == newIndex)
@@ -522,8 +493,8 @@ namespace Ekona.Images
             if (format == ColorFormat.colors16)
                 tiles = Helper.BitsConverter.Bits4ToByte(tiles);
         }
-        public static void Swap_Color(ref byte[] tiles, ref Color[] palette, int oldIndex, int newIndex, ColorFormat format)
-        {
+
+        public static void Swap_Color(ref byte[] tiles, ref Color[] palette, int oldIndex, int newIndex, ColorFormat format) {
             if (format == ColorFormat.colors16) // Yeah, I should improve it
                 tiles = Helper.BitsConverter.BytesToBit4(tiles);
             else if (format != ColorFormat.colors256)
@@ -533,8 +504,7 @@ namespace Ekona.Images
             palette[oldIndex] = palette[newIndex];
             palette[newIndex] = old_color;
 
-            for (int i = 0; i < tiles.Length; i++)
-            {
+            for (int i = 0; i < tiles.Length; i++) {
                 if (tiles[i] == oldIndex)
                     tiles[i] = (byte)newIndex;
                 else if (tiles[i] == newIndex)
@@ -544,16 +514,15 @@ namespace Ekona.Images
             if (format == ColorFormat.colors16)
                 tiles = Helper.BitsConverter.Bits4ToByte(tiles);
         }
-        public static void Replace_Color(ref byte[] tiles, int oldIndex, int newIndex)
-        {
-            for (int i = 0; i < tiles.Length; i++)
-            {
+
+        public static void Replace_Color(ref byte[] tiles, int oldIndex, int newIndex) {
+            for (int i = 0; i < tiles.Length; i++) {
                 if (tiles[i] == oldIndex)
                     tiles[i] = (byte)newIndex;
             }
         }
-        public static void Swap_Palette(ref byte[] tiles, Color[] newp, Color[] oldp, ColorFormat format, decimal threshold = 0)
-        {
+
+        public static void Swap_Palette(ref byte[] tiles, Color[] newp, Color[] oldp, ColorFormat format, decimal threshold = 0) {
             if (format == ColorFormat.colors16) // Yeah, I should improve it
                 tiles = Helper.BitsConverter.BytesToBit4(tiles);
             else if (format != ColorFormat.colors256)
@@ -562,8 +531,7 @@ namespace Ekona.Images
             List<Color> notfound = new List<Color>();
             List<Color> newplist = new List<Color>(newp);
 
-            for (int i = 0; i < tiles.Length; i++)
-            {
+            for (int i = 0; i < tiles.Length; i++) {
                 Color px = oldp[tiles[i]];
                 int id = newplist.IndexOf(px);
 
@@ -573,8 +541,7 @@ namespace Ekona.Images
                 if (id == -1)
                     id = FindNextColor(px, newp, threshold);
 
-                if (id == -1)
-                {
+                if (id == -1) {
                     // If the color is not found, maybe is that the pixel own to another cell (overlapping cells).
                     // For this reason, there are two ways to do that:
                     // 1º Get the original hidden color from the original file                               <- In mind
@@ -594,16 +561,14 @@ namespace Ekona.Images
                 tiles = Helper.BitsConverter.Bits4ToByte(tiles);
         }
 
-        public static Size Get_Size(int fileSize, int bpp)
-        {
+        public static Size Get_Size(int fileSize, int bpp) {
             int width, height;
             int num_pix = fileSize * 8 / bpp;
 
             // If the image it's a square
             if (Math.Pow((int)(Math.Sqrt(num_pix)), 2) == num_pix)
                 width = height = (int)Math.Sqrt(num_pix);
-            else
-            {
+            else {
                 width = (num_pix < 0x100 ? num_pix : 0x0100);
                 height = num_pix / width;
             }
@@ -616,8 +581,7 @@ namespace Ekona.Images
             return new Size(width, height);
         }
 
-        public static uint Add_Image(ref byte[] data, byte[] newData, uint blockSize)
-        {
+        public static uint Add_Image(ref byte[] data, byte[] newData, uint blockSize) {
             // Add the image to the end of the data
             // Return the offset where the data is added
             List<byte> result = new List<byte>();
@@ -636,8 +600,7 @@ namespace Ekona.Images
             return offset;
         }
 
-        public static uint Add_Image(ref byte[] data, byte[] newData, uint partOffset, uint partSize, uint blockSize, out uint addedLength)
-        {
+        public static uint Add_Image(ref byte[] data, byte[] newData, uint partOffset, uint partSize, uint blockSize, out uint addedLength) {
             // Add the image to the end of the partition data
             // Return the offset where the data has been inserted
             List<byte> result = new List<byte>(data);
@@ -656,22 +619,19 @@ namespace Ekona.Images
             return offset;
         }
 
-        public static int FindNextColor(Color c, Color[] palette, decimal threshold = 0)
-        {
+        public static int FindNextColor(Color c, Color[] palette, decimal threshold = 0) {
             int id = -1;
             decimal minDistance = decimal.MaxValue;
 
             // Skip the first color since it used to be the transparent color and we
             // don't want that as the best match if possible.
-            for (int i = 1; i < palette.Length; i++)
-            {
+            for (int i = 1; i < palette.Length; i++) {
                 double x = palette[i].R - c.R;
                 double y = palette[i].G - c.G;
                 double z = palette[i].B - c.B;
                 decimal distance = (decimal)Math.Sqrt(x * x + y * y + z * z);
 
-                if (distance < minDistance)
-                {
+                if (distance < minDistance) {
                     minDistance = distance;
                     id = i;
                 }
@@ -682,8 +642,7 @@ namespace Ekona.Images
                 id = -1;
 
             // If still it doesn't found the color try with the first one.
-            if (id == -1)
-            {
+            if (id == -1) {
                 double x = palette[0].R - c.R;
                 double y = palette[0].G - c.G;
                 double z = palette[0].B - c.B;
@@ -699,8 +658,7 @@ namespace Ekona.Images
             return id;
         }
 
-        public static void Indexed_Image(Bitmap img, ColorFormat cf, out byte[] tiles, out Color[] palette)
-        {
+        public static void Indexed_Image(Bitmap img, ColorFormat cf, out byte[] tiles, out Color[] palette) {
             // It's a slow method but it should work always
             int width = img.Width;
             int height = img.Height;
@@ -709,10 +667,8 @@ namespace Ekona.Images
             int[,] data = new int[width * height, 2];
 
             // Get the indexed data
-            for (int h = 0; h < height; h++)
-            {
-                for (int w = 0; w < width; w++)
-                {
+            for (int h = 0; h < height; h++) {
+                for (int w = 0; w < width; w++) {
                     Color pix = img.GetPixel(w, h);
                     Color apix = Color.FromArgb(pix.R, pix.G, pix.B);   // Without alpha value
 
@@ -731,8 +687,7 @@ namespace Ekona.Images
 
             int max_colors = 0;     // Maximum colors per palette
             int bpc = 0;            // Bits per color
-            switch (cf)
-            {
+            switch (cf) {
                 case ColorFormat.A3I5: max_colors = 32; bpc = 8; break;
                 case ColorFormat.colors4: max_colors = 4; bpc = 2; break;
                 case ColorFormat.colors16: max_colors = 16; bpc = 4; break;
@@ -751,10 +706,8 @@ namespace Ekona.Images
 
             // Finally get the set the tile array with the correct format
             tiles = new byte[width * height * bpc / 8];
-            for (int i = 0, j = 0; i < tiles.Length; )
-            {
-                switch (cf)
-                {
+            for (int i = 0, j = 0; i < tiles.Length;) {
+                switch (cf) {
                     case ColorFormat.colors2:
                     case ColorFormat.colors4:
                     case ColorFormat.colors16:
@@ -772,12 +725,14 @@ namespace Ekona.Images
                         va1 |= (byte)(alpha1 << 5);
                         tiles[i++] = va1;
                         break;
+
                     case ColorFormat.A4I4:
                         byte alpha3 = (byte)(data[j, 1] * 16 / 256);
                         byte va3 = (byte)data[j++, 0];
                         va3 |= (byte)(alpha3 << 4);
                         tiles[i++] = va3;
                         break;
+
                     case ColorFormat.A5I3:
                         byte alpha2 = (byte)(data[j, 1] * 32 / 256);
                         byte va2 = (byte)data[j++, 0];
@@ -799,19 +754,19 @@ namespace Ekona.Images
 
             palette = coldif.ToArray();
         }
-        #endregion
+
+        #endregion Tiles
 
         #region Map
-        public static Byte[] Apply_Map(NTFS[] map, Byte[] tiles, out Byte[] tile_pal, int bpp, int tile_size, int startInfo = 0)
-        {
+
+        public static Byte[] Apply_Map(NTFS[] map, Byte[] tiles, out Byte[] tile_pal, int bpp, int tile_size, int startInfo = 0) {
             int tile_length = tile_size * tile_size * bpp / 8;
             int num_tiles = tiles.Length / tile_length;
 
             List<Byte> bytes = new List<byte>();
             tile_pal = new byte[(map.Length - startInfo) * tile_size * tile_size];
 
-            for (int i = startInfo; i < map.Length; i++)
-            {
+            for (int i = startInfo; i < map.Length; i++) {
                 if (map[i].nTile >= num_tiles)
                     map[i].nTile = 0;
 
@@ -835,15 +790,13 @@ namespace Ekona.Images
 
             return bytes.ToArray();
         }
-        public static Byte[] XFlip(Byte[] tile, int tile_size, int bpp)
-        {
+
+        public static Byte[] XFlip(Byte[] tile, int tile_size, int bpp) {
             byte[] newTile = new byte[tile.Length];
             int tile_width = tile_size * bpp / 8;
 
-            for (int h = 0; h < tile_size; h++)
-            {
-                for (int w = 0; w < tile_width / 2; w++)
-                {
+            for (int h = 0; h < tile_size; h++) {
+                for (int w = 0; w < tile_width / 2; w++) {
                     byte b = tile[((tile_width - 1) - w) + h * tile_width];
                     newTile[w + h * tile_width] = Reverse_Bits(b, bpp);
 
@@ -853,8 +806,8 @@ namespace Ekona.Images
             }
             return newTile;
         }
-        public static Byte Reverse_Bits(byte b, int length)
-        {
+
+        public static Byte Reverse_Bits(byte b, int length) {
             byte rb = 0;
 
             if (length == 4)
@@ -864,15 +817,13 @@ namespace Ekona.Images
 
             return rb;
         }
-        public static Byte[] YFlip(Byte[] tile, int tile_size, int bpp)
-        {
+
+        public static Byte[] YFlip(Byte[] tile, int tile_size, int bpp) {
             byte[] newTile = new byte[tile.Length];
             int tile_width = tile_size * bpp / 8;
 
-            for (int h = 0; h < tile_size / 2; h++)
-            {
-                for (int w = 0; w < tile_width; w++)
-                {
+            for (int h = 0; h < tile_size / 2; h++) {
+                for (int w = 0; w < tile_width; w++) {
                     newTile[w + h * tile_width] = tile[w + (tile_size - 1 - h) * tile_width];
                     newTile[w + (tile_size - 1 - h) * tile_width] = tile[w + h * tile_width];
                 }
@@ -880,12 +831,10 @@ namespace Ekona.Images
             return newTile;
         }
 
-        public static NTFS[] Create_BasicMap(int num_tiles, int startTile = 0, byte palette = 0)
-        {
+        public static NTFS[] Create_BasicMap(int num_tiles, int startTile = 0, byte palette = 0) {
             NTFS[] map = new NTFS[num_tiles];
 
-            for (int i = startTile; i < num_tiles; i++)
-            {
+            for (int i = startTile; i < num_tiles; i++) {
                 map[i] = new NTFS();
                 map[i].nPalette = palette;
                 map[i].yFlip = 0;
@@ -898,23 +847,21 @@ namespace Ekona.Images
 
             return map;
         }
-        public static NTFS[] Create_Map(ref byte[] data, int bpp, int tile_size, byte palette = 0)
-        {
+
+        public static NTFS[] Create_Map(ref byte[] data, int bpp, int tile_size, byte palette = 0) {
             int ppt = tile_size * tile_size; // pixels per tile
             int tile_length = ppt * bpp / 8;
 
             // Divide the data in tiles
             byte[][] tiles = new byte[data.Length / tile_length][];
-            for (int i = 0; i < tiles.Length; i++)
-            {
+            for (int i = 0; i < tiles.Length; i++) {
                 tiles[i] = new byte[tile_length];
                 Array.Copy(data, i * tiles[i].Length, tiles[i], 0, tiles[i].Length);
             }
 
             NTFS[] map = new NTFS[tiles.Length];
             List<byte[]> newtiles = new List<byte[]>();
-            for (int i = 0; i < map.Length; i++)
-            {
+            for (int i = 0; i < map.Length; i++) {
                 map[i].nPalette = palette;
                 map[i].xFlip = 0;
                 map[i].yFlip = 0;
@@ -923,27 +870,22 @@ namespace Ekona.Images
                 byte flipX = 0;
                 byte flipY = 0;
 
-                for (ushort t = 0; t < newtiles.Count; t++)
-                {
-                    if (Compare_Array(newtiles[t], tiles[i]))
-                    {
+                for (ushort t = 0; t < newtiles.Count; t++) {
+                    if (Compare_Array(newtiles[t], tiles[i])) {
                         index = t;
                         break;
                     }
-                    if (Compare_Array(newtiles[t], XFlip(tiles[i], tile_size, bpp)))
-                    {
+                    if (Compare_Array(newtiles[t], XFlip(tiles[i], tile_size, bpp))) {
                         index = t;
                         flipX = 1;
                         break;
                     }
-                    if (Compare_Array(newtiles[t], YFlip(tiles[i], tile_size, bpp)))
-                    {
+                    if (Compare_Array(newtiles[t], YFlip(tiles[i], tile_size, bpp))) {
                         index = t;
                         flipY = 1;
                         break;
                     }
-                    if (Compare_Array(newtiles[t], YFlip(XFlip(tiles[i], tile_size, bpp), tile_size, bpp)))
-                    {
+                    if (Compare_Array(newtiles[t], YFlip(XFlip(tiles[i], tile_size, bpp), tile_size, bpp))) {
                         index = t;
                         flipX = 1;
                         flipY = 1;
@@ -953,8 +895,7 @@ namespace Ekona.Images
 
                 if (index > -1)
                     map[i].nTile = (ushort)index;
-                else
-                {
+                else {
                     map[i].nTile = (ushort)newtiles.Count;
                     newtiles.Add(tiles[i]);
                 }
@@ -969,8 +910,8 @@ namespace Ekona.Images
                     data[j + i * tile_length] = newtiles[i][j];
             return map;
         }
-        public static bool Compare_Array(byte[] d1, byte[] d2)
-        {
+
+        public static bool Compare_Array(byte[] d1, byte[] d2) {
             if (d1.Length != d2.Length)
                 return false;
 
@@ -981,8 +922,7 @@ namespace Ekona.Images
             return true;
         }
 
-        public static NTFS MapInfo(ushort value)
-        {
+        public static NTFS MapInfo(ushort value) {
             NTFS mapInfo = new NTFS();
 
             mapInfo.nTile = (ushort)(value & 0x3FF);
@@ -992,8 +932,8 @@ namespace Ekona.Images
 
             return mapInfo;
         }
-        public static ushort MapInfo(NTFS map)
-        {
+
+        public static ushort MapInfo(NTFS map) {
             int npalette = map.nPalette << 12;
             int yFlip = map.yFlip << 11;
             int xFlip = map.xFlip << 10;
@@ -1001,61 +941,69 @@ namespace Ekona.Images
 
             return (ushort)data;
         }
-        #endregion
+
+        #endregion Map
 
         #region OAM
-        public static Size Get_OAMSize(byte shape, byte size)
-        {
+
+        public static Size Get_OAMSize(byte shape, byte size) {
             Size imageSize = new Size();
 
-            switch (shape)
-            {
+            switch (shape) {
                 case 0x00:  // Square
-                    switch (size)
-                    {
+                    switch (size) {
                         case 0x00:
                             imageSize = new Size(8, 8);
                             break;
+
                         case 0x01:
                             imageSize = new Size(16, 16);
                             break;
+
                         case 0x02:
                             imageSize = new Size(32, 32);
                             break;
+
                         case 0x03:
                             imageSize = new Size(64, 64);
                             break;
                     }
                     break;
+
                 case 0x01:  // Horizontal
-                    switch (size)
-                    {
+                    switch (size) {
                         case 0x00:
                             imageSize = new Size(16, 8);
                             break;
+
                         case 0x01:
                             imageSize = new Size(32, 8);
                             break;
+
                         case 0x02:
                             imageSize = new Size(32, 16);
                             break;
+
                         case 0x03:
                             imageSize = new Size(64, 32);
                             break;
                     }
                     break;
+
                 case 0x02:  // Vertical
-                    switch (size)
-                    {
+                    switch (size) {
                         case 0x00:
                             imageSize = new Size(8, 16);
                             break;
+
                         case 0x01:
                             imageSize = new Size(8, 32);
                             break;
+
                         case 0x02:
                             imageSize = new Size(16, 32);
                             break;
+
                         case 0x03:
                             imageSize = new Size(32, 64);
                             break;
@@ -1068,22 +1016,18 @@ namespace Ekona.Images
 
         public static Bitmap Get_Image(Bank bank, uint blockSize, ImageBase img, PaletteBase pal, int max_width, int max_height,
                                        bool draw_grid, bool draw_cells, bool draw_numbers, bool trans, bool image, int currOAM = -1,
-                                       int zoom = 1, int[] index = null)
-        {
+                                       int zoom = 1, int[] index = null) {
             Size size = new Size(max_width * zoom, max_height * zoom);
             Bitmap bank_img = new Bitmap(size.Width, size.Height);
             Graphics graphic = Graphics.FromImage(bank_img);
 
-            if (bank.oams.Length == 0)
-            {
+            if (bank.oams.Length == 0) {
                 graphic.DrawString("No OAM", SystemFonts.CaptionFont, Brushes.Black, new PointF(max_width / 2, max_height / 2));
                 return bank_img;
             }
 
-            if (draw_grid)
-            {
-                for (int i = (0 - size.Width); i < size.Width; i += 8)
-                {
+            if (draw_grid) {
+                for (int i = (0 - size.Width); i < size.Width; i += 8) {
                     graphic.DrawLine(Pens.LightBlue, (i + size.Width / 2) * zoom, 0, (i + size.Width / 2) * zoom, size.Height * zoom);
                     graphic.DrawLine(Pens.LightBlue, 0, (i + size.Height / 2) * zoom, size.Width * zoom, (i + size.Height / 2) * zoom);
                 }
@@ -1091,10 +1035,8 @@ namespace Ekona.Images
                 graphic.DrawLine(Pens.Blue, 0, (max_height / 2) * zoom, max_width * zoom, (max_height / 2) * zoom);
             }
 
-
             Image cell;
-            for (int i = 0; i < bank.oams.Length; i++)
-            {
+            for (int i = 0; i < bank.oams.Length; i++) {
                 bool draw = false;
                 if (index == null)
                     draw = true;
@@ -1104,15 +1046,14 @@ namespace Ekona.Images
                             draw = true;
                 if (!draw)
                     continue;
-    
+
                 if (bank.oams[i].width == 0x00 || bank.oams[i].height == 0x00)
                     continue;
 
                 uint tileOffset = bank.oams[i].obj2.tileOffset;
                 tileOffset = (uint)(tileOffset << (byte)blockSize);
 
-                if (image)
-                {
+                if (image) {
                     ImageBase cell_img = new TestImage();
                     cell_img.Set_Tiles((byte[])img.Tiles.Clone(), bank.oams[i].width, bank.oams[i].height, img.FormatColor,
                                        img.FormTile, false);
@@ -1146,13 +1087,15 @@ namespace Ekona.Images
                     //}
 
                     #region Flip
+
                     if (bank.oams[i].obj1.flipX == 1 && bank.oams[i].obj1.flipY == 1)
                         cell.RotateFlip(RotateFlipType.RotateNoneFlipXY);
                     else if (bank.oams[i].obj1.flipX == 1)
                         cell.RotateFlip(RotateFlipType.RotateNoneFlipX);
                     else if (bank.oams[i].obj1.flipY == 1)
                         cell.RotateFlip(RotateFlipType.RotateNoneFlipY);
-                    #endregion
+
+                    #endregion Flip
 
                     if (trans)
                         ((Bitmap)cell).MakeTransparent(pal.Palette[num_pal][0]);
@@ -1174,8 +1117,7 @@ namespace Ekona.Images
             return bank_img;
         }
 
-        public static Byte[] Get_OAMdata(OAM oam, byte[] image, ColorFormat format)
-        {
+        public static Byte[] Get_OAMdata(OAM oam, byte[] image, ColorFormat format) {
             if (format == ColorFormat.colors16)
                 image = Helper.BitsConverter.BytesToBit4(image);
 
@@ -1196,8 +1138,8 @@ namespace Ekona.Images
             else
                 return data.ToArray();
         }
-        public static int Comparision_OAM(OAM c1, OAM c2)
-        {
+
+        public static int Comparision_OAM(OAM c1, OAM c2) {
             if (c1.obj2.priority < c2.obj2.priority)
                 return 1;
             else if (c1.obj2.priority > c2.obj2.priority)
@@ -1213,8 +1155,7 @@ namespace Ekona.Images
             }
         }
 
-        public static ushort[] OAMInfo(OAM oam)
-        {
+        public static ushort[] OAMInfo(OAM oam) {
             ushort[] obj = new ushort[3];
 
             // OBJ0
@@ -1235,13 +1176,11 @@ namespace Ekona.Images
             if (oam.obj1.xOffset < 0)
                 oam.obj1.xOffset += 0x200;
             obj[1] += (ushort)(oam.obj1.xOffset & 0x1FF);
-            if (oam.obj0.rs_flag == 0)
-            {
+            if (oam.obj0.rs_flag == 0) {
                 obj[1] += (ushort)((oam.obj1.unused & 0x7) << 9);
                 obj[1] += (ushort)((oam.obj1.flipX & 1) << 12);
                 obj[1] += (ushort)((oam.obj1.flipY & 1) << 13);
-            }
-            else
+            } else
                 obj[1] += (ushort)((oam.obj1.select_param & 0x1F) << 9);
             obj[1] += (ushort)((oam.obj1.size & 3) << 14);
 
@@ -1253,8 +1192,8 @@ namespace Ekona.Images
 
             return obj;
         }
-        public static OAM OAMInfo(ushort[] obj)
-        {
+
+        public static OAM OAMInfo(ushort[] obj) {
             OAM oam = new OAM();
 
             // Obj 0
@@ -1273,13 +1212,11 @@ namespace Ekona.Images
             oam.obj1.xOffset = obj[1] & 0x01FF;
             if (oam.obj1.xOffset >= 0x100)
                 oam.obj1.xOffset -= 0x200;
-            if (oam.obj0.rs_flag == 0)
-            {
+            if (oam.obj0.rs_flag == 0) {
                 oam.obj1.unused = (byte)((obj[1] >> 9) & 7);
                 oam.obj1.flipX = (byte)((obj[1] >> 12) & 1);
                 oam.obj1.flipY = (byte)((obj[1] >> 13) & 1);
-            }
-            else
+            } else
                 oam.obj1.select_param = (byte)((obj[1] >> 9) & 0x1F);
             oam.obj1.size = (byte)((obj[1] >> 14) & 3);
 
@@ -1294,10 +1231,11 @@ namespace Ekona.Images
 
             return oam;
         }
-        public static OAM OAMInfo(ushort v1, ushort v2, ushort v3)
-        {
+
+        public static OAM OAMInfo(ushort v1, ushort v2, ushort v3) {
             return OAMInfo(new ushort[] { v1, v2, v3 });
         }
-        #endregion
+
+        #endregion OAM
     }
 }

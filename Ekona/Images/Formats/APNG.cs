@@ -4,17 +4,17 @@
 // Copyright (C) 2012
 //
 //   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by 
+//   it under the terms of the GNU General Public License as published by
 //   the Free Software Foundation, either version 3 of the License, or
 //   (at your option) any later version.
 //
-//   This program is distributed in the hope that it will be useful, 
+//   This program is distributed in the hope that it will be useful,
 //   but WITHOUT ANY WARRANTY; without even the implied warranty of
 //   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details. 
+//   GNU General Public License for more details.
 //
 //   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 // </copyright>
 
@@ -24,14 +24,13 @@
 // -----------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.IO;
 
-namespace Ekona.Images.Formats
-{
-    public static class APNG
-    {
+namespace Ekona.Images.Formats {
+
+    public static class APNG {
         // Info from:
         // https://wiki.mozilla.org/APNG_Specification
         // http://www.w3.org/TR/PNG/
@@ -43,12 +42,12 @@ namespace Ekona.Images.Formats
         /// <param name="apng">The path of the output file</param>
         /// <param name="delay">The delay between frames (delay/1000)</param>
         /// <param name="loops">The number of  loops (if 0 = infinite)</param>
-        public static void Create(string[] pngs, string apng, int delay, int loops)
-        {
+        public static void Create(string[] pngs, string apng, int delay, int loops) {
             byte[] pngSignature = new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 };
             IHDR ihdr = Read_IHDR(pngs[0]);
-            
+
             #region Section acTL
+
             acTL actl = new acTL();
             actl.length = BitConverter.GetBytes(8).Reverse().ToArray();
             actl.id = Encoding.ASCII.GetBytes(new char[] { 'a', 'c', 'T', 'L' });
@@ -60,17 +59,17 @@ namespace Ekona.Images.Formats
             stream.AddRange(actl.num_plays);
             actl.crc = Helper.CRC32.Calculate(stream.ToArray());
             stream.Clear();
-            #endregion
+
+            #endregion Section acTL
 
             List<fcTL> fctl = new List<fcTL>();
             List<fdAT> fdat = new List<fdAT>();
             int i = 0;
-            fctl.Add(Read_fcTL(pngs[0], i, delay)); 
+            fctl.Add(Read_fcTL(pngs[0], i, delay));
             i++;
             byte[] IDAT = Read_IDAT(pngs[0]);
 
-            foreach (string png in pngs)
-            {
+            foreach (string png in pngs) {
                 if (png == pngs[0])
                     continue;
 
@@ -87,12 +86,11 @@ namespace Ekona.Images.Formats
 
             Write(apng, pngSignature, ihdr, actl, IDAT, fctl.ToArray(), fdat.ToArray(), iend);
         }
-        public static void Create(System.Drawing.Bitmap[] pngs, string apng, int delay, int loops)
-        {
+
+        public static void Create(System.Drawing.Bitmap[] pngs, string apng, int delay, int loops) {
             string[] files = new string[pngs.Length];
 
-            for (int i = 0; i < pngs.Length; i++)
-            {
+            for (int i = 0; i < pngs.Length; i++) {
                 files[i] = Path.GetTempFileName();
                 pngs[i].Save(files[i]);
             }
@@ -103,8 +101,7 @@ namespace Ekona.Images.Formats
         }
 
         private static void Write(string apng, byte[] signature, IHDR ihdr, acTL actl, byte[] idat,
-            fcTL[] fctl, fdAT[] fdat, IEND iend)
-        {
+            fcTL[] fctl, fdAT[] fdat, IEND iend) {
             BinaryWriter bw = new BinaryWriter(new FileStream(apng, FileMode.Create));
 
             bw.Write(signature);
@@ -141,8 +138,7 @@ namespace Ekona.Images.Formats
 
             bw.Write(idat);
 
-            for (int i = 0; i < fdat.Length; i++)
-            {
+            for (int i = 0; i < fdat.Length; i++) {
                 bw.Write(fctl[i + 1].length);
                 bw.Write(fctl[i + 1].id);
                 bw.Write(fctl[i + 1].sequence_numer);
@@ -171,8 +167,7 @@ namespace Ekona.Images.Formats
             bw.Close();
         }
 
-        private static IHDR Read_IHDR(string png)
-        {
+        private static IHDR Read_IHDR(string png) {
             BinaryReader br = new BinaryReader(new FileStream(png, FileMode.Open));
             br.BaseStream.Position = 0x08;
             IHDR ihdr = new IHDR();
@@ -187,12 +182,12 @@ namespace Ekona.Images.Formats
             ihdr.filter = br.ReadByte();
             ihdr.interlace = br.ReadByte();
             ihdr.crc = br.ReadBytes(4);
-            
+
             br.Close();
             return ihdr;
         }
-        private static fcTL Read_fcTL(string png, int seq, int delay)
-        {
+
+        private static fcTL Read_fcTL(string png, int seq, int delay) {
             BinaryReader br = new BinaryReader(new FileStream(png, FileMode.Open));
             br.BaseStream.Position = 0x10;
             fcTL fctl = new fcTL();
@@ -226,15 +221,14 @@ namespace Ekona.Images.Formats
             br.Close();
             return fctl;
         }
-        private static byte[] Read_IDAT(string png)
-        {
+
+        private static byte[] Read_IDAT(string png) {
             BinaryReader br = new BinaryReader(new FileStream(png, FileMode.Open));
             byte[] buffer;
 
             bool encontrado = false;
             string c = "\0\0\0\0";
-            while (!encontrado)
-            {
+            while (!encontrado) {
                 c = c.Remove(0, 1);
 
                 c += (char)br.ReadByte();
@@ -250,8 +244,8 @@ namespace Ekona.Images.Formats
             br.Close();
             return buffer;
         }
-        private static fdAT Read_fdAT(string png, int i)
-        {
+
+        private static fdAT Read_fdAT(string png, int i) {
             BinaryReader br = new BinaryReader(new FileStream(png, FileMode.Open));
             fdAT fdat = new fdAT();
 
@@ -260,8 +254,7 @@ namespace Ekona.Images.Formats
 
             bool encontrado = false;
             string c = "\0\0\0\0";
-            while (!encontrado)
-            {
+            while (!encontrado) {
                 c = c.Remove(0, 1);
 
                 c += (char)br.ReadByte();
@@ -271,7 +264,7 @@ namespace Ekona.Images.Formats
 
             br.BaseStream.Position -= 8;
             int length = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
-            fdat.length = BitConverter.GetBytes(length + 4).Reverse().ToArray();         
+            fdat.length = BitConverter.GetBytes(length + 4).Reverse().ToArray();
             br.BaseStream.Position += 4;
             fdat.data = br.ReadBytes(length);
             List<Byte> stream = new List<byte>();
@@ -284,8 +277,7 @@ namespace Ekona.Images.Formats
             return fdat;
         }
 
-        private struct IHDR
-        {
+        private struct IHDR {
             public byte[] length;
             public byte[] id;
             public uint width;
@@ -297,16 +289,16 @@ namespace Ekona.Images.Formats
             public byte interlace;
             public byte[] crc;
         }
-        private struct acTL
-        {
+
+        private struct acTL {
             public byte[] length;
             public byte[] id;
             public byte[] num_frames;
             public byte[] num_plays;
             public byte[] crc;
         }
-        private struct fcTL
-        {
+
+        private struct fcTL {
             public byte[] length;
             public byte[] id;
             public byte[] sequence_numer;
@@ -320,16 +312,16 @@ namespace Ekona.Images.Formats
             public byte blend_op;
             public byte[] crc;
         }
-        private struct fdAT
-        {
+
+        private struct fdAT {
             public byte[] length;
             public byte[] id;
             public byte[] sequence_number;
             public byte[] data;
             public byte[] crc;
         }
-        private struct IEND
-        {
+
+        private struct IEND {
             public byte[] length;
             public byte[] id;
             public byte[] crc;

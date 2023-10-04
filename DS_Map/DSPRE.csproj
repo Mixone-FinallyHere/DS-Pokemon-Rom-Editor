@@ -112,6 +112,12 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EventEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="EventEditor.Designer.cs">
+      <DependentUpon>EventEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="EventFileImport.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -128,6 +134,12 @@
     </Compile>
     <Compile Include="LearnsetEditor.designer.cs">
       <DependentUpon>LearnsetEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MatrixEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MatrixEditor.Designer.cs">
+      <DependentUpon>MatrixEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="PersonalDataEditor.cs">
       <SubType>Form</SubType>
@@ -283,6 +295,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\writeText.Designer.cs" />
+    <EmbeddedResource Include="EventEditor.resx">
+      <DependentUpon>EventEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="EventFileImport.resx">
       <DependentUpon>EventFileImport.cs</DependentUpon>
     </EmbeddedResource>
@@ -291,6 +306,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="LearnsetEditor.resx">
       <DependentUpon>LearnsetEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MatrixEditor.resx">
+      <DependentUpon>MatrixEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PersonalDataEditor.resx">
       <DependentUpon>PersonalDataEditor.cs</DependentUpon>

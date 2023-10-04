@@ -4,17 +4,17 @@
 // Copyright (C) 2012
 //
 //   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by 
+//   it under the terms of the GNU General Public License as published by
 //   the Free Software Foundation, either version 3 of the License, or
 //   (at your option) any later version.
 //
-//   This program is distributed in the hope that it will be useful, 
+//   This program is distributed in the hope that it will be useful,
 //   but WITHOUT ANY WARRANTY; without even the implied warranty of
 //   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details. 
+//   GNU General Public License for more details.
 //
 //   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 // </copyright>
 
@@ -24,13 +24,13 @@
 // -----------------------------------------------------------------------
 using System.Windows.Forms;
 
-namespace Ekona
-{
+namespace Ekona {
+
     /// <summary>
     /// IPlugin interface to support a file format
     /// </summary>
-    public interface IPlugin
-    {
+    public interface IPlugin {
+
         /// <summary>
         /// First method to be called. It passes the class IPluginHost
         /// </summary>
@@ -57,7 +57,7 @@ namespace Ekona
 
         /// <summary>
         /// This methos will be called when the user double click a file.
-        /// It's used for a fast reading, 
+        /// It's used for a fast reading,
         /// ie: double click the palette file instead of click on the button View if you want to see the next image.
         /// It should call the methods Set_Palette, Set_Image, Set_Sprite.... in pluginHost.
         /// </summary>

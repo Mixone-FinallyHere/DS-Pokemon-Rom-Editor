@@ -17,42 +17,40 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
-namespace NSMBe4.DSFileSystem
-{
-    public class Filesystem
-    {
+namespace NSMBe4.DSFileSystem {
+
+    public class Filesystem {
         protected FilesystemSource source;
         public List<File> allFiles = new List<File>();
         public List<Directory> allDirs = new List<Directory>();
         protected Dictionary<int, File> filesById = new Dictionary<int, File>();
+
         //        protected Dictionary<string, File> filesByName = new Dictionary<string, File>();
         protected Dictionary<int, Directory> dirsById = new Dictionary<int, Directory>();
+
         //        protected Dictionary<string, Directory> dirsByName = new Dictionary<string, Directory>();
         public Stream s;
+
         public Directory mainDir;
         protected File freeSpaceDelimiter;
         public int fileDataOffset = 0;
 
         //public FilesystemBrowser viewer;
 
-        public Filesystem(FilesystemSource fs)
-        {
+        public Filesystem(FilesystemSource fs) {
             this.source = fs;
             this.s = source.load();
         }
 
-        public File getFileById(int id)
-        {
+        public File getFileById(int id) {
             if (!filesById.ContainsKey(id))
                 return null;
             return filesById[id];
         }
 
-        public File getFileByName(string name)
-        {
+        public File getFileByName(string name) {
             foreach (File f in allFiles)
                 if (!f.isSystemFile && f.name == name)
                     return f;
@@ -60,16 +58,13 @@ namespace NSMBe4.DSFileSystem
             return null;
         }
 
-        public Directory getDirByPath(string path)
-        {
+        public Directory getDirByPath(string path) {
             string[] shit = path.Split(new char[] { '/' });
             Directory dir = mainDir;
-            for (int i = 0; i < shit.Length; i++)
-            {
+            for (int i = 0; i < shit.Length; i++) {
                 Directory newDir = null;
                 foreach (Directory d in dir.childrenDirs)
-                    if (d.name == shit[i])
-                    {
+                    if (d.name == shit[i]) {
                         newDir = d;
                         break;
                     }
@@ -80,8 +75,7 @@ namespace NSMBe4.DSFileSystem
             return dir;
         }
 
-        protected void addFile(File f)
-        {
+        protected void addFile(File f) {
             allFiles.Add(f);
             if (f.id != -1)
                 if (!filesById.ContainsKey(f.id))
@@ -89,9 +83,7 @@ namespace NSMBe4.DSFileSystem
             //            filesByName.Add(f.name, f);
         }
 
-
-        protected void addDir(Directory d)
-        {
+        protected void addDir(Directory d) {
             allDirs.Add(d);
             if (d.id != -1)
                 dirsById.Add(d.id, d);
@@ -99,15 +91,13 @@ namespace NSMBe4.DSFileSystem
         }
 
         //Tries to find LEN bytes of continuous unused space AFTER the freeSpaceDelimiter (usually fat or fnt)
-        public int findFreeSpace(int len, int align)
-        {
+        public int findFreeSpace(int len, int align) {
             allFiles.Sort(); //sort by offset
 
             File bestSpace = null;
             int bestSpaceLeft = int.MaxValue;
 
-            for (int i = allFiles.IndexOf(freeSpaceDelimiter); i < allFiles.Count - 1; i++)
-            {
+            for (int i = allFiles.IndexOf(freeSpaceDelimiter); i < allFiles.Count - 1; i++) {
                 int spBegin = allFiles[i].fileBegin + allFiles[i].fileSize; //- 1 + 1;
                 if (spBegin % align != 0)
                     spBegin += align - spBegin % align;
@@ -116,11 +106,9 @@ namespace NSMBe4.DSFileSystem
                 if (spEnd % align != 0)
                     spEnd -= spEnd % align;
                 int spSize = spEnd - spBegin + 1;
-                if (spSize >= len)
-                {
+                if (spSize >= len) {
                     int spLeft = len - spSize;
-                    if (spLeft < bestSpaceLeft && (allFiles[i].fileBegin >= 0x1400000))
-                    {
+                    if (spLeft < bestSpaceLeft && (allFiles[i].fileBegin >= 0x1400000)) {
                         bestSpaceLeft = spLeft;
                         bestSpace = allFiles[i];
                     }
@@ -132,24 +120,21 @@ namespace NSMBe4.DSFileSystem
             else //if (allFiles[allFiles.Count - 1].fileBegin >= 0x1400000)
                 return allFiles[allFiles.Count - 1].fileBegin + allFiles[allFiles.Count - 1].fileSize + 10;
             //            else
-            //                return 0x1400000; //just add the file at the very end 
+            //                return 0x1400000; //just add the file at the very end
 
             //The 0x1400000 hack is not needed anymore. We now know what data we were overwriting: the RSA sig.
             //See http://board.dirbaio.net/thread.php?id=185 for more details...
         }
 
         //yeah, i'm tired of looking through the dump myself ;)
-        public bool findErrors()
-        {
+        public bool findErrors() {
             allFiles.Sort();
             bool res = false;
-            for (int i = 0; i < allFiles.Count - 1; i++)
-            {
+            for (int i = 0; i < allFiles.Count - 1; i++) {
                 int firstEnd = allFiles[i].fileBegin + allFiles[i].fileSize - 1;
                 int secondStart = allFiles[i + 1].fileBegin;
 
-                if (firstEnd >= secondStart)
-                {
+                if (firstEnd >= secondStart) {
                     Console.Out.WriteLine("ERROR: FILES OVERLAP:");
                     allFiles[i].dumpFile(2);
                     allFiles[i + 1].dumpFile(2);
@@ -160,54 +145,42 @@ namespace NSMBe4.DSFileSystem
             return res;
         }
 
-        public void close()
-        {
+        public void close() {
             source.close();
         }
 
-        public void save()
-        {
+        public void save() {
             source.save();
         }
 
-        public void dumpFilesOrdered(TextWriter outs)
-        {
+        public void dumpFilesOrdered(TextWriter outs) {
             allFiles.Sort();
             foreach (File f in allFiles)
                 outs.WriteLine(f.fileBegin.ToString("X8") + " .. " + (f.fileBegin + f.fileSize - 1).ToString("X8") + ":  " + f.getPath());
         }
 
-        public virtual void fileMoved(File f)
-        {
+        public virtual void fileMoved(File f) {
         }
 
-        public int getFilesystemEnd()
-        {
+        public int getFilesystemEnd() {
             allFiles.Sort();
             File lastFile = allFiles[allFiles.Count - 1];
             int end = lastFile.fileBegin + lastFile.fileSize; //well, 1 byte doesnt matter
             return end;
         }
 
-
-
-        public uint readUInt(Stream s)
-        {
+        public uint readUInt(Stream s) {
             uint res = 0;
-            for (int i = 0; i < 4; i++)
-            {
+            for (int i = 0; i < 4; i++) {
                 res |= (uint)s.ReadByte() << 8 * i;
             }
             return res;
         }
 
-
-        public void moveAllFiles(File first, int firstOffs)
-        {
+        public void moveAllFiles(File first, int firstOffs) {
             allFiles.Sort();
             Console.Out.WriteLine("Moving file " + first.name);
             Console.Out.WriteLine("Into " + firstOffs.ToString("X"));
-
 
             int firstStart = first.fileBegin;
             int diff = (int)firstOffs - (int)firstStart;
@@ -218,8 +191,7 @@ namespace NSMBe4.DSFileSystem
 
             //WARNING: I assume all the aligns are powers of 2
             int maxAlign = 4;
-            for (int i = allFiles.IndexOf(first); i < allFiles.Count; i++)
-            {
+            for (int i = allFiles.IndexOf(first); i < allFiles.Count; i++) {
                 if (allFiles[i].alignment > maxAlign)
                     maxAlign = allFiles[i].alignment;
             }
@@ -227,7 +199,6 @@ namespace NSMBe4.DSFileSystem
             //To preserve the alignment of all the moved files
             if (diff % maxAlign != 0)
                 diff += (int)(maxAlign - diff % maxAlign);
-
 
             int fsEnd = getFilesystemEnd();
             int toCopy = (int)fsEnd - (int)firstStart;

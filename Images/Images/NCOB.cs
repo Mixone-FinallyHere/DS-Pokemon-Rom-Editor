@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using Ekona;
+﻿using Ekona;
 using Ekona.Images;
+using System;
+using System.IO;
 
-namespace Images
-{
-    public class NCOB : SpriteBase
-    {
-        sNCOB ncob;
-        ImageBase img;
+namespace Images {
 
-        public NCOB(string file, int id, string fileName = "") : base(file, id, fileName) { }
+    public class NCOB : SpriteBase {
+        private sNCOB ncob;
+        private ImageBase img;
 
-        public override void Read(string fileIn)
-        {
+        public NCOB(string file, int id, string fileName = "") : base(file, id, fileName) {
+        }
+
+        public override void Read(string fileIn) {
             ncob = new sNCOB();
             BinaryReader br = new BinaryReader(File.OpenRead(fileIn));
 
@@ -28,25 +24,21 @@ namespace Images
             ncob.generic.header_size = br.ReadUInt16();
             ncob.generic.nSection = br.ReadUInt16();
 
-            for (int i = 0; i < ncob.generic.nSection; i++)
-            {
+            for (int i = 0; i < ncob.generic.nSection; i++) {
                 string type = new String(br.ReadChars(4));
 
-                switch (type)
-                {
+                switch (type) {
                     case "CELL":
                         ncob.cell.type = "CELL".ToCharArray();
                         ncob.cell.size = br.ReadUInt32();
                         ncob.cell.num_banks = br.ReadUInt32();
                         ncob.cell.banks = new Ekona.Images.Bank[ncob.cell.num_banks];
 
-                        for (int b = 0; b < ncob.cell.num_banks; b++)
-                        {
+                        for (int b = 0; b < ncob.cell.num_banks; b++) {
                             ncob.cell.banks[b] = new Ekona.Images.Bank();
                             ncob.cell.banks[b].oams = new OAM[br.ReadUInt32()];
 
-                            for (int o = 0; o < ncob.cell.banks[b].oams.Length; o++)
-                            {
+                            for (int o = 0; o < ncob.cell.banks[b].oams.Length; o++) {
                                 OAM oam = new OAM();
                                 oam.obj1.xOffset = br.ReadInt16();
                                 oam.obj0.yOffset = br.ReadInt16();
@@ -96,18 +88,15 @@ namespace Images
             Set_Banks(ncob.cell.banks, 0, false);
         }
 
-        public override void Write(string fileOut, ImageBase image, PaletteBase palette)
-        {
+        public override void Write(string fileOut, ImageBase image, PaletteBase palette) {
             throw new NotImplementedException();
         }
 
-        public ImageBase Image
-        {
+        public ImageBase Image {
             get { return img; }
         }
 
-        public struct sNCOB
-        {
+        public struct sNCOB {
             public NitroHeader generic;
             public CELL cell;
             public CHAR chars;
@@ -124,23 +113,22 @@ namespace Images
             public EXTR extr;
             public LINK link;
 
-            public struct CELL
-            {
+            public struct CELL {
                 public char[] type;
                 public uint size;
                 public uint num_banks;
                 public Ekona.Images.Bank[] banks;
             }
-            public struct CHAR
-            {
+
+            public struct CHAR {
                 public char[] type;
                 public uint size;
                 public uint unknown;
                 public uint data_size;
                 public byte[] data;
             }
-            public struct GRP
-            {
+
+            public struct GRP {
                 public char[] type;
                 public uint size;
                 public uint num_element;
@@ -148,50 +136,50 @@ namespace Images
 
                 public ulong[] data;
             }
-            public struct ANIM
-            {
+
+            public struct ANIM {
                 public char[] type;
                 public uint size;
                 public byte[] unknown;
             }
-            public struct ACTL
-            {
+
+            public struct ACTL {
                 public char[] type;
                 public uint size;
                 public uint num_element;
 
                 public byte[][] unknown;    // 0x0C per block
             }
-            public struct MODE
-            {
+
+            public struct MODE {
                 public char[] type;
                 public uint size;
                 public uint unknown1;
                 public uint unknown2;
             }
-            public struct LABL
-            {
+
+            public struct LABL {
                 public char[] type;
                 public uint size;
                 public uint num_element;
                 public string[] names;  // 0x40 per name
             }
-            public struct CMNT
-            {
+
+            public struct CMNT {
                 public char[] type;
                 public uint size;
                 public uint unknown;
             }
-            public struct CCMT
-            {
+
+            public struct CCMT {
                 public char[] type;
                 public uint size;
                 public uint num_element;
 
                 public ulong[] unknown;
             }
-            public struct ECMT
-            {
+
+            public struct ECMT {
                 public char[] type;
                 public uint size;
                 public uint num_element;
@@ -199,28 +187,28 @@ namespace Images
                 public uint[] size_e;
                 public string[] name;       // SJIS
             }
-            public struct FCMT
-            {
+
+            public struct FCMT {
                 public char[] type;
                 public uint size;
 
                 public byte[] data;
             }
-            public struct CLBL
-            {
+
+            public struct CLBL {
                 public char[] type;
                 public uint size;
                 public uint num_element;
                 public uint[] data;
             }
-            public struct EXTR
-            {
+
+            public struct EXTR {
                 public char[] type;
                 public uint size;
                 public uint unknown;
             }
-            public struct LINK
-            {
+
+            public struct LINK {
                 public char[] type;
                 public uint size;
                 public string link;

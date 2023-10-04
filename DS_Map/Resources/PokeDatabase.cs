@@ -4,8 +4,11 @@ using System.Drawing;
 using static DSPRE.RomInfo;
 
 namespace DSPRE.Resources {
+
     public static class PokeDatabase {
+
         public static class Area {
+
             public static string[] PtAreaIconValues = new string[] {
                 "[00] City",
                 "[01] City",
@@ -52,7 +55,9 @@ namespace DSPRE.Resources {
                 "[16] Unknown/Unused",
             };
         }
+
         public static class ShowName {
+
             public static string[] DPShowNameValues = new string[] {
                 "[000] Show",
                 "[001] Show",
@@ -60,6 +65,7 @@ namespace DSPRE.Resources {
                 "[003] Show",
                 "[004] Don't show"
             };
+
             public static string[] PtShowNameValues = new string[] {
                 "[000] Show",
                 "[001] Show",
@@ -74,7 +80,9 @@ namespace DSPRE.Resources {
                 "[134] Show"
             };
         }
+
         public static class Weather {
+
             public static Dictionary<int, string> DPWeatherDict = new Dictionary<int, string> {
                 [00] = "Normal",
                 [01] = "Normal, somewhat dark",
@@ -106,6 +114,7 @@ namespace DSPRE.Resources {
                 [27] = "Diamond dust [27]",
                 [28] = "Snowfall, slow [28]",
             };
+
             public static Dictionary<int, string> PtWeatherDict = new Dictionary<int, string> {
                 [00] = "Normal",
                 [01] = "Normal, somewhat dark",
@@ -145,6 +154,7 @@ namespace DSPRE.Resources {
                 [35] = "Diamond dust [35]",
                 [36] = "Snowfall, slow [36]",
             };
+
             public static Dictionary<int, string> HGSSWeatherDict = new Dictionary<int, string> {
                 [00] = "Normal",
                 [01] = "Rain",
@@ -162,7 +172,9 @@ namespace DSPRE.Resources {
                 [13] = "Low Light (Battle Arcade)"
             };
         }
+
         public static class CameraAngles {
+
             public static Dictionary<int, string> DPPtCameraDict = new Dictionary<int, string>() {
                 [00] = "3D Normal",
                 [01] = "3D Top Higher",
@@ -181,6 +193,7 @@ namespace DSPRE.Resources {
                 [14] = "3D Top - Wide FOV",
                 [15] = "3D Front Low"
             };
+
             public static Dictionary<int, string> HGSSCameraDict = new Dictionary<int, string>() {
                 [00] = "3D Top View [00]",
                 [01] = "3D Front High",
@@ -201,7 +214,9 @@ namespace DSPRE.Resources {
                 [16] = "3D Top View [16]"
             };
         }
+
         public abstract class MusicDB {
+
             public static Dictionary<ushort, string> DPMusicDict = new Dictionary<ushort, string>() { //Perfectly contained in Platinum's, as it seems (?)
                 [1000] = "Mystery Zone",
                 [1001] = "Silence",
@@ -298,6 +313,7 @@ namespace DSPRE.Resources {
                 [1096] = "Hall of Origin",
                 [1097] = "GTS theme"
             };
+
             public static Dictionary<ushort, string> PtMusicDict = new Dictionary<ushort, string>() {
                 [1000] = "Mystery Zone",
                 [1001] = "Silence",
@@ -405,6 +421,7 @@ namespace DSPRE.Resources {
                 [1213] = "Wi-Fi Plaza: Parade",
                 [1218] = "Twinleaf Town (Music Box)",
             };
+
             public static Dictionary<ushort, string> HGSSMusicDict = new Dictionary<ushort, string>() {
                 [1000] = "Mystery Zone",
                 [1001] = "Silence [Outside]",
@@ -517,8 +534,11 @@ namespace DSPRE.Resources {
                 [1216] = "Route 17"
             };
         }
+
         public static class EventEditor {
+
             public static class Spawnables {
+
                 public static string[] orientationsArray = new string[] {
                     "Front Interaction",
                     "Activated from the left",
@@ -528,13 +548,16 @@ namespace DSPRE.Resources {
                     "Activated from the sides",
                     "Front/Back Interaction",
                 };
+
                 public static string[] typesArray = new string[] {
                     "Misc",
                     "Board (Front Auto-Trigger)",
                     "Hidden Item",
                 };
             }
+
             public static class Overworlds {
+
                 public static string[] movementsArray = new string[] {
                     "[00]  None",
                     "[01]  None",
@@ -611,7 +634,9 @@ namespace DSPRE.Resources {
                 };
             }
         }
+
         public static class System {
+
             public static Dictionary<string, gVerEnum> versionsDict = new Dictionary<string, gVerEnum>() {
                 ["ADAE"] = gVerEnum.Diamond,
                 ["ADAS"] = gVerEnum.Diamond,
@@ -655,6 +680,7 @@ namespace DSPRE.Resources {
                 [0x04] = "[04] Grass Sound",
                 [0x80] = "[80] Blocked"
             };
+
             public static Dictionary<byte, string> MapCollisionTypePainters = new Dictionary<byte, string>() {
                 [0x00] = "[00] None",
                 [0x02] = "[02] Tall Grass (Wild)",
@@ -766,6 +792,7 @@ namespace DSPRE.Resources {
                 [0xEC] = "[EC] Store Shelf 3",
                 [0xFF] = "[FF] No Attribute"
             };
+
             public static Dictionary<ushort, string> pokeNames = new Dictionary<ushort, string>() {
                 [1] = "Bulbasaur",
                 [2] = "Ivysaur",
@@ -1263,7 +1290,7 @@ namespace DSPRE.Resources {
                 [494] = "Egg",
                 [495] = "Bad Egg",
 
-                // empty indices 
+                // empty indices
                 [496] = "Egg",
                 [497] = "Egg",
                 [498] = "Egg",
@@ -1471,8 +1498,10 @@ namespace DSPRE.Resources {
                 [698] = "Meloetta",
                 [699] = "Genesect",
             };
+
             public static class MatrixCellColors {
                 /* Initialize dictionary of colors corresponding to border maps in the matrix editor */
+
                 public static Dictionary<List<uint>, (Color back, Color fore)> DPPtmatrixColorsDict = new Dictionary<List<uint>, (Color back, Color fore)> {
                     [new List<uint> { 173, 176, 177, 179 }] = (Color.ForestGreen, Color.White),
                     [new List<uint> { 174 }] = (Color.SteelBlue, Color.White),
@@ -1480,12 +1509,14 @@ namespace DSPRE.Resources {
                     [new List<uint> { 178 }] = (Color.PowderBlue, Color.Black),
                     [new List<uint> { GameMatrix.EMPTY }] = (Color.Black, Color.White)
                 };
+
                 public static Dictionary<List<uint>, (Color back, Color fore)> HGSSmatrixColorsDict = new Dictionary<List<uint>, (Color back, Color fore)> {
                     [new List<uint> { 208 }] = (Color.ForestGreen, Color.White),
                     [new List<uint> { 209 }] = (Color.SteelBlue, Color.White),
                     [new List<uint> { 210 }] = (Color.Sienna, Color.White),
                     [new List<uint> { GameMatrix.EMPTY }] = (Color.Black, Color.White)
                 };
+
                 public static Dictionary<List<uint>, (Color back, Color fore)> GenericMatrixColorsDict = new Dictionary<List<uint>, (Color back, Color fore)> {
                     [new List<uint> { 203 }] = (Color.FromArgb(80, 200, 16), Color.White),
                     [new List<uint> { 204, 209 }] = (Color.SteelBlue, Color.White),
@@ -1495,7 +1526,9 @@ namespace DSPRE.Resources {
                     [new List<uint> { GameMatrix.EMPTY }] = (Color.Black, Color.White)
                 };
             }
+
             public static class AreaPics {
+
                 public static Dictionary<int, string> hgssAreaPicDict = new Dictionary<int, string>() {
                     [0] = "empty",
                     [1] = "hgsswall",
@@ -1509,7 +1542,9 @@ namespace DSPRE.Resources {
                     [9] = "hgssgray"
                 };
             }
+
             public static class WeatherPics {
+
                 public static Dictionary<byte[], string> dpWeatherImageDict = new Dictionary<byte[], string>() {
                     [new byte[] { 0, 8, 13, 18, 19, 20, 23, 25 }] = "dpnormal",
                     [new byte[] { 1 }] = "dpcloudy",
@@ -1529,6 +1564,7 @@ namespace DSPRE.Resources {
                     [new byte[] { 17 }] = "dplightning",
                     [new byte[] { 22 }] = "dplightsandstorm"
                 };
+
                 public static Dictionary<byte[], string> ptWeatherImageDict = new Dictionary<byte[], string>() {
                     [new byte[] { 0, 8, 13, 20, 31, 33 }] = "ptnormal",
                     [new byte[] { 1 }] = "ptcloudy",
@@ -1573,7 +1609,9 @@ namespace DSPRE.Resources {
                 };
             }
         }
+
         public static class PersonalData {
+
             public class PersonalExtraFiles {
                 public int monId { get; set; }
                 public string description { get; set; }

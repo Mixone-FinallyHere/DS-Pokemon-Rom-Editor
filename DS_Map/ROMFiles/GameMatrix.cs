@@ -1,31 +1,31 @@
 using System;
 using System.IO;
 using System.Text;
-using System.Windows.Forms;
 using static DSPRE.RomInfo;
 
 namespace DSPRE.ROMFiles {
-   /* ---------------------- MATRIX DATA STRUCTURE (DPPtHGSS):-----------------------------
+    /* ---------------------- MATRIX DATA STRUCTURE (DPPtHGSS):-----------------------------
 
-   0x0  //  byte:       Matrix width (a.k.a row length) (x)
-   0x1  //  byte:       Matrix height (a.k.a number of rows per section) (y)
-   0x2  //  byte:       Headers section boolean (0 = not present, 1 = present)
-   0x3  //  byte:       Altitudes section flag (0 = not present, 1 = present)
-   0x4  //  byte:       Length of matrix name string
-   0x5  //  string:     Matrix name string (UTF-8 Encoded)
-   --   //              [Header section if applicable: y blocks of length x]
-   --   //              [Altitudes section if applicable: y blocks of length x]
-   --   //              [Map files section: y blocks of length x]
+    0x0  //  byte:       Matrix width (a.k.a row length) (x)
+    0x1  //  byte:       Matrix height (a.k.a number of rows per section) (y)
+    0x2  //  byte:       Headers section boolean (0 = not present, 1 = present)
+    0x3  //  byte:       Altitudes section flag (0 = not present, 1 = present)
+    0x4  //  byte:       Length of matrix name string
+    0x5  //  string:     Matrix name string (UTF-8 Encoded)
+    --   //              [Header section if applicable: y blocks of length x]
+    --   //              [Altitudes section if applicable: y blocks of length x]
+    --   //              [Map files section: y blocks of length x]
 
-   -------------------------------------------------------------------------------------- */
+    -------------------------------------------------------------------------------------- */
 
     /// <summary>
     /// Class to store map matrix data from Pokémon NDS games
     /// </summary>
-    public class GameMatrix: RomFile {
-        #region Fields (8)
-        public static readonly string DefaultFilter = "Game Matrix File (*.mtx)|*.mtx";
+    public class GameMatrix : RomFile {
 
+        #region Fields (8)
+
+        public static readonly string DefaultFilter = "Game Matrix File (*.mtx)|*.mtx";
 
         public bool hasHeadersSection { get; set; }
         public bool hasHeightsSection { get; set; }
@@ -39,9 +39,11 @@ namespace DSPRE.ROMFiles {
         public ushort[,] maps;
 
         public static readonly ushort EMPTY = 65535;
-        #endregion Fields
+
+        #endregion Fields (8)
 
         #region Constructors(1)
+
         public GameMatrix(Stream data) {
             using (BinaryReader reader = new BinaryReader(data)) {
                 /* Read matrix size and sections included */
@@ -89,11 +91,12 @@ namespace DSPRE.ROMFiles {
                 }
             }
         }
-        public GameMatrix(int ID) : this (new FileStream(RomInfo.gameDirs[DirNames.matrices].unpackedDir + "\\" + ID.ToString("D4"), FileMode.Open)) {
+
+        public GameMatrix(int ID) : this(new FileStream(RomInfo.gameDirs[DirNames.matrices].unpackedDir + "\\" + ID.ToString("D4"), FileMode.Open)) {
             this.id = ID;
         }
 
-        public GameMatrix(GameMatrix copy, int newID) { 
+        public GameMatrix(GameMatrix copy, int newID) {
             this.id = newID;
             this.name = copy.name;
             this.width = copy.width;
@@ -116,11 +119,12 @@ namespace DSPRE.ROMFiles {
             this.height = 1;
             this.maps = new ushort[1, 1] { { 0 } };
         }
-        #endregion
+
+        #endregion Constructors(1)
 
         #region Methods (6)
-        public void ResizeMatrix(int newHeight, int newWidth)
-        {
+
+        public void ResizeMatrix(int newHeight, int newWidth) {
             /*  Initialize new arrays   */
             ushort[,] newHeaders = new ushort[newHeight, newWidth];
             byte[,] newAltitudes = new byte[newHeight, newWidth];
@@ -179,6 +183,7 @@ namespace DSPRE.ROMFiles {
         public override string ToString() {
             return (this.id == null ? "" : id.ToString()) + ": " + this.name;
         }
+
         public override byte[] ToByteArray() {
             MemoryStream newData = new MemoryStream();
             using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -209,16 +214,18 @@ namespace DSPRE.ROMFiles {
                         writer.Write(maps[i, j]);
                     }
                 }
-
             }
             return newData.ToArray();
         }
+
         public void SaveToFileDefaultDir(int IDtoReplace, bool showSuccessMessage = true) {
             SaveToFileDefaultDir(DirNames.matrices, IDtoReplace, showSuccessMessage);
         }
+
         public void SaveToFileExplorePath(string suggestedFileName, bool showSuccessMessage = true) {
             SaveToFileExplorePath("Gen IV Matrix File", "mtx", suggestedFileName, showSuccessMessage);
         }
-        #endregion
+
+        #endregion Methods (6)
     }
 }

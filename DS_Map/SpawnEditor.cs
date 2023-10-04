@@ -6,9 +6,11 @@ using System.Windows.Forms;
 using static DSPRE.RomInfo;
 
 namespace DSPRE {
+
     public partial class SpawnEditor : Form {
         private List<string> locations = RomInfo.GetLocationNames();
         private List<string> names;
+
         public SpawnEditor(HashSet<string> results, List<string> allNames, ushort headerNumber = 0, int matrixX = 0, int matrixY = 0) {
             InitializeComponent();
             this.names = allNames;
@@ -25,12 +27,14 @@ namespace DSPRE {
             matrixxUpDown.Value = matrixX;
             matrixyUpDown.Value = matrixY;
         }
+
         public SpawnEditor(List<string> allNames) {
             InitializeComponent();
             this.names = allNames;
             SetupFields(allNames);
             readDefaultSpawnPosButton_Click(null, null);
-        }              
+        }
+
         private void SetupFields(IEnumerable<string> headersList) {
             SetupDirections();
             SetupHeadersList(headersList);
@@ -41,15 +45,17 @@ namespace DSPRE {
             spawnHeaderComboBox.Items.Clear();
             spawnHeaderComboBox.Items.AddRange(headersList.ToArray());
         }
-        private void SetupDirections () {
+
+        private void SetupDirections() {
             playerDirCombobox.Items.Clear();
             playerDirCombobox.Items.AddRange(new string[4] { "Up", "Down", "Left", "Right" });
         }
+
         private void saveSpawnEditorButton_Click(object sender, EventArgs e) {
             DialogResult d = MessageBox.Show("This operation will overwrite: " + Environment.NewLine
                 + "- 10 bytes of data at ARM9 offset 0x" + RomInfo.arm9spawnOffset.ToString("X") + Environment.NewLine
-                + "- 4 bytes of data at Overlay" + RomInfo.initialMoneyOverlayNumber + " offset 0x" + RomInfo.initialMoneyOverlayOffset.ToString("X") + 
-                Environment.NewLine + "\nProceed?", "Confirmation required",  MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                + "- 4 bytes of data at Overlay" + RomInfo.initialMoneyOverlayNumber + " offset 0x" + RomInfo.initialMoneyOverlayOffset.ToString("X") +
+                Environment.NewLine + "\nProceed?", "Confirmation required", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (d == DialogResult.Yes) {
                 string moneyOverlayPath = DSUtils.GetOverlayPath(RomInfo.initialMoneyOverlayNumber);
@@ -66,7 +72,9 @@ namespace DSPRE {
                 MessageBox.Show("No changes have been made.", "Operation canceled", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
-        private void readDefaultSpawnPosButton_Click(object sender, EventArgs e) {;
+
+        private void readDefaultSpawnPosButton_Click(object sender, EventArgs e) {
+            ;
             SetupFields(names);
 
             ushort headerNumber = BitConverter.ToUInt16(DSUtils.ARM9.ReadBytes(RomInfo.arm9spawnOffset, 2), 0);
@@ -74,10 +82,9 @@ namespace DSPRE {
             ushort globalY = BitConverter.ToUInt16(DSUtils.ARM9.ReadBytes(RomInfo.arm9spawnOffset + 12, 2), 0);
 
             spawnHeaderComboBox.SelectedIndex = headerNumber;
-            
+
             localmapxUpDown.Value = (short)(globalX % 32);
             localmapyUpDown.Value = (short)(globalY % 32);
-
 
             try {
                 matrixxUpDown.Value = (ushort)Math.Min(globalX / 32, matrixxUpDown.Maximum);
@@ -90,10 +97,11 @@ namespace DSPRE {
             } catch (ArgumentOutOfRangeException) {
                 matrixyUpDown.Value = matrixyUpDown.Maximum;
             }
-            
+
             ReadDefaultMoney();
             playerDirCombobox.SelectedIndex = BitConverter.ToUInt16(DSUtils.ARM9.ReadBytes(RomInfo.arm9spawnOffset + 16, 2), 0);
         }
+
         private void ReadDefaultMoney() {
             if (DSUtils.CheckOverlayHasCompressionFlag(RomInfo.initialMoneyOverlayNumber)) {
                 if (DSUtils.OverlayIsCompressed(RomInfo.initialMoneyOverlayNumber)) {
@@ -123,9 +131,11 @@ namespace DSPRE {
                 case gFamEnum.DP:
                     locationNameLBL.Text = locations[((HeaderDP)currentHeader).locationName];
                     break;
+
                 case gFamEnum.Plat:
                     locationNameLBL.Text = locations[((HeaderPt)currentHeader).locationName];
                     break;
+
                 case gFamEnum.HGSS:
                     locationNameLBL.Text = locations[((HeaderHGSS)currentHeader).locationName];
                     break;
@@ -140,4 +150,3 @@ namespace DSPRE {
         }
     }
 }
- 

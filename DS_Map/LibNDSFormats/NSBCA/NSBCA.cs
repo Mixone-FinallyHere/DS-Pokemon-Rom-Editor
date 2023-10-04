@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
+using System.Text;
 
 namespace MKDS_Course_Editor.NSBCA {
+
     public class NSBCA {
+
         public struct NSBCA_File {
             public header Header;
+
             public struct header {
                 public string ID;
                 public byte[] Magic;
@@ -16,13 +18,17 @@ namespace MKDS_Course_Editor.NSBCA {
                 public Int16 nSection;
                 public Int32[] Section_Offset;
             }
+
             public jnt0 JNT0;
+
             public struct jnt0 //Scale Rotation and Translation
             {
                 public string ID;
                 public Int32 Size;
+
                 //3D Info Structure
                 public byte dummy;
+
                 public byte num_objs;
                 public short section_size;
                 public UnknownBlock unknownBlock;
@@ -37,6 +43,7 @@ namespace MKDS_Course_Editor.NSBCA {
                     public short[] unknown1;
                     public short[] unknown2;
                 }
+
                 public struct Info {
                     public short header_size;
                     public short data_size;
@@ -48,7 +55,9 @@ namespace MKDS_Course_Editor.NSBCA {
                     }
                 }
             }
+
             public J_AC[] JAC;
+
             public struct J_AC {
                 public string ID;
                 public Int16 NrFrames;
@@ -63,6 +72,7 @@ namespace MKDS_Course_Editor.NSBCA {
                 public Int32[] ObjInfoOffset;
 
                 public objInfo[] ObjInfo;
+
                 public struct objInfo {
                     public Int16 Flag;
                     public byte Unknown1;
@@ -83,6 +93,7 @@ namespace MKDS_Course_Editor.NSBCA {
                 }
             }
         }
+
         /*
          * I've been studying the NSBCA format heavily over the last few days trying to figure it out.
          * I've determined that the first offset in a joint animation contains Pivoting data, and the second section contains Rotation data.
@@ -95,9 +106,6 @@ namespace MKDS_Course_Editor.NSBCA {
          * This looks a bit funky and overcomplicated but so far all the animations I've been working with calculate the correct number of keyframes, so I'm assuming I'm on the right track.
          * Am yet to get to the point of loading animations into a model, but hopefully I won't get some spastic result :S
 
-          
-        
-         
         Object Flag: --zyx-Sr-RZYX-T-
         > found in the header of  each object of an animation
         ===========================
@@ -202,6 +210,7 @@ namespace MKDS_Course_Editor.NSBCA {
         Scale		 [1|0|07|2|0] 28/07 - 07 Frames
         ===========================================================
          */
+
         public static NSBCA_File Read(string Filename) {
             byte[] file_ = File.ReadAllBytes(Filename);
             if (file_[0] == 76 && file_[1] == 90 && file_[2] == 55 && file_[3] == 55) {
@@ -264,7 +273,6 @@ namespace MKDS_Course_Editor.NSBCA {
                             }
 
                             long dataoffset = 0;
-
 
                             ns.JAC[i].ObjInfoOffset = new Int32[ns.JAC[i].NrObjects];
                             for (int j = 0; j < ns.JAC[i].NrObjects; j++) {
@@ -385,7 +393,6 @@ namespace MKDS_Course_Editor.NSBCA {
                                             ns.JAC[i].ObjInfo[j].rotate_keyframes[1].Add(mode);
                                         }
                                         er.BaseStream.Position = curpos;
-
                                     }
                                 }
                                 if ((ns.JAC[i].ObjInfo[j].Flag >> 9 & 1) == 0) {

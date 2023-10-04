@@ -1,19 +1,19 @@
-﻿using System;
+﻿using DSPRE.Resources;
+using DSPRE.Resources.ROMToolboxDB;
+using DSPRE.ROMFiles;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Resources;
-using System.Windows.Forms;
-using System.Linq;
-using DSPRE.ROMFiles;
-using System.Collections.Generic;
-using DSPRE.Resources.ROMToolboxDB;
-using DSPRE.Resources;
-using static DSPRE.RomInfo;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using static DSPRE.Resources.ROMToolboxDB.ToolboxDB;
-using static NSMBe4.ROM;
+using static DSPRE.RomInfo;
 
 namespace DSPRE {
+
     public partial class ROMToolboxDialog : Form {
         public static uint expandedARMfileID = ToolboxDB.syntheticOverlayFileNumbersDB[RomInfo.gameFamily];
 
@@ -33,6 +33,7 @@ namespace DSPRE {
         public static int expandedTrainerNameLength = 12;
 
         #region Constructor
+
         public ROMToolboxDialog() {
             InitializeComponent();
 
@@ -56,6 +57,7 @@ namespace DSPRE {
                     DisableScrcmdRepointPatch("Unsupported");
                     DisableKillTextureAnimationsPatch("Unsupported");
                     break;
+
                 case gFamEnum.Plat:
                     DisableOverlay1patch("Unsupported");
                     DisableMatrixExpansionPatch("Unsupported");
@@ -67,6 +69,7 @@ namespace DSPRE {
                     }
                     CheckDynamicHeadersPatchApplied();
                     break;
+
                 case gFamEnum.HGSS:
                     if (!DSUtils.CheckOverlayHasCompressionFlag(1)) {
                         DisableOverlay1patch("Already applied");
@@ -88,12 +91,14 @@ namespace DSPRE {
         }
 
         #region Patch Disable
+
         private void DisableOverlay1patch(string reason) {
             overlay1uncomprButton.Enabled = false;
             overlay1uncompressedLBL.Enabled = false;
             overlay1patchtextLBL.Enabled = false;
             overlay1uncomprButton.Text = reason;
         }
+
         private void DisableBDHCamPatch(string reason) {
             BDHCamPatchButton.Enabled = false;
             BDHCamPatchLBL.Enabled = false;
@@ -101,30 +106,35 @@ namespace DSPRE {
             BDHCamARM9requiredLBL.Enabled = false;
             BDHCamPatchButton.Text = reason;
         }
+
         private void DisableARM9patch(string reason) {
             applyARM9ExpansionButton.Enabled = false;
             arm9expansionTextLBL.Enabled = false;
             arm9expansionLBL.Enabled = false;
             applyARM9ExpansionButton.Text = reason;
         }
+
         private void DisableDynamicHeadersPatch(string reason) {
             applyDynamicHeadersButton.Enabled = false;
             dynamicHeadersTextLBL.Enabled = false;
             dynamicHeadersLBL.Enabled = false;
             applyDynamicHeadersButton.Text = reason;
         }
+
         private void DisableMatrixExpansionPatch(string reason) {
             expandMatrixButton.Enabled = false;
             matrixExpansionLBL.Enabled = false;
             matrixExpansionTextLBL.Enabled = false;
             expandMatrixButton.Text = reason;
         }
+
         private void DisableStandardizeItemsPatch(string reason) {
             applyItemStandardizeButton.Enabled = false;
             standardizePatchLBL.Enabled = false;
             standardizePatchTextLBL.Enabled = false;
             applyItemStandardizeButton.Text = reason;
         }
+
         private void DisableScrcmdRepointPatch(string reason) {
             repointScrcmdButton.Enabled = false;
             repointScrcmdLBL.Enabled = false;
@@ -132,22 +142,27 @@ namespace DSPRE {
             scrcmdARM9requiredLBL.Enabled = false;
             repointScrcmdButton.Text = reason;
         }
+
         private void DisableKillTextureAnimationsPatch(string reason) {
             disableTextureAnimationsButton.Enabled = false;
             disableTextureAnimationsLBL.Enabled = false;
             disableTextureAnimationsTextLBL.Enabled = false;
             disableTextureAnimationsButton.Text = reason;
         }
+
         private void DisableTrainerNameExpansionPatch(string reason) {
             expandTrainerNamesButton.Enabled = false;
             expandTrainerNamesLBL.Enabled = false;
             expandTrainerNamesTextLBL.Enabled = false;
             expandTrainerNamesButton.Text = reason;
         }
-        #endregion
-        #endregion
 
-        #region Patch 
+        #endregion Patch Disable
+
+        #endregion Constructor
+
+        #region Patch
+
         private static bool CheckFilesArm9ExpansionApplied() {
             ARM9PatchData data = new ARM9PatchData();
 
@@ -163,6 +178,7 @@ namespace DSPRE {
 
             return true;
         }
+
         public static bool CheckFilesBDHCamPatchApplied() {
             BDHCAMPatchData data = new BDHCAMPatchData();
 
@@ -181,7 +197,6 @@ namespace DSPRE {
             if (overlayCode1.Length != overlayCode1Read.Length || !overlayCode1.SequenceEqual(overlayCode1Read))
                 return false;
 
-
             byte[] overlayCode2 = DSUtils.HexStringToByteArray(data.overlayString2);
             byte[] overlayCode2Read = DSUtils.ReadFromFile(overlayFilePath, data.overlayOffset2, overlayCode2.Length); //Write new overlayCode1
             if (overlayCode2.Length != overlayCode2Read.Length || !overlayCode2.SequenceEqual(overlayCode2Read))
@@ -194,6 +209,7 @@ namespace DSPRE {
 
             return true;
         }
+
         public static bool CheckFilesMatrixExpansionApplied() {
             foreach (KeyValuePair<uint[], string> kv in ToolboxDB.matrixExpansionDB) {
                 foreach (uint offset in kv.Key) {
@@ -210,6 +226,7 @@ namespace DSPRE {
             }
             return true;
         }
+
         public static bool CheckScriptsStandardizedItemNumbers() {
             ScriptFile itemScript = new ScriptFile(RomInfo.itemScriptFileNumber);
             if (itemScript.allScripts.Count - 1 < new TextArchive(RomInfo.itemNamesTextNumber).messages.Count) {
@@ -223,6 +240,7 @@ namespace DSPRE {
             }
             return true;
         }
+
         public bool CheckStandardizedItems() {
             DSUtils.TryUnpackNarcs(new List<RomInfo.DirNames> { RomInfo.DirNames.scripts });
 
@@ -238,6 +256,7 @@ namespace DSPRE {
             DisableStandardizeItemsPatch("Already applied");
             return true;
         }
+
         public bool CheckMatrixExpansionApplied() {
             if (!ROMToolboxDialog.flag_MatrixExpansionApplied) {
                 if (!ROMToolboxDialog.CheckFilesMatrixExpansionApplied()) {
@@ -250,7 +269,9 @@ namespace DSPRE {
             expandedMatrixCB.Visible = true;
             return true;
         }
+
         public string backupSuffix = ".backup";
+
         private bool CheckARM9ExpansionApplied() {
             if (!ROMToolboxDialog.flag_arm9Expanded) {
                 if (!ROMToolboxDialog.CheckFilesArm9ExpansionApplied()) {
@@ -274,6 +295,7 @@ namespace DSPRE {
 
             return true;
         }
+
         public bool CheckDynamicHeadersPatchApplied() {
             if (!flag_DynamicHeadersPatchApplied) {
                 if (!ROMToolboxDialog.CheckFilesDynamicHeadersPatchApplied()) {
@@ -312,6 +334,7 @@ namespace DSPRE {
             DisableBDHCamPatch("Already applied");
             return true;
         }
+
         public void CheckScrcmdRepointPatchApplied() {
             //throw new NotImplementedException();
         }
@@ -324,10 +347,12 @@ namespace DSPRE {
                         if (RomInfo.gameLanguage.Equals(gLangEnum.English)) position = 0x6AC32;
                         else if (RomInfo.gameLanguage.Equals(gLangEnum.Spanish)) position = 0x6AC8E;
                         break;
+
                     case gFamEnum.Plat:
                         if (RomInfo.gameLanguage.Equals(gLangEnum.English)) position = 0x791DE;
                         else if (RomInfo.gameLanguage.Equals(gLangEnum.Spanish)) position = 0x7927E;
                         break;
+
                     case gFamEnum.HGSS:
                         if (RomInfo.gameLanguage.Equals(gLangEnum.English) || RomInfo.gameVersion.Equals(gVerEnum.SoulSilver)) position = 0x7342E;
                         else if (RomInfo.gameLanguage.Equals(gLangEnum.Spanish)) position = 0x73426;
@@ -342,11 +367,12 @@ namespace DSPRE {
             } else {
                 DisableTrainerNameExpansionPatch("Already\nApplied");
             }
-
         }
-        #endregion
+
+        #endregion Patch
 
         #region Button Actions
+
         private void SentenceCasePatchButton_Click(object sender, EventArgs e) {
             DialogResult d;
             d = MessageBox.Show("Confirming this process will apply the following changes:\n\n" +
@@ -372,6 +398,7 @@ namespace DSPRE {
                 MessageBox.Show("No changes have been made.", "Operation canceled", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+
         private void BDHCAMPatchButton_Click(object sender, EventArgs e) {
             BDHCAMPatchData data = new BDHCAMPatchData();
 
@@ -434,6 +461,7 @@ namespace DSPRE {
                 MessageBox.Show("No changes have been made.", "Operation canceled", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+
         private void overlay1uncomprButton_Click(object sender, EventArgs e) {
             if (ConfigureOverlay1Uncompressed()) {
                 DisableOverlay1patch("Already applied");
@@ -477,14 +505,12 @@ namespace DSPRE {
                 "Confirm to proceed", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 
             if (d == DialogResult.Yes) {
-
                 DSUtils.TryUnpackNarcs(new List<RomInfo.DirNames> { RomInfo.DirNames.scripts });
                 DSUtils.TryUnpackNarcs(new List<RomInfo.DirNames> { RomInfo.DirNames.eventFiles });
 
                 if (ROMToolboxDialog.flag_standardizedItems) {
                     AlreadyApplied();
                 } else {
-
                     // Load item script file data
                     ScriptFile itemScriptFile = new ScriptFile(RomInfo.itemScriptFileNumber);
 
@@ -546,7 +572,6 @@ namespace DSPRE {
                     itemScriptFile.allScripts.Clear();
 
                     for (ushort i = 0; i < itemCount; i++) {
-
                         List<ScriptCommand> cmdList = new List<ScriptCommand> {
                             new ScriptCommand("SetVar 0x8008 " + i),
                             new ScriptCommand("SetVar 0x8009 0x1"),
@@ -571,6 +596,7 @@ namespace DSPRE {
                 MessageBox.Show("No changes have been made.", "Operation canceled", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+
         private void ApplyARM9ExpansionButton_Click(object sender, EventArgs e) {
             ARM9PatchData data = new ARM9PatchData();
 
@@ -593,7 +619,7 @@ namespace DSPRE {
                     File.Delete(fullFilePath);
                     using (BinaryWriter f = new BinaryWriter(File.Create(fullFilePath))) {
                         for (int i = 0; i < 0x16000; i++)
-                            f.Write((byte)0x00); // Write Expanded ARM9 File 
+                            f.Write((byte)0x00); // Write Expanded ARM9 File
                     }
 
                     DisableARM9patch("Already applied");
@@ -620,6 +646,7 @@ namespace DSPRE {
                 MessageBox.Show("No changes have been made.", "Operation canceled", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+
         private void expandMatrixButton_Click(object sender, EventArgs e) {
             string listOfChanges = "";
             int languageOffset = 0;
@@ -667,6 +694,7 @@ namespace DSPRE {
                 MessageBox.Show("No changes have been made.", "Operation canceled", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+
         private void dynamicHeadersButton_Click(object sender, EventArgs e) {
             DynamicHeadersPatchData data = new DynamicHeadersPatchData();
             var headersDir = RomInfo.gameDirs[DirNames.dynamicHeaders];
@@ -712,7 +740,7 @@ namespace DSPRE {
 
                     **BRANCHES FOR OTHER VERSIONS/LANGUAGES:
 
-                     HG ESP (IPKS): 
+                     HG ESP (IPKS):
                      CC F7 5C F9	    bl 0x02007524	@Load_Memory
                      DF F7 4D FC	    bl 0x0201AB0C	@Free_Memory
 
@@ -723,7 +751,7 @@ namespace DSPRE {
                      Plat USA (CPUE):
                      CC F7 48 FD	    bl 0x02006AC0	@Load_Memory
                      DE F7 C7 F8	    bl 0x020181C4	@Free_Memory
-                    
+
                      Plat ESP (CPUS), ITA (CPUI), FRA (CPUF), GER (CPUD):
                      CC F7 00 FD	    bl 0x02006AD4	@Load_Memory
                      CC F7 74 FC	    bl 0x02018234	@Free_Memory
@@ -736,7 +764,7 @@ namespace DSPRE {
                     DSUtils.ARM9.WriteBytes(DSUtils.HexStringToByteArray(data.initString), data.initOffset);
 
                     /* - Neutralize instances of (HeaderID * 0x18) so the base offset which the data is read from is always 0x0:
-                           
+
                             Replace this:
                             18 21       mov r1, #0x18
                             41 43       mul r1, r0
@@ -744,9 +772,9 @@ namespace DSPRE {
                             with this:
                             19 00       lsl r1, r3, 0
                             C0 46       nop
-        
+
                       - Change pointers to header fields, from (ARM9_HEADER_TABLE_OFFSET + n) to simply (0 + n)
-                     
+
                        * for ESP HG (IPKS): subtract 0x8 from every reference offset
                        * for JAP HG (IPKJ) and SS (IPGJ): subtract 0x448 from every reference offset
                        * for Plat ESP, ITA, FRA, GER, JAP: add 0xA4 to every reference offset
@@ -761,7 +789,7 @@ namespace DSPRE {
                     }
 
                     if (specialCase) {
-                        /*  Special case: at 0x3B522 (non-JAP and non-Spanish HG offset) there is an instruction 
+                        /*  Special case: at 0x3B522 (non-JAP and non-Spanish HG offset) there is an instruction
                             between the (mov r1, #0x18) and (mul r1, r0) commands, so we must handle this separately */
 
                         DSUtils.ARM9.WriteBytes(DSUtils.HexStringToByteArray(data.specialCaseData1), (uint)(data.specialCaseOffset1 + data.pointerDiff));
@@ -774,7 +802,7 @@ namespace DSPRE {
                     Directory.CreateDirectory(headersDir.unpackedDir);
 
                     /* Now move the headers data from arm9 to the new directory. Upon saving the ROM,
-                       the data will be packed into a NARC and replace a/0/5/0 in HGSS or 
+                       the data will be packed into a NARC and replace a/0/5/0 in HGSS or
                        debug/cb_edit/d_test.narc in Platinum */
 
                     int headerCount = RomInfo.GetHeaderCount();
@@ -796,6 +824,7 @@ namespace DSPRE {
                 MessageBox.Show("No changes have been made.", "Operation canceled", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+
         private void disableDynamicTexturesButton_Click(object sender, EventArgs e) {
             DialogResult d;
             d = MessageBox.Show("Applying this patch will set the Dynamic Textures field of all AreaData files to 0xFFFF.\n\n" +
@@ -848,11 +877,13 @@ namespace DSPRE {
                         else if (RomInfo.gameLanguage.Equals(gLangEnum.Spanish)) position = 0x6AC8E;
                         else gameFamGood = false;
                         break;
+
                     case gFamEnum.Plat:
                         if (RomInfo.gameLanguage.Equals(gLangEnum.English)) position = 0x791DE;
                         else if (RomInfo.gameLanguage.Equals(gLangEnum.Spanish)) position = 0x7927E;
                         else gameFamGood = false;
                         break;
+
                     case gFamEnum.HGSS:
                         if (RomInfo.gameLanguage.Equals(gLangEnum.English) || RomInfo.gameVersion.Equals(gVerEnum.SoulSilver)) position = 0x7342E;
                         else if (RomInfo.gameLanguage.Equals(gLangEnum.Spanish)) position = 0x73426;
@@ -879,6 +910,7 @@ namespace DSPRE {
         }
 
         #region Mikelan's custom commands
+
         private void applyCustomCommands(object sender, EventArgs e) {
             int expTableOffset = GetCommandTableOffset();
 
@@ -900,8 +932,8 @@ namespace DSPRE {
             if (ImportCustomCommand()) {
                 MessageBox.Show("Script commands succesfully installed in the ROM", "Done", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-
         }
+
         private int GetCommandTableOffset() { // Checks if command table is repointed IN THE EXPANDED ARM9 FILE, returns pointer inside this file
             ResourceManager customcmdDB = new ResourceManager("DSPRE.Resources.ROMToolboxDB.CustomScrCmdDB", Assembly.GetExecutingAssembly());
             int pointerOffset = int.Parse(customcmdDB.GetString("pointerOffset" + "_" + RomInfo.gameVersion + "_" + RomInfo.gameLanguage));
@@ -915,6 +947,7 @@ namespace DSPRE {
             }
             return -1; // No table in expanded arm9 file
         }
+
         private void RepointCommandTable() {
             string expandedPath = RomInfo.gameDirs[DirNames.synthOverlay].unpackedDir + "\\0000";
             ResourceManager customcmdDB = new ResourceManager("DSPRE.Resources.ROMToolboxDB.CustomScrCmdDB", Assembly.GetExecutingAssembly());
@@ -939,6 +972,7 @@ namespace DSPRE {
                 wr.Write((uint)0x053C);
             }
         }
+
         private bool ImportCustomCommand() {
             string expandedPath = RomInfo.gameDirs[DirNames.synthOverlay].unpackedDir + "\\0000";
             int appliedPatches = 0;
@@ -991,7 +1025,6 @@ namespace DSPRE {
                                 appliedPatches++;
                             }
                         }
-
                     } catch {
                         MessageBox.Show("Selected command installation file is corrupted.\n\n" +
                         "Please, download it again or contact its creator.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -1009,16 +1042,17 @@ namespace DSPRE {
 
             return true;
         }
-        #endregion
 
-        #endregion
+        #endregion Mikelan's custom commands
+
+        #endregion Button Actions
 
         #region Error Messsages
+
         private void AlreadyApplied() {
             MessageBox.Show("This patch has already been applied.", "Can't reapply patch", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        #endregion
 
-
+        #endregion Error Messsages
     }
 }

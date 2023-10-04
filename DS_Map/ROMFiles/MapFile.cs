@@ -1,10 +1,8 @@
-using System.IO;
-using System.Collections.Generic;
 using LibNDSFormats.NSBMD;
+using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 using static DSPRE.RomInfo;
-using System;
-using System.Drawing;
 
 namespace DSPRE.ROMFiles {
     /* ----------------------- MAP FILE DATA STRUCTURE (DPPtHGSS):--------------------------
@@ -13,15 +11,15 @@ namespace DSPRE.ROMFiles {
     0x4  //  uint:       Length of buildings section
     0x8  //  uint:       Length of nsbmd model section
     0xC  //  uint:       Length of BDHC section
-    0x10 //  
+    0x10 //
 
     ************* Permissions section (1024 byte - byte pairs):
-        
+
     0x0  //  byte:       Type value of tile (e.g. normal, grass, surfable water)
-    0x1  //  byte:       Collision value of tile (00 for walkable, 80 for blocked)   
+    0x1  //  byte:       Collision value of tile (00 for walkable, 80 for blocked)
 
     ************* Buildings section (# of buildings equal to section length divided by 48):
-    
+
     BUILDING FORMAT:
     0x0  //  uint:      Model ID
     0x4  //  ushort:    65535ths of X coordinate
@@ -38,14 +36,14 @@ namespace DSPRE.ROMFiles {
 
    ************* NSBMD model section
    ************* BDHC section
-   
-   -------------------------------------------------------------------------------------- */
 
+   -------------------------------------------------------------------------------------- */
 
     /// <summary>
     /// Class to store map data in Pokémon NDS games
     /// </summary>
     public class MapFile : RomFile {
+
         #region Fields
 
         public static readonly string NSBMDFilter = "NSBMD File (*.nsbmd)|*.nsbmd";
@@ -73,11 +71,17 @@ namespace DSPRE.ROMFiles {
         public byte[] mapModelData;
         public byte[] bdhc;
         public byte[] bgs = blankBGS;
-        #endregion
+
+        #endregion Fields
 
         #region Constructors (1)
-        public MapFile(string path, gFamEnum gFamily, bool discardMoveperms = false, bool showMessages = true) : this(new FileStream(path, FileMode.Open), gFamily, discardMoveperms, showMessages) { }
-        public MapFile(int mapNumber, gFamEnum gFamily, bool discardMoveperms = false, bool showMessages = true) : this(RomInfo.gameDirs[DirNames.maps].unpackedDir + "\\" + mapNumber.ToString("D4"), gFamily, discardMoveperms, showMessages) { }
+
+        public MapFile(string path, gFamEnum gFamily, bool discardMoveperms = false, bool showMessages = true) : this(new FileStream(path, FileMode.Open), gFamily, discardMoveperms, showMessages) {
+        }
+
+        public MapFile(int mapNumber, gFamEnum gFamily, bool discardMoveperms = false, bool showMessages = true) : this(RomInfo.gameDirs[DirNames.maps].unpackedDir + "\\" + mapNumber.ToString("D4"), gFamily, discardMoveperms, showMessages) {
+        }
+
         public MapFile(Stream data, gFamEnum gFamily, bool discardMoveperms = false, bool showMessages = true) {
             using (BinaryReader reader = new BinaryReader(data)) {
                 /* Read sections lengths */
@@ -123,9 +127,11 @@ namespace DSPRE.ROMFiles {
                 ImportTerrain(reader.ReadBytes(bdhcSectionLength));
             }
         }
-        #endregion
+
+        #endregion Constructors (1)
 
         #region Methods
+
         public byte[] BuildingsToByteArray() {
             MemoryStream newData = new MemoryStream(buildingHeaderSize * buildings.Count);
             using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -153,6 +159,7 @@ namespace DSPRE.ROMFiles {
             }
             return newData.ToArray();
         }
+
         public byte[] CollisionsToByteArray() {
             MemoryStream newData = new MemoryStream();
             using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -165,6 +172,7 @@ namespace DSPRE.ROMFiles {
             }
             return newData.ToArray();
         }
+
         public void ImportBuildings(byte[] newData) {
             buildings = new List<Building>();
             using (BinaryReader reader = new BinaryReader(new MemoryStream(newData))) {
@@ -173,9 +181,9 @@ namespace DSPRE.ROMFiles {
                 }
             }
         }
+
         public bool LoadMapModel(byte[] newData, bool showMessages = true) {
             using (BinaryReader modelReader = new BinaryReader(new MemoryStream(newData))) {
-
                 if (modelReader.ReadUInt32() != NSBMD.NDS_TYPE_BMD0) {
                     if (showMessages) {
                         MessageBox.Show("Please select an NSBMD file.", "Invalid File", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -201,21 +209,24 @@ namespace DSPRE.ROMFiles {
                 for (int i = 0; i < 32; i++) {
                     for (int j = 0; j < 32; j++) {
                         types[i, j] = reader.ReadByte(); // Read permission type (e.g. surfing water, grass, sand etc.)
-                        collisions[i, j] = reader.ReadByte(); // Read walkability (00 for walkable and 80 for blocked)                        
+                        collisions[i, j] = reader.ReadByte(); // Read walkability (00 for walkable and 80 for blocked)
                     }
                 }
             }
         }
+
         public void ImportSoundPlates(byte[] newData) {
             using (BinaryReader reader = new BinaryReader(new MemoryStream(newData))) {
                 bgs = reader.ReadBytes((int)newData.Length);
             }
         }
+
         public void ImportTerrain(byte[] newData) {
             using (BinaryReader reader = new BinaryReader(new MemoryStream(newData))) {
                 bdhc = reader.ReadBytes((int)newData.Length);
             }
         }
+
         public override byte[] ToByteArray() {
             MemoryStream newData = new MemoryStream();
             using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -239,20 +250,25 @@ namespace DSPRE.ROMFiles {
             }
             return newData.ToArray();
         }
+
         public void SaveToFileDefaultDir(int IDtoReplace, bool showSuccessMessage = true) {
             SaveToFileDefaultDir(DirNames.maps, IDtoReplace, showSuccessMessage);
         }
+
         public void SaveToFileExplorePath(string suggestedFileName, bool showSuccessMessage = true) {
             SaveToFileExplorePath("Gen IV Map Bin", "bin", suggestedFileName, showSuccessMessage);
         }
-        #endregion
+
+        #endregion Methods
     }
 
     /// <summary>
     /// Class to store building data from Pokémon NDS games
     /// </summary>
     public class Building {
+
         #region Fields (11)
+
         public NSBMD NSBMDFile;
         public uint modelID { get; set; }
         public short xPosition { get; set; }
@@ -267,9 +283,11 @@ namespace DSPRE.ROMFiles {
         public uint width { get; set; }
         public uint height { get; set; }
         public uint length { get; set; }
-        #endregion Fields
+
+        #endregion Fields (11)
 
         #region Constructors (2)
+
         public Building(Stream data) {
             using (BinaryReader reader = new BinaryReader(data)) {
                 modelID = reader.ReadUInt32();
@@ -299,6 +317,7 @@ namespace DSPRE.ROMFiles {
                 //reader.BaseStream.Position += 0x2;
             }
         }
+
         public Building() {
             modelID = 0;
             xFraction = 0;
@@ -331,16 +350,21 @@ namespace DSPRE.ROMFiles {
             height = toCopy.height;
             length = toCopy.length;
         }
-        #endregion Constructors
+
+        #endregion Constructors (2)
+
         public static ushort DegToU16(float deg) {
             return (ushort)(deg * 65536 / 360);
         }
+
         public static float U16ToDeg(ushort u16) {
             return (float)u16 * 360 / 65536;
         }
+
         public void LoadModelData(string dir) {
             LoadModelDataFromID((int)modelID, dir);
         }
+
         public void LoadModelDataFromID(int modelID, string bmDir) {
             string modelPath = bmDir + "\\" + modelID.ToString("D4");
 

@@ -12,13 +12,14 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Programador: pleoNeX
  * Programa utilizado: Microsoft Visual C# 2010 Express
  * Fecha: 18/02/2011
- * 
+ *
  */
+
 using MKDS_Course_Editor;
 using System;
 using System.Collections.Generic;
@@ -27,8 +28,11 @@ using System.IO;
 using System.Windows.Media.Imaging;
 
 namespace Tinke {
+
     public static class Convertir {
+
         #region Paleta
+
         /// <summary>
         /// A partir de un array de bytes devuelve un array de colores.
         /// </summary>
@@ -42,6 +46,7 @@ namespace Tinke {
             }
             return paleta;
         }
+
         public static byte[] ColorArrayToBGR555(this Color[] palette) {
             byte[] ret = new byte[palette.Length * 2];
 
@@ -52,10 +57,12 @@ namespace Tinke {
 
             return ret;
         }
+
         public static (byte b1, byte b2) ToBGR555(this Color c) {
             byte[] result = BitConverter.GetBytes((short)nclr_e.encodeColor(c.ToArgb(), BGR555_));
             return (result[0], result[1]);
         }
+
         /// <summary>
         /// Convierte dos bytes en un color.
         /// </summary>
@@ -77,8 +84,8 @@ namespace Tinke {
                 return Color.Black;
             }*/
             return Color.FromArgb(decodeColor(BitConverter.ToInt16(new byte[] { byte1, byte2 }, 0), BGR555_));
-
         }
+
         public static byte[][] BytesToTiles_NoChanged(byte[] bytes, int tilesX, int tilesY) {
             List<byte[]> tiles = new List<byte[]>();
             List<byte> temp = new List<byte>();
@@ -99,19 +106,21 @@ namespace Tinke {
 
             return tiles.ToArray();
         }
+
         public static nclr_e.CColorFormat BGR555_ = new nclr_e.CColorFormat("BGR555", 10, 16, new int[] {
         3, 2, 1, 5, 5, 5
     });
-        public static int[][] shiftList = new int[][] { 
-            new int[] { 0, 0 }, 
-            new int[] { 1, 255 }, 
-            new int[] { 3, 85 }, 
-            new int[] { 7, 36 }, 
-            new int[] { 15, 17 }, 
-            new int[] { 31, 8 }, 
-            new int[] { 63, 4 }, 
-            new int[] { 127, 2 }, 
-            new int[] { 255, 1 } 
+
+        public static int[][] shiftList = new int[][] {
+            new int[] { 0, 0 },
+            new int[] { 1, 255 },
+            new int[] { 3, 85 },
+            new int[] { 7, 36 },
+            new int[] { 15, 17 },
+            new int[] { 31, 8 },
+            new int[] { 63, 4 },
+            new int[] { 127, 2 },
+            new int[] { 255, 1 }
         };
 
         public static int decodeColor(int value, nclr_e.CColorFormat format) {
@@ -153,9 +162,11 @@ namespace Tinke {
 
             return rgb;
         }
-        #endregion
+
+        #endregion Paleta
 
         #region Tiles
+
         /// <summary>
         /// Convierte una array de Tiles en bytes
         /// </summary>
@@ -169,8 +180,8 @@ namespace Tinke {
                     resul.Add(tiles[i][j]);
 
             return resul.ToArray();
-
         }
+
         /// <summary>
         /// Convierte una array de bytes en otra de tiles
         /// </summary>
@@ -189,9 +200,9 @@ namespace Tinke {
             }
 
             return resul.ToArray();
-
         }
-        #endregion
+
+        #endregion Tiles
 
         /// <summary>
         /// Convierte una array de bytes en formato 4-bit a otro en formato 8-bit
@@ -209,8 +220,8 @@ namespace Tinke {
             }
 
             return bits8.ToArray();
-
         }
+
         /// <summary>
         /// Convierte una array de bytes en formato 8-bit a otro en formato 4-bit
         /// </summary>
@@ -228,7 +239,6 @@ namespace Tinke {
             }
 
             return bits4.ToArray();
-
         }
 
         /// <summary>
@@ -293,6 +303,7 @@ namespace Tinke {
             bw.Close();
             bw.Dispose();
         }
+
         /// <summary>
         /// Crea un archivos animado gif apartir de varios archivos bitmap
         /// </summary>

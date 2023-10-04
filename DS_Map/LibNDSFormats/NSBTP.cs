@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
-using System.IO;
 
 namespace MKDS_Course_Editor.NSBTP {
+
     public class NSBTP {
+
         public struct NSBTP_File {
             public header Header;
+
             public struct header {
                 public string ID;
                 public byte[] Magic;
@@ -17,13 +18,17 @@ namespace MKDS_Course_Editor.NSBTP {
                 public Int16 nSection;
                 public Int32[] Section_Offset;
             }
+
             public pat0 PAT0;
+
             public struct pat0 //Scale Rotation and Translation
             {
                 public string ID;
                 public Int32 Size;
+
                 //3D Info Structure
                 public byte dummy;
+
                 public byte num_objs;
                 public short section_size;
                 public UnknownBlock unknownBlock;
@@ -38,6 +43,7 @@ namespace MKDS_Course_Editor.NSBTP {
                     public short[] unknown1;
                     public short[] unknown2;
                 }
+
                 public struct Info {
                     public short header_size;
                     public short data_size;
@@ -49,7 +55,9 @@ namespace MKDS_Course_Editor.NSBTP {
                     }
                 }
             }
+
             public M_PT MPT;
+
             public struct M_PT {
                 public string ID;
                 public Int16 NoFrames;
@@ -57,8 +65,10 @@ namespace MKDS_Course_Editor.NSBTP {
                 public byte NoPal;
                 public Int16 Texoffset;
                 public Int16 Paloffset;
+
                 //3D Info Structure
                 public byte dummy;
+
                 public byte num_objs;
                 public short section_size;
                 public UnknownBlock unknownBlock;
@@ -73,10 +83,10 @@ namespace MKDS_Course_Editor.NSBTP {
                     public short[] unknown1;
                     public short[] unknown2;
                 }
+
                 public struct Info {
                     public short header_size;
                     public short data_size;
-
 
                     public info[] Data;
 
@@ -87,9 +97,12 @@ namespace MKDS_Course_Editor.NSBTP {
                     }
                 }
             }
+
             public animData[] AnimData;
+
             public struct animData {
                 public keyFrame[] KeyFrames;
+
                 public struct keyFrame {
                     public short Start;
                     public byte texId;
@@ -99,6 +112,7 @@ namespace MKDS_Course_Editor.NSBTP {
                 }
             }
         }
+
         public static NSBTP_File Read(string Filename) {
             EndianBinaryReader er = new EndianBinaryReader(File.OpenRead(Filename), Endianness.LittleEndian);
             NSBTP_File ns = new NSBTP_File();
@@ -178,7 +192,7 @@ namespace MKDS_Course_Editor.NSBTP {
                             ns.MPT.infoBlock.Data[i].Unknown1 = er.ReadInt16();
                             ns.MPT.infoBlock.Data[i].Offset = er.ReadInt16();
                             ns.AnimData[i].KeyFrames = new NSBTP_File.animData.keyFrame[ns.MPT.infoBlock.Data[i].KeyFrames];
-                           
+
                             for (int j = 0; j < ns.MPT.infoBlock.Data[i].KeyFrames; j++) {
                                 long curpos = er.BaseStream.Position;
                                 er.BaseStream.Position = ns.Header.Section_Offset[0] + ns.PAT0.section_size + ns.MPT.infoBlock.Data[i].Offset + j * 4 + 8;
@@ -193,7 +207,7 @@ namespace MKDS_Course_Editor.NSBTP {
                             }
                         }
                         ns.MPT.names = new string[ns.MPT.num_objs];
-                        
+
                         for (int i = 0; i < ns.MPT.num_objs; i++) {
                             ns.MPT.names[i] = LibNDSFormats.Utils.ReadNSBMDString(er);
                         }

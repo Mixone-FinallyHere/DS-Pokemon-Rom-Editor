@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using DSPRE.ROMFiles;
 using System.IO;
-using DSPRE.ROMFiles;
 using static DSPRE.RomInfo;
 
 namespace DSPRE {
+
     internal class LearnsetData : RomFile {
         public static readonly int bitsMove = 9;
         public static readonly int bitsLevel = 7;
@@ -33,8 +33,8 @@ namespace DSPRE {
             }
         }
 
-
-        public LearnsetData(int ID) : this(new FileStream(RomInfo.gameDirs[DirNames.learnsets].unpackedDir + "\\" + ID.ToString("D4"), FileMode.Open)) { }
+        public LearnsetData(int ID) : this(new FileStream(RomInfo.gameDirs[DirNames.learnsets].unpackedDir + "\\" + ID.ToString("D4"), FileMode.Open)) {
+        }
 
         public override byte[] ToByteArray() {
             using (MemoryStream memoryStream = new MemoryStream()) {
@@ -57,6 +57,7 @@ namespace DSPRE {
         public void SaveToFileDefaultDir(int IDtoReplace, bool showSuccessMessage = true) {
             SaveToFileDefaultDir(DirNames.learnsets, IDtoReplace, showSuccessMessage);
         }
+
         public void SaveToFileExplorePath(string suggestedFileName, bool showSuccessMessage = true) {
             SaveToFileExplorePath("Gen IV Pokémon Learnset data", "bin", suggestedFileName, showSuccessMessage);
         }

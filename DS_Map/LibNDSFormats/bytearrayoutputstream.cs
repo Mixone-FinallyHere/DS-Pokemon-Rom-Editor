@@ -16,10 +16,9 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NSMBe4 {
+
     public class ByteArrayOutputStream {
         //implements an unbonded array to store unlimited data.
         //writes in amortized constant time.
@@ -52,6 +51,7 @@ namespace NSMBe4 {
             writeByte((byte)u);
             writeByte((byte)(u >> 8));
         }
+
         public void writeUInt(uint u) {
             writeByte((byte)u);
             writeByte((byte)(u >> 8));
@@ -61,8 +61,8 @@ namespace NSMBe4 {
 
         public void writeInt(int i) {
             writeUInt((uint)i);
-
         }
+
         public void writeLong(long u) {
             writeByte((byte)u);
             writeByte((byte)(u >> 8));

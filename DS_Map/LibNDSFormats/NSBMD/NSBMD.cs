@@ -1,15 +1,16 @@
 ﻿// NSBMD data definition.
 // Code adapted from kiwi.ds' NSBMD Model Viewer.
 
+using LibNDSFormats.NSBTX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
-using LibNDSFormats.NSBTX;
-using System.Drawing;
 
 namespace LibNDSFormats.NSBMD {
+
     // Class for storing NSBMD data.
     // Adapted from kiwi.ds NSBMD viewer.
     public class NSBMD {
@@ -33,17 +34,20 @@ namespace LibNDSFormats.NSBMD {
         public NSBMDModel[] models;
 
         /// <summary>
-        /// Materials in NSBMD. 
+        /// Materials in NSBMD.
         /// </summary>
         public IEnumerable<NSBMDMaterial> materials;
+
         /// <summary>
         /// NSBMD materials.
         /// </summary>
         public List<NSBMDTexture> Textures = new List<NSBMDTexture>();
+
         /// <summary>
         /// NSBMD materials.
         /// </summary>
         public List<NSBMDPalette> Palettes = new List<NSBMDPalette>();
+
         /// <summary>
         /// Match up model / NSBMD textures.
         /// </summary>
@@ -98,7 +102,6 @@ namespace LibNDSFormats.NSBMD {
                     }
                 }
             }
-
         }
 
         /// <summary>
@@ -115,12 +118,11 @@ namespace LibNDSFormats.NSBMD {
                             continue;
                         var mat2 = models[i].Materials[j];
 
-
                         // match texture
                         if (!gottex && mat1.texname.Equals(mat2.texname))
                         {
                             //Console.WriteLine("tex '{0}' matched.", mat2.texname);
-                            mat1.CopyTo(mat2); 
+                            mat1.CopyTo(mat2);
 
                             gottex = true;
                         }
@@ -137,10 +139,8 @@ namespace LibNDSFormats.NSBMD {
                             gotpal = true;
                         }
                     }*/
-                    try
-                    {
-                        if (materials.ToArray()[models[i].tex_mat.IndexOf(j)].format != 0)
-                        {
+                    try {
+                        if (materials.ToArray()[models[i].tex_mat.IndexOf(j)].format != 0) {
                             //Console.WriteLine("Texture {0}:", j.ToString());
                             //Console.WriteLine("Texture Name: '{0}'", models[i].Materials[j].texname);
                             //Console.WriteLine("Palette Name: '{0}'", models[i].Materials[j].palname);
@@ -157,7 +157,6 @@ namespace LibNDSFormats.NSBMD {
                             }
                         }
                     } catch (Exception e) {
-
                     }
                 }
             }
@@ -184,7 +183,6 @@ namespace LibNDSFormats.NSBMD {
                         }
                         for (int q = 0; q < materials.ToList().Count; q++)
                         {
-
                             if (mat2.format != 7 // NB. direct texture has no palette
                                 && !gotpal
                                 && materials.ToList()[q].palname.Contains(mat2.texname)
@@ -218,7 +216,6 @@ namespace LibNDSFormats.NSBMD {
                 m.Materials.Clear();
             }
         }
-
 
         /// <summary>
         /// Decode objects.
@@ -255,6 +252,7 @@ namespace LibNDSFormats.NSBMD {
                         mod.Objects[d].StackID = stackID = polystack2 = emptystack = emptystack + 1;//stackID + 1;//-1;
                         mod.Objects[d].RestoreID = -1;
                         break;
+
                     case 0x26: //NodeDesc[001]
                         d = reader.ReadByte();
                         e = reader.ReadByte();
@@ -267,6 +265,7 @@ namespace LibNDSFormats.NSBMD {
                         mod.Objects[d].StackID = stackID = polystack2 = g;
                         mod.Objects[d].RestoreID = -1;
                         break;
+
                     case 0x46: // 4 bytes follow
                         d = reader.ReadByte();
                         e = reader.ReadByte();
@@ -279,6 +278,7 @@ namespace LibNDSFormats.NSBMD {
                         mod.Objects[d].StackID = stackID = polystack2 = emptystack = emptystack + 1; //stackID + 1;
                         mod.Objects[d].RestoreID = stackID = g;
                         break;
+
                     case 0x66: //NodeDesc[011]
                         d = reader.ReadByte();
                         e = reader.ReadByte();
@@ -317,6 +317,7 @@ namespace LibNDSFormats.NSBMD {
                         //			printf( "DEBUG: %08x: %02x\n", codeptr, c );
                         codeptr += 2;
                         break;
+
                     case 0x08:
                         d = reader.ReadByte();
                         mod.Objects[d].isBillboard = true;
@@ -324,6 +325,7 @@ namespace LibNDSFormats.NSBMD {
                         //			printf( "DEBUG: %08x: %02x\n", codeptr, c );
                         codeptr += 2;
                         break;
+
                     case 0x09://NodeMix[000] Weight
                         d = reader.ReadByte();
                         polyStack = d;
@@ -348,6 +350,7 @@ namespace LibNDSFormats.NSBMD {
                         //			printf( "DEBUG: %08x: %02x\n", codeptr, c );
                         codeptr++;
                         break;
+
                     case 0x2b: // 0 byte follows
                         if (!begin) {
                             //printf( "DEBUG: %08x: previous 0x0b already ended.", codeptr );
@@ -364,6 +367,7 @@ namespace LibNDSFormats.NSBMD {
                         codeptr += 2;
                         count++;
                         break;
+
                     case 0x05://Shp
                         d = reader.ReadByte();
                         mod.Polygons[d].MatId = matid;
@@ -377,6 +381,7 @@ namespace LibNDSFormats.NSBMD {
                         matid = -1;
                         codeptr += 2;
                         break;
+
                     case 0x0C://EnvMap
                         d = reader.ReadByte();
                         mod.Materials[d].isEnvironmentMap = true;
@@ -387,9 +392,11 @@ namespace LibNDSFormats.NSBMD {
                         //			printf( "DEBUG: %08x: %02x\n", codeptr, c );
                         codeptr++;
                         return true;
+
                     case 0x00://padding
                         //codeptr++;
                         break;
+
                     default:
                         // TODO
                         //printf( "DEBUG: %08x: decodecode: unknown code %02x.\n", codeptr, c );
@@ -518,7 +525,6 @@ namespace LibNDSFormats.NSBMD {
                 objdataoffset = new uint[objnum];
                 objdatasize = new uint[objnum];
 
-
                 for (var j = 0; j < objnum; j++) {
                     objdataoffset[j] = (uint)(reader.ReadUInt32() + objdatabase);
                 }
@@ -528,7 +534,6 @@ namespace LibNDSFormats.NSBMD {
                 }
 
                 objdatasize[objnum - 1] = (uint)(codeoffset - objdataoffset[objnum - 1]);
-
 
                 ////////////////////////////////////////////////
                 // copy NsbmdObject names
@@ -556,7 +561,7 @@ namespace LibNDSFormats.NSBMD {
                 paloffset = reader.ReadUInt16() + texpaloffset;
 
                 // allocate memory for material
-                for (int j = 0; j <= matnum; j++) {//i <= matnum; ++i 
+                for (int j = 0; j <= matnum; j++) {//i <= matnum; ++i
                     mod.Materials.Add(new NSBMDMaterial());
                 }
 
@@ -618,8 +623,7 @@ namespace LibNDSFormats.NSBMD {
                             mod.Materials[j].transT = 0;
                             break;
 
-                        case 1:
-                            {
+                        case 1: {
                                 int sscale = (int)reader.ReadInt32();// >> 0 & 0xFFFFFFFF;
                                 sscale = NSBMDGlRenderer.Sign(sscale, 32);
                                 int tscale = (int)reader.ReadInt32();// >> 0 & 0xFFFFFFFF;
@@ -634,7 +638,6 @@ namespace LibNDSFormats.NSBMD {
                                     mod.Materials[j].transS = (float)reader.ReadInt16() / 4096f;
                                     mod.Materials[j].transT = (float)reader.ReadInt16() / 4096f;
                                 } else {
-
                                 }
                                 break;
                             }
@@ -758,9 +761,7 @@ namespace LibNDSFormats.NSBMD {
                     mod.Polygons.Add(new NSBMDPolygon());
                 }
 
-
                 stream.Skip(14 + (polynum * 4)); // skip bytes, go straight to data offset
-
 
                 for (var j = 0; j < polynum; j++)
                     polyOffsets[j] = reader.ReadUInt32() + polyoffset;
@@ -805,6 +806,7 @@ namespace LibNDSFormats.NSBMD {
             //modelnum = num;
             return model.ToArray();
         }
+
         public static float getFixed(int value, int sign, int var, int frac) {
             float fixe = value;
             if (sign == 1) {
@@ -814,6 +816,7 @@ namespace LibNDSFormats.NSBMD {
             fixe /= divide;
             return fixe;
         }
+
         public static int GetSizeOfObject(object obj) {
             if (obj is Int32) {
                 return 32;
@@ -906,6 +909,7 @@ namespace LibNDSFormats.NSBMD {
             nsbmdObject.materix = NSBMDGlRenderer.multMatrix(nsbmdObject.materix, r);
             nsbmdObject.materix = NSBMDGlRenderer.multMatrix(nsbmdObject.materix, s);
         }
+
         public static float[] mtxPivot(float[] ab, int pv, int neg) {
             float[] data = new float[16];
             data[15] = 1.0F;
@@ -1055,7 +1059,8 @@ namespace LibNDSFormats.NSBMD {
             }
             return data;
         }
-        static Int32 getdword(byte[] b) {
+
+        private static Int32 getdword(byte[] b) {
             Int32 v;
             v = b[0];
             v |= b[1] << 8;
@@ -1063,12 +1068,14 @@ namespace LibNDSFormats.NSBMD {
             v |= b[3] << 24;
             return v;
         }
-        static Int32 getword(byte[] b) {
+
+        private static Int32 getword(byte[] b) {
             Int32 v;
             v = b[0];
             v |= b[1] << 8;
             return v;
         }
+
         /// <summary>
         /// Generate NSBMD from stream.
         /// </summary>
@@ -1118,11 +1125,13 @@ namespace LibNDSFormats.NSBMD {
                         result.models = ReadMdl0(stream, blockoffset[i]);
 
                         break;
+
                     case NDS_TYPE_TEX0:
                         int palnum;
                         int texnum;
                         result.materials = NSBTXLoader.ReadTex0(stream, blockoffset[i], out texnum, out palnum, out result.Textures, out result.Palettes);
                         break;
+
                     default:
                         throw new Exception("Unknown ID");
                 }
@@ -1136,6 +1145,7 @@ namespace LibNDSFormats.NSBMD {
     /// Type for storing RGBA data in.
     /// </summary>
     public struct RGBA {
+
         #region Data Members (6)
 
         public byte A;
@@ -1165,12 +1175,16 @@ namespace LibNDSFormats.NSBMD {
                 switch (i) {
                     case 0:
                         return R;
+
                     case 1:
                         return G;
+
                     case 2:
                         return B;
+
                     case 3:
                         return A;
+
                     default:
                         throw new Exception();
                 }
@@ -1180,23 +1194,29 @@ namespace LibNDSFormats.NSBMD {
                     case 0:
                         R = value;
                         break;
+
                     case 1:
                         G = value;
                         break;
+
                     case 2:
                         B = value;
                         break;
+
                     case 3:
                         A = value;
                         break;
+
                     default:
                         throw new Exception();
                 }
             }
         }
+
         public Color ToColor() {
             return Color.FromArgb(A, R, G, B);
         }
-        #endregion Data Members
+
+        #endregion Data Members (6)
     }
 }

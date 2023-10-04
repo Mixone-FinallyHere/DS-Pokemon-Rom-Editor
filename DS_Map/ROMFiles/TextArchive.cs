@@ -1,24 +1,29 @@
+using DSPRE.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Resources;
 using System.Reflection;
+using System.Resources;
+using System.Text;
 using System.Windows.Forms;
-using DSPRE.Resources;
 using static DSPRE.RomInfo;
 
 namespace DSPRE.ROMFiles {
+
     /// <summary>
     /// Class to store message data from DS Pokémon games
     /// </summary>
     public class TextArchive : RomFile {
+
         #region Fields (2)
+
         public List<string> messages;
         public int initialKey;
-        #endregion Fields
+
+        #endregion Fields (2)
 
         #region Constructors (1)
+
         public TextArchive(FileStream messageStream, List<string> msg, bool discardLines = false) {
             Dictionary<int, string> GetCharDictionary = TextDatabase.readTextDictionary;
             BinaryReader readText = new BinaryReader(messageStream);
@@ -47,7 +52,7 @@ namespace DSPRE.ROMFiles {
                 int[] currentSize = new int[stringCount];
                 bool compressed = new bool();
 
-                for (int i = 0; i < stringCount; i++) { // Reads and stores string offsets and sizes 
+                for (int i = 0; i < stringCount; i++) { // Reads and stores string offsets and sizes
                     int key2 = (key1 * (i + 1) & 0xFFFF);
                     int realKey = key2 | (key2 << 16);
                     currentOffset[i] = ((int)readText.ReadUInt32()) ^ realKey;
@@ -67,28 +72,36 @@ namespace DSPRE.ROMFiles {
                             case 0xE000:
                                 pokemonText.Append(@"\n");
                                 break;
+
                             case 0x25BC:
                                 pokemonText.Append(@"\r");
                                 break;
+
                             case 0x25BD:
                                 pokemonText.Append(@"\f");
                                 break;
+
                             case 0xF100:
                                 compressed = true;
                                 break;
+
                             case 0xFFFE:
                                 pokemonText.Append(@"\v");
                                 specialCharON = true;
                                 break;
+
                             case 0xFFFF:
                                 pokemonText.Append("");
                                 break;
+
                             default:
                                 if (specialCharON) {
                                     pokemonText.Append(car.ToString("X4"));
                                     specialCharON = false;
                                 } else if (compressed) {
-                                    #region Compressed String                                    
+
+                                    #region Compressed String
+
                                     int shift = 0;
                                     int trans = 0;
                                     string uncomp = "";
@@ -135,7 +148,9 @@ namespace DSPRE.ROMFiles {
                                             j++;
                                         }
                                     }
-                                    #endregion
+
+                                    #endregion Compressed String
+
                                     pokemonText.Append(uncomp);
                                 } else {
                                     if (GetCharDictionary.TryGetValue(car, out string character)) {
@@ -155,12 +170,15 @@ namespace DSPRE.ROMFiles {
 
             readText.Dispose();
         }
+
         public TextArchive(int ID, List<string> msg = null, bool discardLines = false) : this(new FileStream(RomInfo.gameDirs[DirNames.textArchives].unpackedDir + "\\" + ID.ToString("D4"), FileMode.Open), msg, discardLines) {
         }
-        #endregion
+
+        #endregion Constructors (1)
 
         #region Methods (2)
-        public int[] EncodeString(string currentMessage, int stringIndex, int stringSize) { // Converts string to hex characters 
+
+        public int[] EncodeString(string currentMessage, int stringIndex, int stringSize) { // Converts string to hex characters
             ResourceManager GetByte = new ResourceManager("DSPRE.Resources.WriteText", Assembly.GetExecutingAssembly());
 
             int[] pokemonMessage = new int[stringSize - 1];
@@ -227,7 +245,8 @@ namespace DSPRE.ROMFiles {
             }
             return pokemonMessage;
         }
-        public int GetStringLength(string currentMessage) { // Calculates string length 
+
+        public int GetStringLength(string currentMessage) { // Calculates string length
             int count = 0;
             var charArray = currentMessage.ToCharArray();
             for (int i = 0; i < currentMessage.Length; i++) {
@@ -282,6 +301,7 @@ namespace DSPRE.ROMFiles {
             count++;
             return count;
         }
+
         private byte[] ToByteArray(List<string> msgSource) {
             MemoryStream newData = new MemoryStream();
             using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -326,12 +346,15 @@ namespace DSPRE.ROMFiles {
         public override byte[] ToByteArray() {
             return this.ToByteArray(messages);
         }
+
         public void SaveToFileDefaultDir(int IDtoReplace, bool showSuccessMessage = true) {
             SaveToFileDefaultDir(DirNames.textArchives, IDtoReplace, showSuccessMessage);
         }
+
         public void SaveToFileExplorePath(string suggestedFileName, bool showSuccessMessage = true) {
             SaveToFileExplorePath("Gen IV Text Archive", "msg", suggestedFileName, showSuccessMessage);
         }
-        #endregion
+
+        #endregion Methods (2)
     }
 }

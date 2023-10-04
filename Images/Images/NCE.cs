@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Drawing;
-using Ekona;
+﻿namespace Images {
 
-namespace Images
-{
-    public static class NCE
-    {
+    public static class NCE {
         //public static NCER Read(string file, IPluginHost pluginHost)
         //{
         //    BinaryReader br = new BinaryReader(File.OpenRead(file));
@@ -55,7 +46,6 @@ namespace Images
 
         //        nce.labl.names[i] = "Bank " + i.ToString();
         //    }
-
 
         //    br.Close();
         //    return nce;

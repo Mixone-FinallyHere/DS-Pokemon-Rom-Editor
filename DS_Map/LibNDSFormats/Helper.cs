@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using OpenTK;
+using System;
 using System.Drawing;
-using OpenTK;
 
 namespace SM64DSe {
-    static class Helper {
+
+    internal static class Helper {
+
         public static ushort ColorToBGR15(Color color) {
             uint r = (uint)((color.R & 0xF8) >> 3);
             uint g = (uint)((color.G & 0xF8) << 2);

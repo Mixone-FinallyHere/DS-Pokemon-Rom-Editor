@@ -12,58 +12,54 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * By: pleoNeX
- * 
+ *
  */
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Windows.Forms;
 
-namespace Ekona.Images
-{
-    public abstract class ImageBase
-    {
+using System;
+using System.Drawing;
+using System.IO;
+
+namespace Ekona.Images {
+
+    public abstract class ImageBase {
 
         #region Variable definition
+
         protected IPluginHost pluginHost; // Optional
         protected string fileName;
         protected int id = -1;
-        bool loaded;
+        private bool loaded;
 
-        Byte[] original;
-        int startByte;
-        int zoom = 1;
+        private Byte[] original;
+        private int startByte;
+        private int zoom = 1;
 
-        Byte[] tiles;
-        Byte[] tilePal;
-        int width, height;
-        ColorFormat format;
-        TileForm tileForm;
-        int tile_size;      // Pixels heigth
-        int bpp;
-        bool canEdit;
+        private Byte[] tiles;
+        private Byte[] tilePal;
+        private int width, height;
+        private ColorFormat format;
+        private TileForm tileForm;
+        private int tile_size;      // Pixels heigth
+        private int bpp;
+        private bool canEdit;
 
-        Object obj;
-        #endregion
+        private Object obj;
 
-        public ImageBase()
-        {
+        #endregion Variable definition
+
+        public ImageBase() {
         }
+
         public ImageBase(Byte[] tiles, int width, int height, ColorFormat format,
-            TileForm tileForm, bool editable, string fileName = "")
-        {
+            TileForm tileForm, bool editable, string fileName = "") {
             this.fileName = fileName;
             Set_Tiles(tiles, width, height, format, tileForm, editable);
         }
-        public ImageBase(string file, int id, string fileName = "")
-        {
+
+        public ImageBase(string file, int id, string fileName = "") {
             this.id = id;
             if (fileName == "")
                 this.fileName = Path.GetFileName(file);
@@ -72,8 +68,8 @@ namespace Ekona.Images
 
             Read(file);
         }
-        public ImageBase(string file, int id, IPluginHost pluginHost, string fileName = "")
-        {
+
+        public ImageBase(string file, int id, IPluginHost pluginHost, string fileName = "") {
             this.id = id;
             this.pluginHost = pluginHost;
             if (fileName == "")
@@ -84,30 +80,26 @@ namespace Ekona.Images
             Read(file);
         }
 
-
-        public Image Get_Image(PaletteBase palette)
-        {
+        public Image Get_Image(PaletteBase palette) {
             palette.Depth = format;
             Color[][] pal_colors = palette.Palette;
 
             Byte[] img_tiles;
-            if (tileForm == Images.TileForm.Horizontal)
-            {
+            if (tileForm == Images.TileForm.Horizontal) {
                 if (height < tile_size) height = tile_size;
                 img_tiles = Actions.LinealToHorizontal(tiles, width, height, bpp, tile_size);
                 tilePal = Actions.LinealToHorizontal(tilePal, width, height, 8, tile_size);
-            }
-            else
+            } else
                 img_tiles = tiles;
 
             return Actions.Get_Image(img_tiles, tilePal, pal_colors, format, width, height);
         }
 
         public abstract void Read(string fileIn);
+
         public abstract void Write(string fileOut, PaletteBase palette);
 
-        public void Change_StartByte(int start)
-        {
+        public void Change_StartByte(int start) {
             if (start < 0 || start >= original.Length)
                 return;
 
@@ -119,8 +111,7 @@ namespace Ekona.Images
         }
 
         public void Set_Tiles(Byte[] tiles, int width, int height, ColorFormat format,
-            TileForm form, bool editable, int tile_size = 8)
-        {
+            TileForm form, bool editable, int tile_size = 8) {
             this.tiles = tiles;
             this.format = format;
             this.tileForm = form;
@@ -151,11 +142,11 @@ namespace Ekona.Images
             // Get the original data for changes in startByte
             original = (byte[])tiles.Clone();
         }
-        public void Set_Tiles(ImageBase new_img)
-        {
+
+        public void Set_Tiles(ImageBase new_img) {
             this.tiles = new_img.Tiles;
             this.format = new_img.FormatColor;
-            this.tileForm = new_img.FormTile;         
+            this.tileForm = new_img.FormTile;
             this.tile_size = new_img.tile_size;
 
             Width = new_img.Width;
@@ -182,8 +173,8 @@ namespace Ekona.Images
             // Get the original data for changes in startByte
             original = (byte[])tiles.Clone();
         }
-        public void Set_Tiles(Byte[] tiles)
-        {
+
+        public void Set_Tiles(Byte[] tiles) {
             this.tiles = tiles;
 
             zoom = 1;
@@ -196,69 +187,62 @@ namespace Ekona.Images
             original = (byte[])tiles.Clone();
         }
 
-
         #region Properties
-        public int ID
-        {
+
+        public int ID {
             get { return id; }
         }
-        public String FileName
-        {
+
+        public String FileName {
             get { return fileName; }
             set { fileName = value; }
         }
-        public bool Loaded
-        {
+
+        public bool Loaded {
             get { return loaded; }
         }
-        public bool CanEdit
-        {
+
+        public bool CanEdit {
             get { return canEdit; }
         }
 
-        public int Zoom
-        {
+        public int Zoom {
             get { return zoom; }
             set { zoom = value; }
         }
-        public int StartByte
-        {
+
+        public int StartByte {
             get { return startByte; }
             set { Change_StartByte(value); }
         }
-        public int Height
-        {
+
+        public int Height {
             get { return height; }
-            set
-            {
+            set {
                 height = value;
-                if (tileForm == TileForm.Horizontal || tileForm == TileForm.Vertical)
-                {
+                if (tileForm == TileForm.Horizontal || tileForm == TileForm.Vertical) {
                     if (this.height < this.tile_size) this.height = this.tile_size;
                     if (this.height % this.tile_size != 0)
                         this.height += this.tile_size - (this.height % this.tile_size);
                 }
             }
         }
-        public int Width
-        {
+
+        public int Width {
             get { return width; }
-            set
-            {
+            set {
                 width = value;
-                if (tileForm == TileForm.Horizontal || tileForm == TileForm.Vertical)
-                {
+                if (tileForm == TileForm.Horizontal || tileForm == TileForm.Vertical) {
                     if (this.width < this.tile_size) this.width = this.tile_size;
                     if (this.width % this.tile_size != 0)
                         this.width += this.tile_size - (this.width % this.tile_size);
                 }
             }
         }
-        public ColorFormat FormatColor
-        {
+
+        public ColorFormat FormatColor {
             get { return format; }
-            set
-            {
+            set {
                 format = value;
                 if (format == Images.ColorFormat.colors16)
                     bpp = 4;
@@ -268,7 +252,7 @@ namespace Ekona.Images
                     bpp = 2;
                 else if (format == Images.ColorFormat.direct)
                     bpp = 16;
-                else if (format == Images.ColorFormat.BGRA32 || format ==Images.ColorFormat.ABGR32)
+                else if (format == Images.ColorFormat.BGRA32 || format == Images.ColorFormat.ABGR32)
                     bpp = 32;
                 else
                     bpp = 8;
@@ -276,56 +260,53 @@ namespace Ekona.Images
                 Array.Resize(ref tilePal, tiles.Length * (tile_size / bpp));
             }
         }
-        public TileForm FormTile
-        {
+
+        public TileForm FormTile {
             get { return tileForm; }
             set { tileForm = value; }
         }
-        public Byte[] Tiles
-        {
-            get
-            {
+
+        public Byte[] Tiles {
+            get {
                 return tiles;
             }
         }
-        public Byte[] TilesPalette
-        {
+
+        public Byte[] TilesPalette {
             get { return tilePal; }
             set { tilePal = value; }
         }
-        public int BPP
-        {
+
+        public int BPP {
             get { return bpp; }
         }
-        public int TileSize
-        {
+
+        public int TileSize {
             get { return tile_size; }
-            set
-            {
+            set {
                 tile_size = value;
                 Array.Resize(ref tilePal, tiles.Length * (tile_size / bpp));
             }
         }
-        public Byte[] Original
-        {
+
+        public Byte[] Original {
             get { return original; }
         }
-        #endregion
+
+        #endregion Properties
     }
 
-    public class TestImage : ImageBase
-    {
+    public class TestImage : ImageBase {
+
         public TestImage()
-            : base()
-        {
+            : base() {
         }
 
-        public override void Read(string fileIn)
-        {
+        public override void Read(string fileIn) {
             throw new NotImplementedException();
         }
-        public override void Write(string fileOut, PaletteBase palette)
-        {
+
+        public override void Write(string fileOut, PaletteBase palette) {
             throw new NotImplementedException();
         }
     }

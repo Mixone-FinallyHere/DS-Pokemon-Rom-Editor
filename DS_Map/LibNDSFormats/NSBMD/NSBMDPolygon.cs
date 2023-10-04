@@ -1,16 +1,14 @@
 // Polygon definition for NSBMD models.
 // Code adapted from kiwi.ds' NSBMD Model Viewer.
 
-using System;
+namespace LibNDSFormats.NSBMD {
 
-namespace LibNDSFormats.NSBMD
-{
-	/// <summary>
-	/// Type for NSBMd polygons.
-	/// </summary>
-    public class NSBMDPolygon
-    {
-        #region Properties (4) 
+    /// <summary>
+    /// Type for NSBMd polygons.
+    /// </summary>
+    public class NSBMDPolygon {
+
+        #region Properties (4)
 
         /// <summary>
         /// Used material ID.
@@ -36,6 +34,7 @@ namespace LibNDSFormats.NSBMD
 
         public int JointID { get; set; }
 
-        #endregion Properties 
+        #endregion Properties (4)
+
     }
 }

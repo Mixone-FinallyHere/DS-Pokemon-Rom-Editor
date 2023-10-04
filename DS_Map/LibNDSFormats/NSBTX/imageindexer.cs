@@ -17,18 +17,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
-using System.Windows.Forms;
 
 namespace NSMBe4 {
     /**
      * This is the core of all the image importing.
      * Takes one or more RGB bitmaps and outputs:
      *  - The image data common to all images. (tiled or non-tiled)
-     *  - One palette for each image, so that viewing the image data with 
+     *  - One palette for each image, so that viewing the image data with
      *    it shows the original image.
-     *    
+     *
      * It could still be optimized more, I know.
      * ~Dirbaio
      */
@@ -71,7 +69,6 @@ namespace NSMBe4 {
                     throw new Exception("Not all images have the same size!!");
             }
 
-
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++) {
                     MultiColor c = new MultiColor(boxColorCount);
@@ -93,7 +90,6 @@ namespace NSMBe4 {
             foreach (MultiColor c in freqTable.Keys)
                 if (c.someTransparent()) ct++;
             Console.Out.WriteLine("Transparent: " + ct);
-
 
             Dictionary<MultiColor, int> newFreqTable = new Dictionary<MultiColor, int>();
             foreach (MultiColor c in freqTable.Keys) {
@@ -136,7 +132,6 @@ namespace NSMBe4 {
                 split(bo);
             }
 
-
             multiPalette = new MultiColor[paletteCount];
             for (int j = useAlpha ? 1 : 0; j < paletteCount; j++)
                 if ((useAlpha ? j : j + 1) <= boxes.Count)
@@ -155,7 +150,6 @@ namespace NSMBe4 {
                 }
                 if (useAlpha)
                     palettes[i][0] = Color.Transparent;
-
             }
 
             //NOW MAP ORIGINAL COLORS TO PALETTE ENTRIES
@@ -184,17 +178,11 @@ namespace NSMBe4 {
 
             Console.Out.WriteLine("DONE");
             /*
-
                 }*/
         }
 
-
-
-
-
         //PUBLIC DATA-RETRIEVING FUNCTIONS
         public byte[] getTiledImageData() {
-
             byte[] palettedImage = new byte[width * height];
             int tileCount = width * height / 64;
             int tileWidth = width / 8;
@@ -209,8 +197,8 @@ namespace NSMBe4 {
                     }
             return palettedImage;
         }
-        public byte[] getTiledImageDataPart(int px, int py, int ptx, int pty) {
 
+        public byte[] getTiledImageDataPart(int px, int py, int ptx, int pty) {
             byte[] palettedImage = new byte[ptx * pty];
             int tileCount = ptx * pty / 64;
             int tileWidth = ptx / 8;
@@ -234,10 +222,6 @@ namespace NSMBe4 {
                 }
             return b;
         }
-
-
-
-
 
         //ALGORITHM CORE
         private byte closestMultiColor(MultiColor mc) {
@@ -289,7 +273,7 @@ namespace NSMBe4 {
 
         private byte median(List<byteint> values, int total) {
             //Naive median algorithm
-            //Binary search would be better? 
+            //Binary search would be better?
             int acum = 0;
             foreach (byteint val in values) {
                 acum += val.i;
@@ -349,15 +333,12 @@ namespace NSMBe4 {
             return (byte)((c >> 3) << 3);
         }
 
-
-
-
-
         //HELPER CLASSES
         private class MultiColor {
             public byte[] data;
             public bool[] transp;
             public bool deleteFlag;
+
             public MultiColor(int count) {
                 data = new byte[count];
                 transp = new bool[count];
@@ -398,6 +379,7 @@ namespace NSMBe4 {
                     if (!transp[i]) return false;
                 return true;
             }
+
             public bool someTransparent() {
                 for (int i = 0; i < transp.Length; i += 3)
                     if (transp[i]) return true;
@@ -405,6 +387,7 @@ namespace NSMBe4 {
             }
 
             private int thehash;
+
             public void calcHash() {
                 unchecked {
                     const int p = 16777619;
@@ -466,6 +449,7 @@ namespace NSMBe4 {
             public byte[] min, max;
             private bool splittable = false;
             private bool splittablecached = false;
+
             public Box(byte[] min, byte[] max) {
                 this.min = min;
                 this.max = max;
@@ -517,6 +501,7 @@ namespace NSMBe4 {
                 min[d] = a;
                 splittablecached = false;
             }
+
             public void setDimMax(byte d, byte a) {
                 max[d] = a;
                 splittablecached = false;
@@ -551,6 +536,7 @@ namespace NSMBe4 {
                     return splittable;
                 }
             }
+
             public bool canSplit2(Dictionary<MultiColor, int> freqTable) {
                 //Whoa... This gets complicated if I have to
                 //take into acount the "don't care" of transparent colors...
@@ -599,6 +585,7 @@ namespace NSMBe4 {
         private class byteint : IComparable {
             public byte b;
             public int i;
+
             public byteint(byte b, int i) {
                 this.b = b;
                 this.i = i;
@@ -612,6 +599,7 @@ namespace NSMBe4 {
             public static bool operator <(byteint a, byteint b) {
                 return a.b < b.b;
             }
+
             public static bool operator >(byteint a, byteint b) {
                 return a.b > b.b;
             }
@@ -620,10 +608,6 @@ namespace NSMBe4 {
                 return "(" + b + ", " + i + ")";
             }
         }
-
-
-
-
 
         //GENERAL PURPOSE FUNCTIONS
         public static Color[] createPaletteForImage(Bitmap b) {
@@ -714,7 +698,6 @@ namespace NSMBe4 {
 
             return (ushort)res;
         }
-
 
         public static byte closest(Color c, Color[] palette) {
             int best = 0;

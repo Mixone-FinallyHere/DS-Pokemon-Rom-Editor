@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 namespace DSPRE.ROMFiles {
+
     public class UniqueList<T> {
         private readonly List<T> list = new List<T>();
         private readonly HashSet<T> set = new HashSet<T>();
@@ -11,7 +12,8 @@ namespace DSPRE.ROMFiles {
             set = new HashSet<T>(capacity);
         }
 
-        public UniqueList() { }
+        public UniqueList() {
+        }
 
         public void Add(T item) {
             if (!set.Contains(item)) {
@@ -37,6 +39,7 @@ namespace DSPRE.ROMFiles {
             }
             return false;
         }
+
         public bool RemoveAt(int index) {
             if (index >= 0 && index < list.Count) {
                 T itemToRemove = list[index];
@@ -51,12 +54,15 @@ namespace DSPRE.ROMFiles {
         public T Find(Predicate<T> match) {
             return list.Find(match);
         }
+
         public int FindIndex(Predicate<T> match) {
             return list.FindIndex(match);
         }
+
         public void Sort() {
             list.Sort();
         }
+
         public IEnumerator<T> GetEnumerator() {
             return list.GetEnumerator();
         }
@@ -86,5 +92,4 @@ namespace DSPRE.ROMFiles {
 
         public int Count => list.Count;
     }
-
 }

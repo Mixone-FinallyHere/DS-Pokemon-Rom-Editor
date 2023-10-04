@@ -15,35 +15,34 @@
 *   along with NSMB Editor 5.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using NSMBe4.DSFileSystem;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Drawing;
-using System.Windows.Forms;
+using System.IO;
 using System.Linq;
-using NSMBe4.DSFileSystem;
+using System.Text;
+using System.Windows.Forms;
 using static NSMBe4.NSBMD.NSBTX_File.PalInfo_Master.Info;
 
-namespace NSMBe4.NSBMD
-{
+namespace NSMBe4.NSBMD {
+
     public class NSBTX {
-        readonly DSFileSystem.File f;
-        readonly byte[] data;
-        readonly int texDataOffset;
-        readonly int palDataOffset;
-        readonly int palDefOffset;
-        readonly int palDataSize;
-        readonly int f5texDataOffset;
-        readonly int f5dataOffset;
+        private readonly DSFileSystem.File f;
+        private readonly byte[] data;
+        private readonly int texDataOffset;
+        private readonly int palDataOffset;
+        private readonly int palDefOffset;
+        private readonly int palDataSize;
+        private readonly int f5texDataOffset;
+        private readonly int f5dataOffset;
         public List<Palette> pal = new List<Palette>();
         public PalettedImage[] textures;
         public PaletteDef[] palettes;
         public ByteArrayInputStream str;
         public int startoffset = 0;
 
-        public NSBTX(DSFileSystem.File f)
-        {
+        public NSBTX(DSFileSystem.File f) {
             this.f = f;
             data = f.getContents();
             str = new ByteArrayInputStream(data);
@@ -63,7 +62,7 @@ namespace NSMBe4.NSBMD
             bool found = false;
             int blockStart = 0;
             while (str.lengthAvailable(4)) {
-                if (BitConverter.GetBytes(str.readUInt()).SequenceEqual(Encoding.ASCII.GetBytes("TEX0"))){ // "TEX0"
+                if (BitConverter.GetBytes(str.readUInt()).SequenceEqual(Encoding.ASCII.GetBytes("TEX0"))) { // "TEX0"
                     str.setOrigin(str.getPos() - 4);
                     blockStart = (int)(str.getPos() - 4);
                     found = true;
@@ -222,7 +221,9 @@ namespace NSMBe4.NSBMD
             }
         }
     }
+
     public class NSBTX_File {
+
         public enum TextureFormat : byte {
             FORMAT_NO_TEXTURE = 0,
             A3I5 = 1,
@@ -237,6 +238,7 @@ namespace NSMBe4.NSBMD
         public byte[] before;
         public byte[] after;
         public Header header;
+
         public struct Header {
             public string ID;
             public ushort unk1;
@@ -246,6 +248,7 @@ namespace NSMBe4.NSBMD
             public short nSection;
             public long[] Section_Offset;
         }
+
         public struct TextureInformation {
             public int unk;
             public int datasize; //shift << 3
@@ -253,6 +256,7 @@ namespace NSMBe4.NSBMD
             public short unk2;
             public int data_Offset;
         }
+
         public struct CompressedTextureInformation {
             public int unk;
             public int datasize; //shift << 3
@@ -261,6 +265,7 @@ namespace NSMBe4.NSBMD
             public int data_Offset;
             public int palIndex;
         }
+
         public struct PaletteInformation {
             public int unk;
             public int datasize; //shift << 3
@@ -268,13 +273,16 @@ namespace NSMBe4.NSBMD
             public short dictionary_Offset;
             public int data_Offset;
         }
+
         public TEX0 tex0;
+
         public struct TEX0 {
             public int Section_size;
             public TextureInformation textureInformation;
             public CompressedTextureInformation compTextureInformation;
             public PaletteInformation paletteInformation;
         }
+
         public struct UnknownBlock {
             public short header_size;
             public short section_size;
@@ -282,7 +290,9 @@ namespace NSMBe4.NSBMD
 
             public List<(short unk1, short unk2)> data;
         }
+
         public TexInfo_Master texInfo;
+
         public struct TexInfo_Master {
             public byte dummy;
             public byte num_objs;
@@ -292,6 +302,7 @@ namespace NSMBe4.NSBMD
             public List<string> names;
 
             public struct Info {
+
                 public struct TexInfo {
                     public int Texture_Offset; //shift << 3, relative to start of Texture Data
                     public short Parameters;
@@ -302,8 +313,10 @@ namespace NSMBe4.NSBMD
 
                     public byte[] Image;
                     public byte[] spData;
+
                     // Parameters
                     public byte repeat_X;   // 0 = freeze; 1 = repeat
+
                     public byte repeat_Y;   // 0 = freeze; 1 = repeat
                     public byte flip_X;     // 0 = no; 1 = flip each 2nd texture (requires repeat)
                     public byte flip_Y;     // 0 = no; 1 = flip each 2nd texture (requires repeat)
@@ -323,7 +336,9 @@ namespace NSMBe4.NSBMD
                 public TexInfo[] tInfoArr;
             }
         }
+
         public PalInfo_Master palInfo;
+
         public struct PalInfo_Master {
             public byte dummy;
             public byte num_objs;
@@ -331,7 +346,9 @@ namespace NSMBe4.NSBMD
             public UnknownBlock unknownBlock;
             public Info infoBlock;
             public List<string> names;
+
             public struct Info {
+
                 public struct PalInfo {
                     public int Palette_Offset; //shift << 3, relative to start of Palette Data
                     public short Color0;
@@ -345,7 +362,7 @@ namespace NSMBe4.NSBMD
             }
         }
 
-        readonly int[] bitDepth = { 0, 8, 2, 4, 8, 2, 8, 16 };
+        private readonly int[] bitDepth = { 0, 8, 2, 4, 8, 2, 8, 16 };
 
         public NSBTX_File(FileStream f) {
             using (EndianBinaryReader er = new EndianBinaryReader(f, Endianness.LittleEndian)) {
@@ -384,8 +401,8 @@ namespace NSMBe4.NSBMD
                 }
 
                 tex0.Section_size = er.ReadInt32();
-                
-                tex0.textureInformation.unk  = er.ReadInt32();
+
+                tex0.textureInformation.unk = er.ReadInt32();
                 tex0.textureInformation.datasize = er.ReadInt16() << 3;
                 tex0.textureInformation.dictionary_Offset = er.ReadInt16();
                 tex0.textureInformation.unk2 = er.ReadInt16();
@@ -447,6 +464,7 @@ namespace NSMBe4.NSBMD
                             case 2:
                                 texInfo.infoBlock.tInfoArr[i].width = 0x200;
                                 break;
+
                             default:
                                 texInfo.infoBlock.tInfoArr[i].width = 0x100;
                                 break;
@@ -458,6 +476,7 @@ namespace NSMBe4.NSBMD
                             case 2:
                                 texInfo.infoBlock.tInfoArr[i].height = 0x200;
                                 break;
+
                             default:
                                 texInfo.infoBlock.tInfoArr[i].height = 0x100;
                                 break;
@@ -546,6 +565,7 @@ namespace NSMBe4.NSBMD
                 }
             }
         }
+
         public (Bitmap bmp, int ctrlCode) GetBitmap(int imageIndex, int palIndex) {
             NSBTX_File overworldFrames = null;
 
@@ -566,6 +586,7 @@ namespace NSMBe4.NSBMD
                             b.SetPixel(j - (j / b.Width * b.Width), j / b.Width, c);
                         }
                         break;
+
                     case TextureFormat.COLOR_4:
                         for (int j = 0; j < pixelnum; j++) {
                             uint index = this.texInfo.infoBlock.tInfoArr[imageIndex].Image[j / 4];
@@ -588,13 +609,14 @@ namespace NSMBe4.NSBMD
                             b.SetPixel(j - (j / b.Width * b.Width), j / b.Width, c);
                         }
                         break;
+
                     case TextureFormat.COLOR_16:
                         for (int j = 0; j < pixelnum; j++) {
                             uint index = this.texInfo.infoBlock.tInfoArr[imageIndex].Image[j / 2];
                             index = (index >> ((j % 2) << 2)) & 0x0f;
 
                             PalInfo[] pinfoArr = this.palInfo.infoBlock.pInfoArr;
-                            
+
                             Color c;
                             if (index == 0 && this.texInfo.infoBlock.tInfoArr[imageIndex].color0 == 1) {
                                 c = Color.Transparent;
@@ -610,6 +632,7 @@ namespace NSMBe4.NSBMD
                             b.SetPixel(j - (j / b.Width * b.Width), j / b.Width, c);
                         }
                         break;
+
                     case TextureFormat.COLOR_256:
                         for (int j = 0; j < pixelnum; j++) {
                             byte index = this.texInfo.infoBlock.tInfoArr[imageIndex].Image[j];
@@ -631,10 +654,12 @@ namespace NSMBe4.NSBMD
                             b.SetPixel(j - (j / b.Width * b.Width), j / b.Width, c);
                         }
                         break;
+
                     case TextureFormat.TEXEL_4X4:
                         overworldFrames.convert_4x4texel_b(this.texInfo.infoBlock.tInfoArr[imageIndex].Image, b.Width, b.Height, this.texInfo.infoBlock.tInfoArr[imageIndex].spData, this.palInfo.infoBlock.pInfoArr[palIndex].pal, b);
                         b.UnlockBits();
                         break;
+
                     case TextureFormat.A5I3:
                         for (int j = 0; j < pixelnum; j++) {
                             int index = this.texInfo.infoBlock.tInfoArr[imageIndex].Image[j] & 0x7;
@@ -644,13 +669,14 @@ namespace NSMBe4.NSBMD
                             b.SetPixel(j - (j / b.Width * b.Width), j / b.Width, c);
                         }
                         break;
+
                     case TextureFormat.DIRECT:
                         for (int j = 0; j < pixelnum; j++) {
                             ushort p = (ushort)(this.texInfo.infoBlock.tInfoArr[imageIndex].Image[j * 2] + (this.texInfo.infoBlock.tInfoArr[imageIndex].Image[j * 2 + 1] << 8));
                             Color c = Color.FromArgb(
-                                ((p & 0x8000) != 0) ? 0xff : 0, 
-                                ((p >> 0) & 0x1f) << 3, 
-                                ((p >> 5) & 0x1f) << 3, 
+                                ((p & 0x8000) != 0) ? 0xff : 0,
+                                ((p >> 0) & 0x1f) << 3,
+                                ((p >> 5) & 0x1f) << 3,
                                 ((p >> 10) & 0x1f) << 3);
                             b.SetPixel(j - (j / b.Width * b.Width), j / b.Width, c);
                         }
@@ -662,6 +688,7 @@ namespace NSMBe4.NSBMD
 
             return (b_, ctrlCode);
         }
+
         public byte[] ToByteArray() {
             MemoryStream newData = new MemoryStream();
             using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -676,7 +703,7 @@ namespace NSMBe4.NSBMD
 
                 writer.Write(header.header_size);
                 writer.Write(header.nSection);
-                
+
                 for (int i = 0; i < header.nSection; i++) {
                     writer.Write(header.Section_Offset[i]);
                 }
@@ -685,7 +712,7 @@ namespace NSMBe4.NSBMD
                 writer.Write(Encoding.ASCII.GetBytes("TEX0"));
 
                 writer.Write(tex0.Section_size);
-                
+
                 writer.Write(tex0.textureInformation.unk);
                 writer.Write((short)(tex0.textureInformation.datasize >> 3));
                 writer.Write(tex0.textureInformation.dictionary_Offset);
@@ -785,7 +812,6 @@ namespace NSMBe4.NSBMD
                     writer.BaseStream.Seek(curpos, SeekOrigin.Begin);
                 }
 
-
                 for (int i = 0; i < palInfo.num_objs; i++) {
                     writer.Write(Encoding.ASCII.GetBytes(palInfo.names[i].PadRight(16, '\0')));
                 }
@@ -800,15 +826,14 @@ namespace NSMBe4.NSBMD
 
             return newData.ToArray();
         }
-        public bool convert_4x4texel(uint[] tex, int width, int height, ushort[] data, Color[] pal, ImageTexeler.LockBitmap rgbaOut)
-        {
+
+        public bool convert_4x4texel(uint[] tex, int width, int height, ushort[] data, Color[] pal, ImageTexeler.LockBitmap rgbaOut) {
             int w = width / 4;
             int h = height / 4;
 
             // traverse 'w x h blocks' of 4x4-texel
             for (int y = 0; y < h; y++)
-                for (int x = 0; x < w; x++)
-                {
+                for (int x = 0; x < w; x++) {
                     int index = y * w + x;
                     UInt32 t = tex[index];
                     ushort d = data[index];
@@ -826,15 +851,18 @@ namespace NSMBe4.NSBMD
                                     pixel = pal[(addr << 1) + texel];
                                     if (texel == 3) pixel = Color.Transparent; // make it transparent, alpha = 0
                                     break;
+
                                 case 2:
                                     pixel = pal[(addr << 1) + texel];
                                     break;
+
                                 case 1:
                                     switch (texel) {
                                         case 0:
                                         case 1:
                                             pixel = pal[(addr << 1) + texel];
                                             break;
+
                                         case 2:
                                             byte R = (byte)((pal[(addr << 1)].R + pal[(addr << 1) + 1].R) / 2L);
                                             byte G = (byte)((pal[(addr << 1)].G + pal[(addr << 1) + 1].G) / 2L);
@@ -842,17 +870,20 @@ namespace NSMBe4.NSBMD
                                             byte A = 0xff;
                                             pixel = Color.FromArgb(A, R, G, B);
                                             break;
+
                                         case 3:
                                             pixel = Color.Transparent; // make it transparent, alpha = 0
                                             break;
                                     }
                                     break;
+
                                 case 3:
                                     switch (texel) {
                                         case 0:
                                         case 1:
                                             pixel = pal[(addr << 1) + texel];
                                             break;
+
                                         case 2: {
                                                 byte R = (byte)((pal[(addr << 1)].R * 5L + pal[(addr << 1) + 1].R * 3L) / 8);
                                                 byte G = (byte)((pal[(addr << 1)].G * 5L + pal[(addr << 1) + 1].G * 3L) / 8);
@@ -871,6 +902,7 @@ namespace NSMBe4.NSBMD
                                             }
                                     }
                                     break;
+
                                 default:
                                     break;
                             }
@@ -881,8 +913,8 @@ namespace NSMBe4.NSBMD
                 }
             return true;
         }
-        public void convert_4x4texel_b(byte[] tex, int width, int height, byte[] data, Color[] pal, ImageTexeler.LockBitmap rgbaOut)
-        {
+
+        public void convert_4x4texel_b(byte[] tex, int width, int height, byte[] data, Color[] pal, ImageTexeler.LockBitmap rgbaOut) {
             var list1 = new List<uint>();
             for (int i = 0; i < (tex.Length + 1) / 4; ++i) {
                 list1.Add(LibNDSFormats.Utils.Read4BytesAsUInt32(tex, i * 4));
@@ -916,6 +948,7 @@ namespace NSMBe4.NSBMD
         }
 
         public class DupFrameHashSetComparer : IEqualityComparer<HashSet<(byte f1, byte f2)>> {
+
             #region IEqualityComparer<Customer> Members
 
             public bool Equals(HashSet<(byte f1, byte f2)> x, HashSet<(byte f1, byte f2)> y) {
@@ -924,15 +957,13 @@ namespace NSMBe4.NSBMD
 
             public int GetHashCode(HashSet<(byte f1, byte f2)> obj) {
                 int ret = 0;
-                foreach(var key in obj) {
+                foreach (var key in obj) {
                     ret += key.GetHashCode();
                 }
                 return ret;
             }
 
-            #endregion
+            #endregion IEqualityComparer<Customer> Members
         }
-
     }
-
 }

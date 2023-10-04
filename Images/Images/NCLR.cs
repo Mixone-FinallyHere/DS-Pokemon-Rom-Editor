@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Drawing;
-using Ekona;
+﻿using Ekona;
 using Ekona.Images;
+using System;
+using System.Drawing;
+using System.IO;
+using System.Linq;
 
-namespace Images
-{
-    public class NCLR : PaletteBase
-    {
-        sNCLR nclr;
+namespace Images {
 
-        public NCLR(string file, int id, string fileName = "") : base(file, id, fileName) { }
+    public class NCLR : PaletteBase {
+        private sNCLR nclr;
 
-        public override void Read(string fileIn)
-        {
+        public NCLR(string file, int id, string fileName = "") : base(file, id, fileName) {
+        }
+
+        public override void Read(string fileIn) {
             nclr = new sNCLR();
 
             BinaryReader br = new BinaryReader(File.OpenRead(fileIn));
@@ -75,8 +72,7 @@ namespace Images
             Set_Palette(pltt.palettes, pltt.depth, true);
         }
 
-        public override void Write(string fileOut)
-        {
+        public override void Write(string fileOut) {
             Update_Struct();
             BinaryWriter bw = new BinaryWriter(File.OpenWrite(fileOut));
 
@@ -102,8 +98,7 @@ namespace Images
             bw.Close();
         }
 
-        private void Update_Struct()
-        {
+        private void Update_Struct() {
             nclr.pltt.palettes = Palette;
             nclr.pltt.depth = Depth;
 
@@ -120,6 +115,7 @@ namespace Images
             public TTLP pltt;
             public PMCP pmcp;
         }
+
         public struct TTLP  // PaLeTTe
         {
             public char[] ID;
@@ -131,8 +127,8 @@ namespace Images
             public UInt32 num_colors;    // Number of colors
             public Color[][] palettes;
         }
-        public struct PMCP
-        {
+
+        public struct PMCP {
             public char[] ID;
             public uint blockSize;
             public ushort unknown1;

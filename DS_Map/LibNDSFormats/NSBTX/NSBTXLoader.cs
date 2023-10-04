@@ -1,32 +1,30 @@
 ﻿// Loader for NSBTX files/data.
 // Code adapted from kiwi.ds' NSBMD Model Viewer.
 
+using LibNDSFormats.NSBMD;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using LibNDSFormats.NSBMD;
 using System.Linq;
-using System.Windows.Forms;
 
-namespace LibNDSFormats.NSBTX
-{
+namespace LibNDSFormats.NSBTX {
+
     /// <summary>
     /// Loader for NSBTX files & data.
     /// </summary>
-    public static class NSBTXLoader
-    {
+    public static class NSBTXLoader {
         public static object MessageBoxIcons { get; private set; }
+
         #region Methods (2)
 
-        // Public Methods (2) 
+        // Public Methods (2)
 
         /// <summary>
         /// Load NSBTX from stream.
         /// </summary>
         /// <param name="stream">Stream to use.</param>
         /// <returns>Material definitions.</returns>
-        public static IEnumerable<NSBMDMaterial> LoadNsbtx(Stream stream, out List<NSBMDTexture> texs, out List<NSBMDPalette> pals)
-        {
+        public static IEnumerable<NSBMDMaterial> LoadNsbtx(Stream stream, out List<NSBMDTexture> texs, out List<NSBMDPalette> pals) {
             texs = new List<NSBMDTexture>();
             pals = new List<NSBMDPalette>();
             var materials = new List<NSBMDMaterial>();
@@ -63,13 +61,11 @@ namespace LibNDSFormats.NSBTX
         /// </summary>
         /// <param name="stream">File to use.</param>
         /// <returns>Material definitions.</returns>
-        public static IEnumerable<NSBMDMaterial> LoadNsbtx(FileInfo fileInfo, out List<NSBMDTexture> texs, out List<NSBMDPalette> pals)
-        {
+        public static IEnumerable<NSBMDMaterial> LoadNsbtx(FileInfo fileInfo, out List<NSBMDTexture> texs, out List<NSBMDPalette> pals) {
             texs = new List<NSBMDTexture>();
             pals = new List<NSBMDPalette>();
             IEnumerable<NSBMDMaterial> result = null;
-            using (var fileStream = new FileStream(fileInfo.FullName, FileMode.Open))
-            {
+            using (var fileStream = new FileStream(fileInfo.FullName, FileMode.Open)) {
                 result = LoadNsbtx(fileStream, out texs, out pals);
             }
             return result;
@@ -80,8 +76,7 @@ namespace LibNDSFormats.NSBTX
         /// </summary>
         /// <param name="stream">Stream to use.</param>
         /// <returns>Material definitions.</returns>
-        public static IEnumerable<NSBMDMaterial> ReadTex0(Stream stream, int blockoffset, out int ptexnum, out int ppalnum, out List<NSBMDTexture> texs, out List<NSBMDPalette> pals)
-        {
+        public static IEnumerable<NSBMDMaterial> ReadTex0(Stream stream, int blockoffset, out int ptexnum, out int ppalnum, out List<NSBMDTexture> texs, out List<NSBMDPalette> pals) {
             EndianBinaryReader reader = new EndianBinaryReader(stream, Endianness.LittleEndian);
             UInt32 blocksize, blockptr, blocklimit;
             int texnum;
@@ -143,11 +138,9 @@ namespace LibNDSFormats.NSBTX
             for (i = 0; i < material.Length; i++)
                 material[i] = new NSBMDMaterial();
 
-
             stream.Skip(14 + (texnum * 4)); // go straight to texture info
 
-            for (i = 0; i < texnum; i++)
-            {
+            for (i = 0; i < texnum; i++) {
                 UInt32 offset;
                 int param;
                 int format;
@@ -183,8 +176,7 @@ namespace LibNDSFormats.NSBTX
 
             ////////////////////////////////////////////
             // copy texture names
-            for (i = 0; i < texnum; i++)
-            {
+            for (i = 0; i < texnum; i++) {
                 material[i].texname = Utils.ReadNSBMDString(reader);
                 reader.BaseStream.Position -= 16;
                 texs[i].texname = Utils.ReadNSBMDString(reader);
@@ -192,8 +184,7 @@ namespace LibNDSFormats.NSBTX
 
             ////////////////////////////////////////////////
             // calculate each texture's size
-            for (i = 0; i < texnum; i++)
-            {
+            for (i = 0; i < texnum; i++) {
                 int[] bpp = { 0, 8, 2, 4, 8, 2, 8, 16 };
 
                 var mat = material[i];
@@ -207,8 +198,7 @@ namespace LibNDSFormats.NSBTX
             // palette definition
             stream.Seek(paldefoffset + 2, SeekOrigin.Begin); // skip palnum, already read
             stream.Seek(14 + (palnum * 4), SeekOrigin.Current); // go straight to palette info
-            for (i = 0; i < palnum; i++)
-            {
+            for (i = 0; i < palnum; i++) {
                 uint curOffset = (uint)((reader.ReadUInt16() << 3) + paldataoffset);
                 stream.Seek(2, SeekOrigin.Current); // skip 2 bytes
                 material[i].paloffset = curOffset;
@@ -219,8 +209,7 @@ namespace LibNDSFormats.NSBTX
 
             ////////////////////////////////////////////////
             // copy palette names
-            for (i = 0; i < palnum; i++)
-            {
+            for (i = 0; i < palnum; i++) {
                 var mat = material[i];
                 mat.palname = Utils.ReadNSBMDString(reader);
                 reader.BaseStream.Position -= 16;
@@ -254,21 +243,17 @@ namespace LibNDSFormats.NSBTX
             material[i].palsize = blocklimit - material[i].paloffset;
             pals[i].palsize = blocklimit - material[i].paloffset;*/
             List<int> offsets = new List<int>();
-            for (int k = 0; k < pals.Count; k++)
-            {
-                if (!offsets.Contains((int)pals[k].paloffset))
-                {
+            for (int k = 0; k < pals.Count; k++) {
+                if (!offsets.Contains((int)pals[k].paloffset)) {
                     offsets.Add((int)pals[k].paloffset);
                 }
             }
             offsets.Add((int)blocklimit);
             offsets.Sort();
-            for (int k = 0; k < pals.Count; k++)
-            {
+            for (int k = 0; k < pals.Count; k++) {
                 int pallength;
                 int l = -1;
-                do
-                {
+                do {
                     l++;
                 }
                 while (offsets[l] - pals[k].paloffset <= 0);//nsbtx.PalInfo.infoBlock.PalInfo[i + j].Palette_Offset - nsbtx.PalInfo.infoBlock.PalInfo[i].Palette_Offset == 0)
@@ -283,8 +268,7 @@ namespace LibNDSFormats.NSBTX
 
             ////////////////////////////////////////////////
             // traverse each texture
-            for (i = 0; i < texnum; i++)
-            {
+            for (i = 0; i < texnum; i++) {
                 var mat = material[i];
                 stream.Seek(mat.texoffset, SeekOrigin.Begin);
 
@@ -298,8 +282,7 @@ namespace LibNDSFormats.NSBTX
 
                 ////////////////////////////////////////////////
                 // additional data for format 5 4x4 compressed texels
-                if (mat.format == 5)
-                {
+                if (mat.format == 5) {
                     UInt32 r = mat.texsize / 2;//>> 1;
                     stream.Seek(spdataoffset + (mat.texoffset - sptexoffset) / 2, SeekOrigin.Begin);
 
@@ -312,13 +295,10 @@ namespace LibNDSFormats.NSBTX
                 }
             }
 
-
             ////////////////////////////////////////////////
             // traverse each palette
-            for (i = 0; i < palnum; i++)
-            {
-                try
-                {
+            for (i = 0; i < palnum; i++) {
+                try {
                     NSBMDMaterial mat = material[i];
                     var palentry = mat.palsize >> 1;
 
@@ -327,8 +307,7 @@ namespace LibNDSFormats.NSBTX
                     //Console.WriteLine("DEBUG: converting pal '{0}', palentry = {1}", mat.palname, palentry);
 
                     stream.Seek(mat.paloffset, SeekOrigin.Begin);
-                    for (j = 0; j < palentry; j++)
-                    {
+                    for (j = 0; j < palentry; j++) {
                         ushort p = reader.ReadUInt16();
                         rgbq[j].R = (byte)(((p >> 0) & 0x1f) << 3); // red
                         rgbq[j].G = (byte)(((p >> 5) & 0x1f) << 3); // green
@@ -338,9 +317,7 @@ namespace LibNDSFormats.NSBTX
                     }
                     mat.paldata = rgbq;
                     pals[i].paldata = rgbq;
-                }
-                catch
-                {
+                } catch {
                 }
             }
 
@@ -350,6 +327,6 @@ namespace LibNDSFormats.NSBTX
             return material;
         }
 
-        #endregion Methods
+        #endregion Methods (2)
     }
 }

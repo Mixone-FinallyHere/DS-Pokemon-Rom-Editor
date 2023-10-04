@@ -4,17 +4,17 @@
 // Copyright (C) 2012
 //
 //   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by 
+//   it under the terms of the GNU General Public License as published by
 //   the Free Software Foundation, either version 3 of the License, or
 //   (at your option) any later version.
 //
-//   This program is distributed in the hope that it will be useful, 
+//   This program is distributed in the hope that it will be useful,
 //   but WITHOUT ANY WARRANTY; without even the implied warranty of
 //   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details. 
+//   GNU General Public License for more details.
 //
 //   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 // </copyright>
 
@@ -23,24 +23,21 @@
 // <date>23/06/2012 19:04:27</date>
 // -----------------------------------------------------------------------
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
-namespace Ekona.Images
-{
-    public class RawPalette : PaletteBase
-    {
+namespace Ekona.Images {
+
+    public class RawPalette : PaletteBase {
+
         // Unknown data
-        byte[] prev_data;
-        byte[] next_data;
+        private byte[] prev_data;
+
+        private byte[] next_data;
 
         public RawPalette(string file, int id, bool editable, ColorFormat depth, int offset, int size, string fileName = "")
-            : base()
-        {
+            : base() {
             if (fileName == "")
                 this.fileName = System.IO.Path.GetFileName(file);
             else
@@ -49,21 +46,21 @@ namespace Ekona.Images
 
             Read(file, editable, depth, offset, size);
         }
+
         public RawPalette(Color[][] colors, bool editable, ColorFormat depth, string fileName = "")
-            : base()
-        {
+            : base() {
             this.fileName = fileName;
             Set_Palette(colors, depth, editable);
         }
+
         public RawPalette(Color[] colors, bool editable, ColorFormat depth, string fileName = "")
-            : base()
-        {
+            : base() {
             this.fileName = fileName;
             Set_Palette(new Color[][] { colors }, depth, editable);
         }
+
         public RawPalette(string file, int id, bool editable, int offset, int size, string fileName = "")
-            : base()
-        {
+            : base() {
             if (fileName == "")
                 this.fileName = System.IO.Path.GetFileName(file);
             else
@@ -73,13 +70,11 @@ namespace Ekona.Images
             Read(file, editable, offset, size);
         }
 
-
-        public override void Read(string fileIn)
-        {
+        public override void Read(string fileIn) {
             Read(fileIn, true, 0, -1);
         }
-        public void Read(string fileIn, bool editable, ColorFormat depth, int offset, int fileSize)
-        {
+
+        public void Read(string fileIn, bool editable, ColorFormat depth, int offset, int fileSize) {
             BinaryReader br = new BinaryReader(File.OpenRead(fileIn));
             prev_data = br.ReadBytes(offset);
 
@@ -100,8 +95,8 @@ namespace Ekona.Images
 
             Set_Palette(palette, depth, editable);
         }
-        public void Read(string fileIn, bool editable, int offset, int fileSize)
-        {
+
+        public void Read(string fileIn, bool editable, int offset, int fileSize) {
             BinaryReader br = new BinaryReader(File.OpenRead(fileIn));
             prev_data = br.ReadBytes(offset);
 
@@ -127,8 +122,7 @@ namespace Ekona.Images
             br.Close();
         }
 
-        public override void Write(string fileOut)
-        {
+        public override void Write(string fileOut) {
             BinaryWriter bw = new BinaryWriter(File.OpenWrite(fileOut));
 
             bw.Write(prev_data);
@@ -141,15 +135,15 @@ namespace Ekona.Images
         }
     }
 
-    public class RawImage : ImageBase
-    {
+    public class RawImage : ImageBase {
+
         // Unknown data - Needed to write the file
-        byte[] prev_data, post_data;
-        byte[] ori_data;
+        private byte[] prev_data, post_data;
+
+        private byte[] ori_data;
 
         public RawImage(String file, int id, TileForm form, ColorFormat format,
-            bool editable, int offset, int size, string fileName = "") : base()
-        {
+            bool editable, int offset, int size, string fileName = "") : base() {
             this.id = id;
             if (fileName == "")
                 this.fileName = Path.GetFileName(file);
@@ -158,9 +152,9 @@ namespace Ekona.Images
 
             Read(file, form, format, editable, offset, size);
         }
+
         public RawImage(String file, int id, TileForm form, ColorFormat format,
-            int width, int height, bool editable, int offset, int size, string fileName = "") : base()
-        {
+            int width, int height, bool editable, int offset, int size, string fileName = "") : base() {
             this.id = id;
             if (fileName == "")
                 this.fileName = Path.GetFileName(file);
@@ -171,22 +165,20 @@ namespace Ekona.Images
             this.Width = width;
             this.Height = height;
         }
+
         public RawImage(byte[] tiles, TileForm form, ColorFormat format, int width, int height,
             bool editable, string fileName = "")
-            : base()
-        {
+            : base() {
             this.fileName = fileName;
             Set_Tiles(tiles, width, height, format, form, editable);
         }
 
-
-        public override void Read(string fileIn)
-        {
+        public override void Read(string fileIn) {
             Read(fileIn, TileForm.Horizontal, Images.ColorFormat.colors16, true, 0, -1);
         }
+
         public void Read(string fileIn, TileForm form, ColorFormat format, bool editable,
-            int offset, int fileSize)
-        {
+            int offset, int fileSize) {
             BinaryReader br = new BinaryReader(File.OpenRead(fileIn));
             prev_data = br.ReadBytes(offset);
 
@@ -213,8 +205,7 @@ namespace Ekona.Images
             Height = size.Height;
         }
 
-        public override void Write(string fileOut, PaletteBase palette)
-        {
+        public override void Write(string fileOut, PaletteBase palette) {
             // MetLob edition 25/12/2015
             int dataSize = (post_data.Length == 0) ? Tiles.Length : Math.Min(Tiles.Length, ori_data.Length - StartByte);
             if (dataSize < Tiles.Length)
@@ -235,15 +226,15 @@ namespace Ekona.Images
         }
     }
 
-    public class RawMap : MapBase
-    {
+    public class RawMap : MapBase {
+
         // Unknown data
-        byte[] prev_data;
-        byte[] next_data;
+        private byte[] prev_data;
+
+        private byte[] next_data;
 
         public RawMap(string file, int id, int offset, int size, bool editable, string fileName = "")
-            : base()
-        {
+            : base() {
             this.id = id;
             if (fileName == "")
                 this.fileName = System.IO.Path.GetFileName(file);
@@ -252,17 +243,16 @@ namespace Ekona.Images
 
             Read(file, offset, size, editable);
         }
+
         public RawMap(NTFS[] map, int width, int height, bool editable, string fileName = "")
-            : base(map, editable, width, height, fileName)
-        {
+            : base(map, editable, width, height, fileName) {
         }
 
-        public override void Read(string fileIn)
-        {
+        public override void Read(string fileIn) {
             Read(fileIn, 0, -1, true);
         }
-        public void Read(string fileIn, int offset, int size, bool editable)
-        {
+
+        public void Read(string fileIn, int offset, int size, bool editable) {
             BinaryReader br = new BinaryReader(File.OpenRead(fileIn));
             prev_data = br.ReadBytes(offset);
 
@@ -285,8 +275,7 @@ namespace Ekona.Images
             Set_Map(map, editable, width, height);
         }
 
-        public override void Write(string fileOut, ImageBase image, PaletteBase palette)
-        {
+        public override void Write(string fileOut, ImageBase image, PaletteBase palette) {
             BinaryWriter bw = new BinaryWriter(File.OpenWrite(fileOut));
 
             bw.Write(prev_data);
@@ -299,28 +288,24 @@ namespace Ekona.Images
         }
     }
 
-    public class RawSprite : SpriteBase
-    {
+    public class RawSprite : SpriteBase {
 
-        public RawSprite(Bank[] banks, uint blocksize, bool editable = false)
-        {
+        public RawSprite(Bank[] banks, uint blocksize, bool editable = false) {
             Set_Banks(banks, blocksize, editable);
         }
-        public RawSprite(OAM[] oams, uint blocksize, bool editable = false)
-        {
+
+        public RawSprite(OAM[] oams, uint blocksize, bool editable = false) {
             Bank bank = new Bank();
             bank.name = "Bank 1";
             bank.oams = oams;
             Set_Banks(new Bank[] { bank }, blocksize, editable);
         }
 
-        public override void Read(string fileIn)
-        {
+        public override void Read(string fileIn) {
             throw new NotImplementedException();
         }
 
-        public override void Write(string fileOut, ImageBase image, PaletteBase palette)
-        {
+        public override void Write(string fileOut, ImageBase image, PaletteBase palette) {
             throw new NotImplementedException();
         }
     }

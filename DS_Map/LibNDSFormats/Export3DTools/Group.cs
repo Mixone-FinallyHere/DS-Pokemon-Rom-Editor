@@ -1,42 +1,31 @@
-﻿namespace MKDS_Course_Editor.Export3DTools
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Reflection;
+﻿namespace MKDS_Course_Editor.Export3DTools {
 
-    public class Group
-    {
+    using System.Collections.Generic;
+
+    public class Group {
         private List<Polygon> PolygonList = new List<Polygon>();
 
-        public void Add(Polygon g)
-        {
+        public void Add(Polygon g) {
             this.PolygonList.Add(g);
         }
 
-        public IEnumerator<Polygon> GetEnumerator()
-        {
+        public IEnumerator<Polygon> GetEnumerator() {
             return this.PolygonList.GetEnumerator();
         }
 
-        public Polygon this[int i]
-        {
-            get
-            {
+        public Polygon this[int i] {
+            get {
                 return this.PolygonList[i];
             }
-            set
-            {
+            set {
                 this.PolygonList[i] = value;
             }
         }
 
-        public Polygon[] Polygons
-        {
-            get
-            {
+        public Polygon[] Polygons {
+            get {
                 return this.PolygonList.ToArray();
             }
         }
     }
 }
-

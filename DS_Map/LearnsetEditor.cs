@@ -2,13 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Windows;
 using System.Windows.Forms;
-using static ScintillaNET.Style;
 using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace DSPRE {
+
     public partial class LearnsetEditor : Form {
         private bool disableHandlers = false;
 
@@ -49,7 +47,7 @@ namespace DSPRE {
             List<string> fileNames = new List<string>(count);
             fileNames.AddRange(pokenames);
 
-            for(int i = 0; i < count-pokenames.Length; i++) {
+            for (int i = 0; i < count - pokenames.Length; i++) {
                 PokeDatabase.PersonalData.PersonalExtraFiles extraEntry = PokeDatabase.PersonalData.personalExtraFiles[i];
                 fileNames.Add(fileNames[extraEntry.monId] + " - " + extraEntry.description);
             }
@@ -66,6 +64,7 @@ namespace DSPRE {
 
             pokemonNameInputComboBox.SelectedIndex = 1;
         }
+
         private void setDirty(bool status) {
             if (status) {
                 dirty = true;
@@ -75,6 +74,7 @@ namespace DSPRE {
                 this.Text = formName;
             }
         }
+
         private bool CheckDiscardChanges() {
             if (!dirty) {
                 return true;
@@ -88,24 +88,25 @@ namespace DSPRE {
             monNumberNumericUpDown.Value = currentLoadedId;
             pokemonNameInputComboBox.SelectedIndex = currentLoadedId;
 
-
             return false;
         }
+
         private string ElemToString((ushort level, ushort move) elem) {
             return $"Lv. {elem.level}: {moveNames[elem.move]}";
         }
+
         private void ChangeLoadedFile(int toLoad) {
             currentLoadedId = toLoad;
             currentLoadedFile = new LearnsetData(currentLoadedId);
             PopulateAllFromCurrentFile();
             UpdateButtonsOnMoveSelection();
-            
+
             int excess = toLoad - pokenames.Length;
             if (excess >= 0) {
                 toLoad = PokeDatabase.PersonalData.personalExtraFiles[excess].iconId;
             }
             pokemonPictureBox.Image = DSUtils.GetPokePic(toLoad, pokemonPictureBox.Width, pokemonPictureBox.Height);
-            
+
             setDirty(false);
         }
 
@@ -134,23 +135,20 @@ namespace DSPRE {
                 int newNumber = pokemonNameInputComboBox.SelectedIndex;
                 monNumberNumericUpDown.Value = newNumber;
                 ChangeLoadedFile(newNumber);
-               
             }
             disableHandlers = false;
         }
 
         private void monNumberNumericUpDown_ValueChanged(object sender, EventArgs e) {
-            if (disableHandlers) { 
-                return; 
+            if (disableHandlers) {
+                return;
             }
 
             disableHandlers = true;
             if (CheckDiscardChanges()) {
-
                 int newNumber = (int)monNumberNumericUpDown.Value;
                 pokemonNameInputComboBox.SelectedIndex = newNumber;
                 ChangeLoadedFile(newNumber);
-                
             }
             disableHandlers = false;
         }
@@ -164,9 +162,10 @@ namespace DSPRE {
         }
 
         private bool CheckValidEntry() {
-            return levelNumericUpDown.Value > 0 && 
+            return levelNumericUpDown.Value > 0 &&
                 moveInputComboBox.SelectedIndex > 0;
         }
+
         private void levelNumericUpDown_ValueChanged(object sender, EventArgs e) {
             if (currentLoadedFile == null) {
                 return;
@@ -204,7 +203,7 @@ namespace DSPRE {
         private void addMoveButton_Click(object sender, EventArgs e) {
             (byte level, ushort move) newEntry = ((byte)levelNumericUpDown.Value, (ushort)moveInputComboBox.SelectedIndex);
             currentLoadedFile.list.Add(newEntry);
-                
+
             currentLoadedFile.list.Sort();
             PopulateAllFromCurrentFile();
             movesListBox.SelectedIndex = currentLoadedFile.list.FindIndex(x => x == newEntry);
@@ -255,11 +254,11 @@ namespace DSPRE {
                     PopulateAllFromCurrentFile();
                     newSelection = currentLoadedFile.list.FindIndex(x => x == newEntry);
                 }
-                
+
                 movesListBox.SelectedIndex = newSelection;
                 editMode = false;
                 movesListBox.Enabled = true;
-            } else {  
+            } else {
                 editMode = true;
                 movesListBox.Enabled = false;
 

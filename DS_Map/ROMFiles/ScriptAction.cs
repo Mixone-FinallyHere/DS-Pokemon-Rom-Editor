@@ -1,29 +1,34 @@
-﻿using DSPRE.Resources;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 
 namespace DSPRE.ROMFiles {
+
     public class ActionContainer {
         public List<ScriptAction> actionCommandsList;
         public uint manualUserID;
 
         #region Constructors (2)
+
         public ActionContainer(uint actionNumber, List<ScriptAction> actionCommandsList = null) {
             manualUserID = actionNumber;
             this.actionCommandsList = actionCommandsList;
         }
-        #endregion
+
+        #endregion Constructors (2)
     }
+
     public class ScriptAction {
 
         #region Fields (4)
+
         public ushort? id;
         public ushort? repetitionCount;
         public string name;
-        #endregion
+
+        #endregion Fields (4)
 
         public ScriptAction(ushort id, ushort? repetitionCount = null) {
             this.id = id;
@@ -37,6 +42,7 @@ namespace DSPRE.ROMFiles {
                 name += " " + "0x" + ((ushort)repetitionCount).ToString("X");
             }
         }
+
         public ScriptAction(string wholeLine, int lineNumber) {
             name = wholeLine;
 

@@ -1,12 +1,9 @@
-﻿using DSPRE.ROMFiles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace DSPRE.Resources {
-    public static class ScriptDatabase {  
+
+    public static class ScriptDatabase {
+
         public static Dictionary<ushort, string> comparisonOperatorsDict = new Dictionary<ushort, string>() {
             [0] = "LESS",
             [1] = "EQUAL",
@@ -15,18 +12,21 @@ namespace DSPRE.Resources {
             [4] = "GREATER/EQUAL",
             [5] = "DIFFERENT",
         };
+
         public static Dictionary<ushort, string> comparisonOperatorsGenVappendix = new Dictionary<ushort, string>() {
             /* GEN V ONLY */
             [6] = "OR",
             [7] = "AND",
             [0xFF] = "TRUEUP"
         };
+
         public static Dictionary<ushort, string> specialOverworlds = new Dictionary<ushort, string>() {
             [241] = "Camera",
             [242] = "Partner",
             [253] = "Following",
             [255] = "Player"
         };
+
         public static Dictionary<byte, string> overworldDirections = new Dictionary<byte, string>() {
             [0] = "Up",
             [1] = "Down",
@@ -52,6 +52,7 @@ namespace DSPRE.Resources {
             0x16,
             0x1B
         };
+
         public static Dictionary<ushort, string> movementsDictIDName = new Dictionary<ushort, string>() {
             [0x0000] = "LookUp",
             [0x0001] = "LookDown",
@@ -646,9 +647,8 @@ namespace DSPRE.Resources {
             [0x0284] = "CountSeenUnown",
 
             [0x028B] = "CheckEventValidity",
-            
-            [0x028F] = "CountLeagueVictories",
 
+            [0x028F] = "CountLeagueVictories",
 
             [0x0297] = "GetBP",
             [0x0298] = "AddBP",
@@ -676,6 +676,7 @@ namespace DSPRE.Resources {
             [0x02C2] = "HideSaveBox",
             [0x02C3] = "ScopeMode"
         };
+
         public static Dictionary<ushort, byte[]> DPPtScrCmdParameters = new Dictionary<ushort, byte[]>() {
             [0x0000] = new byte[1] { 0 },
             [0x0001] = new byte[1] { 0 },
@@ -1141,23 +1142,23 @@ namespace DSPRE.Resources {
             [0x01CD] = new byte[] { 2, 2, 2, 2, 2 },
             [0x01CE] = new byte[1] { 0 },
 
-            [0x01CF] = new byte[] { 0xFF, 1,  //0xFF signals that this scrcmd takes a variable num of parameters, 1 is the size of the 1st par  
+            [0x01CF] = new byte[] { 0xFF, 1,  //0xFF signals that this scrcmd takes a variable num of parameters, 1 is the size of the 1st par
                 0, 0,           //if 1st par is 0, read 0 parameters
                 1, 0,           //if 1st par is 1, read 0 parameters
                 2, 1,   2       //if 1st par is 2, read 1 parameter of size = 2 bytes
-            },      
+            },
 
-            [0x01D0] = new byte[] { 0xFF, 1,  //0xFF signals that this scrcmd takes a variable num of parameters, 1 is the size of the 1st par  
+            [0x01D0] = new byte[] { 0xFF, 1,  //0xFF signals that this scrcmd takes a variable num of parameters, 1 is the size of the 1st par
                 0, 0,           //if 1st par is 0, read 0 parameters
                 1, 0,           //if 1st par is 1, read 0 parameters
                 2, 1,   2       //if 1st par is 2, read 1 parameter of size = 2 bytes
-            },      
+            },
 
-            [0x01D1] = new byte[] { 0xFF, 1,  //0xFF signals that this scrcmd takes a variable num of parameters, 1 is the size of the 1st par  
+            [0x01D1] = new byte[] { 0xFF, 1,  //0xFF signals that this scrcmd takes a variable num of parameters, 1 is the size of the 1st par
                 0, 0,           //if 1st par is 0, read 0 parameters
                 1, 0,           //if 1st par is 1, read 0 parameters
                 2, 1,   2       //if 1st par is 2, read 1 parameter of size = 2 bytes
-            },      
+            },
 
             [0x01D2] = new byte[] { 2, 2 },
             [0x01D3] = new byte[] { 2, 2, 2 },
@@ -1242,7 +1243,7 @@ namespace DSPRE.Resources {
                 4, 1,  2,       //if value is 4, read 1 parameter... which takes up 2 bytes
                 5, 1,  2,       //if value is 5, read 1 parameter... which takes up 2 bytes
                 6, 0			//if value is 6, don't read anything
-			},          
+			},
             [0x021E] = new byte[1] { 0 },
             [0x021F] = new byte[] { 2, 2 },
             [0x0220] = new byte[1] { 0 },
@@ -1268,11 +1269,11 @@ namespace DSPRE.Resources {
             [0x0234] = new byte[] { 2 },
             [0x0235] = new byte[] { 0xFF, 2,   //0xFF = Variable number of parameters,  2 = size of first parameter
                 0, 1,   2,          //if value is 0, read 1 parameter... which takes up 2 bytes
-                1, 3,   2, 2, 2,    //if value is 1, read 3 parameters... each one takes up 2 bytes 
+                1, 3,   2, 2, 2,    //if value is 1, read 3 parameters... each one takes up 2 bytes
                 2, 0,               //if value is 2, don't read anything
-                3, 3,   2, 2, 2,    //if value is 3, read 3 parameters... each one takes up 2 bytes 
-                4, 2,   2, 2,       //if value is 4, read 2 parameters... each one takes up 2 bytes 
-                5, 3,   2, 2, 2,    //if value is 5, read 3 parameters... each one takes up 2 bytes 
+                3, 3,   2, 2, 2,    //if value is 3, read 3 parameters... each one takes up 2 bytes
+                4, 2,   2, 2,       //if value is 4, read 2 parameters... each one takes up 2 bytes
+                5, 3,   2, 2, 2,    //if value is 5, read 3 parameters... each one takes up 2 bytes
                 6, 1,   2           //if value is 6, read 1 parameter... which takes up 2 bytes
             },
             [0x0236] = new byte[] { 2 },
@@ -1289,11 +1290,11 @@ namespace DSPRE.Resources {
                 2, 1,   2,          //if value is 2, read 1 parameter... which takes up 2 bytes
                 3, 1,   2,          //if value is 3, read 1 parameter... which takes up 2 bytes
                 4, 0,               //if value is 4, don't read anything
-                5, 2,   2, 2,       //if value is 5, read 2 parameters... each one takes up 2 bytes 
+                5, 2,   2, 2,       //if value is 5, read 2 parameters... each one takes up 2 bytes
                 6, 2,   2, 2,       //if value is 6, read 2 parameters... each one takes up 2 bytes
                 7, 0,               //if value is 7, don't read anything
                 8, 0                //if value is 8, don't read anything
-            },              
+            },
             [0x023F] = new byte[1] { 0 },
             [0x0240] = new byte[1] { 0 },
             [0x0241] = new byte[1] { 0 },
@@ -1432,6 +1433,7 @@ namespace DSPRE.Resources {
         public static Dictionary<ushort, string> DPScrCmdNames = new Dictionary<ushort, string>() {
             [0x0264] = "CheckBurmyForms",
         };
+
         public static Dictionary<ushort, byte[]> DPScrCmdParameters = new Dictionary<ushort, byte[]>() {
             [0x011D] = new byte[] { 1, 1, 2 },
 
@@ -1501,7 +1503,7 @@ namespace DSPRE.Resources {
 
             //International release exclusive
             [0x0337] = "CheckPokemonIsSeen",
-            
+
             [0x033C] = "TextItemLowercase",
             [0x033D] = "TextItemPlural",
 
@@ -1834,7 +1836,7 @@ namespace DSPRE.Resources {
             [0x00C5] = "TextMove",
             [0x00C6] = "TextNumber",
             [0x00C7] = "TextPokeNickname",
-            
+
             [0x00C9] = "TextPlayerTrainerType",
             [0x00CA] = "TextPokemon",
             [0x00CB] = "TextStarterPokemon",
@@ -2089,7 +2091,6 @@ namespace DSPRE.Resources {
 
             [0x02D3] = "BoatAnimation",
 
-
             [0x02D9] = "CheckPokemonAlive",
             [0x02DA] = "CheckFollowingPoke",
 
@@ -2117,6 +2118,7 @@ namespace DSPRE.Resources {
             [0x0353] = "TextCapitalize",
             [0x0354] = "TextFloor"
         };
+
         public static Dictionary<ushort, byte[]> HGSSScrCmdParameters = new Dictionary<ushort, byte[]>() {
             [0x0000] = new byte[1] { 0 },
             [0x0001] = new byte[1] { 0 },
@@ -2519,19 +2521,19 @@ namespace DSPRE.Resources {
             [0x018E] = new byte[] { 2, 2, 2 },
             [0x018F] = new byte[] { 1, 2, 2 },
 
-            [0x0190] = new byte[] { 0xFF, 1,  //0xFF signals that this scrcmd takes a variable num of parameters, 1 is the size of the 1st par  
+            [0x0190] = new byte[] { 0xFF, 1,  //0xFF signals that this scrcmd takes a variable num of parameters, 1 is the size of the 1st par
                 0, 0,           //if 1st par is 0, read 0 parameters
                 1, 0,           //if 1st par is 1, read 0 parameters
                 2, 1,   2       //if 1st par is 2, read 1 parameter of size = 2 bytes
             },
 
-            [0x0191] = new byte[] { 0xFF, 1,  //0xFF signals that this scrcmd takes a variable num of parameters, 1 is the size of the 1st par  
+            [0x0191] = new byte[] { 0xFF, 1,  //0xFF signals that this scrcmd takes a variable num of parameters, 1 is the size of the 1st par
                 0, 0,           //if 1st par is 0, read 0 parameters
                 1, 0,           //if 1st par is 1, read 0 parameters
                 2, 1,   2       //if 1st par is 2, read 1 parameter of size = 2 bytes
             },
 
-            [0x0192] = new byte[] { 0xFF, 1,  //0xFF signals that this scrcmd takes a variable num of parameters, 1 is the size of the 1st par  
+            [0x0192] = new byte[] { 0xFF, 1,  //0xFF signals that this scrcmd takes a variable num of parameters, 1 is the size of the 1st par
                 0, 0,           //if 1st par is 0, read 0 parameters
                 1, 0,           //if 1st par is 1, read 0 parameters
                 2, 1,   2       //if 1st par is 2, read 1 parameter of size = 2 bytes
@@ -2608,7 +2610,7 @@ namespace DSPRE.Resources {
                 5, 1,  2,       //if value is 5, read 1 parameter... which takes up 2 bytes
                 6, 0,           //if value is 6, don't read anything
                 7, 1,  2,       //if value is 7, read 1 parameter... which takes up 2 bytes
-            },          
+            },
             [0x01D2] = new byte[] { 2, 2 },
             [0x01D3] = new byte[] { 2 },
             [0x01D4] = new byte[] { 2, 2 },
@@ -2638,11 +2640,11 @@ namespace DSPRE.Resources {
                 2, 1,   2,          //if value is 2, read 1 parameter... which takes up 2 bytes
                 3, 1,   2,          //if value is 3, read 1 parameter... which takes up 2 bytes
                 4, 0,               //if value is 4, don't read anything
-                5, 2,   2, 2,       //if value is 5, read 2 parameters... each one takes up 2 bytes 
+                5, 2,   2, 2,       //if value is 5, read 2 parameters... each one takes up 2 bytes
                 6, 2,   2, 2,       //if value is 6, read 2 parameters... each one takes up 2 bytes
                 7, 0,               //if value is 7, don't read anything
                 8, 0                //if value is 8, don't read anything
-            },              
+            },
             [0x01EA] = new byte[] { 2 },
             [0x01EB] = new byte[] { 2 },
             [0x01EC] = new byte[] { 2, 2, 2 },

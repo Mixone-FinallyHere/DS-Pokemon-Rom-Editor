@@ -12,39 +12,34 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * By: pleoNeX
- * 
+ *
  */
+
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml.Linq;
 
-namespace Ekona.Images.Dialogs
-{
-    public partial class OAMEditor : Form
-    {
-        Bank bank;
-        bool stop;
+namespace Ekona.Images.Dialogs {
 
-        bool preview;
-        SpriteBase sprite;
-        ImageBase image;
-        PaletteBase palette;
+    public partial class OAMEditor : Form {
+        private Bank bank;
+        private bool stop;
 
-        public OAMEditor()
-        {
+        private bool preview;
+        private SpriteBase sprite;
+        private ImageBase image;
+        private PaletteBase palette;
+
+        public OAMEditor() {
             InitializeComponent();
         }
-        public OAMEditor(string langxml, Bank bank)
-        {
+
+        public OAMEditor(string langxml, Bank bank) {
             InitializeComponent();
             this.bank = bank;
             numOAM.Maximum = bank.oams.Length - 1;
@@ -55,8 +50,8 @@ namespace Ekona.Images.Dialogs
 
             Read_Language(langxml);
         }
-        public OAMEditor(string langxml, Bank bank, SpriteBase sprite, ImageBase image, PaletteBase palette)
-        {
+
+        public OAMEditor(string langxml, Bank bank, SpriteBase sprite, ImageBase image, PaletteBase palette) {
             InitializeComponent();
             this.bank = bank;
             numOAM.Maximum = bank.oams.Length - 1;
@@ -71,8 +66,8 @@ namespace Ekona.Images.Dialogs
 
             Read_Language(langxml);
         }
-        public OAMEditor(XElement langxml, Bank bank, SpriteBase sprite, ImageBase image, PaletteBase palette)
-        {
+
+        public OAMEditor(XElement langxml, Bank bank, SpriteBase sprite, ImageBase image, PaletteBase palette) {
             InitializeComponent();
             this.bank = bank;
             numOAM.Maximum = bank.oams.Length - 1;
@@ -87,26 +82,22 @@ namespace Ekona.Images.Dialogs
 
             Read_Language(langxml);
         }
-        private void OAMEditor_Load(object sender, EventArgs e)
-        {
+
+        private void OAMEditor_Load(object sender, EventArgs e) {
             Read_Info(0);
             Update_Image();
         }
 
-        private void Read_Language(string langxml)
-        {
-            try
-            {
+        private void Read_Language(string langxml) {
+            try {
                 XElement xml = XElement.Load(langxml);
                 xml = xml.Element("Ekona").Element("OAMEditor");
                 Read_Language(xml);
-            }
-            catch { throw new Exception("There was an error reading the XML file of language."); }
+            } catch { throw new Exception("There was an error reading the XML file of language."); }
         }
-        private void Read_Language(XElement xml)
-        {
-            try
-            {
+
+        private void Read_Language(XElement xml) {
+            try {
                 this.Text = xml.Element("S01").Value;
                 label11.Text = xml.Element("S02").Value;
                 label12.Text = xml.Element("S03").Value + ' ' + numOAM.Maximum.ToString();
@@ -152,19 +143,16 @@ namespace Ekona.Images.Dialogs
                 checkNumbers.Text = xml.Element("S2A").Value;
                 checkGrid.Text = xml.Element("S2B").Value;
                 checkCurrOAM.Text = xml.Element("S2C").Value;
-            }
-            catch { throw new Exception("There was an error reading the XML file of language."); }
+            } catch { throw new Exception("There was an error reading the XML file of language."); }
         }
 
-        private void Read_Info(int i)
-        {
+        private void Read_Info(int i) {
             OAM oam = bank.oams[i];
             stop = true;
 
             // Obj0
             numYoffset.Value = oam.obj0.yOffset;
-            if (oam.obj0.rs_flag == 0)
-            {
+            if (oam.obj0.rs_flag == 0) {
                 checkRSflag.Checked = false;
                 checkObjdisable.Enabled = true;
                 checkDoubleSize.Enabled = false;
@@ -172,9 +160,7 @@ namespace Ekona.Images.Dialogs
                 checkFlipX.Enabled = true;
                 checkFlipY.Enabled = true;
                 numSelectPar.Enabled = false;
-            }
-            else
-            {
+            } else {
                 checkRSflag.Checked = true;
                 checkObjdisable.Enabled = false;
                 checkDoubleSize.Enabled = true;
@@ -203,20 +189,21 @@ namespace Ekona.Images.Dialogs
             numPal.Value = oam.obj2.index_palette;
 
             // Auto size
-            switch (oam.obj0.shape)
-            {
+            switch (oam.obj0.shape) {
                 case 0:
                     if (oam.obj1.size == 0) comboSize.SelectedIndex = 0;
                     else if (oam.obj1.size == 1) comboSize.SelectedIndex = 1;
                     else if (oam.obj1.size == 2) comboSize.SelectedIndex = 2;
                     else if (oam.obj1.size == 3) comboSize.SelectedIndex = 3;
                     break;
+
                 case 1:
                     if (oam.obj1.size == 0) comboSize.SelectedIndex = 4;
                     else if (oam.obj1.size == 1) comboSize.SelectedIndex = 5;
                     else if (oam.obj1.size == 2) comboSize.SelectedIndex = 6;
                     else if (oam.obj1.size == 3) comboSize.SelectedIndex = 7;
                     break;
+
                 case 2:
                     if (oam.obj1.size == 0) comboSize.SelectedIndex = 8;
                     else if (oam.obj1.size == 1) comboSize.SelectedIndex = 9;
@@ -228,8 +215,8 @@ namespace Ekona.Images.Dialogs
             numNumOAM.Value = oam.num_cell;
             stop = false;
         }
-        private void Update_Image()
-        {
+
+        private void Update_Image() {
             stop = true;
 
             OAM oam = bank.oams[(int)numOAM.Value];
@@ -251,40 +238,33 @@ namespace Ekona.Images.Dialogs
             stop = false;
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
-        {
+        private void btnSave_Click(object sender, EventArgs e) {
             this.Close();
         }
 
-        public Bank Bank
-        {
+        public Bank Bank {
             get { return bank; }
         }
 
-        private void numOAM_ValueChanged(object sender, EventArgs e)
-        {
+        private void numOAM_ValueChanged(object sender, EventArgs e) {
             Read_Info((int)numOAM.Value);
             Update_Image();
         }
 
-        private void Change_OBJ0(object sender, EventArgs e)
-        {
+        private void Change_OBJ0(object sender, EventArgs e) {
             if (stop)
                 return;
 
             bank.oams[(int)numOAM.Value].obj0.yOffset = (int)numYoffset.Value;
             bank.oams[(int)numOAM.Value].obj0.rs_flag = (byte)(checkRSflag.Checked ? 1 : 0);
-            if (checkRSflag.Checked)
-            {
+            if (checkRSflag.Checked) {
                 checkObjdisable.Enabled = false;
                 checkDoubleSize.Enabled = true;
 
                 checkFlipX.Enabled = false;
                 checkFlipY.Enabled = false;
                 numSelectPar.Enabled = true;
-            }
-            else
-            {
+            } else {
                 checkObjdisable.Enabled = true;
                 checkDoubleSize.Enabled = false;
 
@@ -301,8 +281,8 @@ namespace Ekona.Images.Dialogs
 
             Update_Image();
         }
-        private void Change_OBJ1(object sender, EventArgs e)
-        {
+
+        private void Change_OBJ1(object sender, EventArgs e) {
             if (stop)
                 return;
 
@@ -313,8 +293,8 @@ namespace Ekona.Images.Dialogs
             bank.oams[(int)numOAM.Value].obj1.size = (byte)numSize.Value;
             Update_Image();
         }
-        private void Change_OBJ2(object sender, EventArgs e)
-        {
+
+        private void Change_OBJ2(object sender, EventArgs e) {
             if (stop)
                 return;
 
@@ -324,12 +304,12 @@ namespace Ekona.Images.Dialogs
 
             Update_Image();
         }
-        private void Change_Preview(object sender, EventArgs e)
-        {
+
+        private void Change_Preview(object sender, EventArgs e) {
             Update_Image();
         }
-        private void numNumOAM_ValueChanged(object sender, EventArgs e)
-        {
+
+        private void numNumOAM_ValueChanged(object sender, EventArgs e) {
             if (stop)
                 return;
 
@@ -348,57 +328,66 @@ namespace Ekona.Images.Dialogs
             Update_Image();
         }
 
-        private void comboSize_SelectedIndexChanged(object sender, EventArgs e)
-        {
+        private void comboSize_SelectedIndexChanged(object sender, EventArgs e) {
             if (stop)
                 return;
 
-            switch (comboSize.SelectedIndex)
-            {
+            switch (comboSize.SelectedIndex) {
                 case 0:
                     bank.oams[(int)numOAM.Value].obj0.shape = 0;
                     bank.oams[(int)numOAM.Value].obj1.size = 0;
                     break;
+
                 case 1:
                     bank.oams[(int)numOAM.Value].obj0.shape = 0;
                     bank.oams[(int)numOAM.Value].obj1.size = 1;
                     break;
+
                 case 2:
                     bank.oams[(int)numOAM.Value].obj0.shape = 0;
                     bank.oams[(int)numOAM.Value].obj1.size = 2;
                     break;
+
                 case 3:
                     bank.oams[(int)numOAM.Value].obj0.shape = 0;
                     bank.oams[(int)numOAM.Value].obj1.size = 3;
                     break;
+
                 case 4:
                     bank.oams[(int)numOAM.Value].obj0.shape = 1;
                     bank.oams[(int)numOAM.Value].obj1.size = 0;
                     break;
+
                 case 5:
                     bank.oams[(int)numOAM.Value].obj0.shape = 1;
                     bank.oams[(int)numOAM.Value].obj1.size = 1;
                     break;
+
                 case 6:
                     bank.oams[(int)numOAM.Value].obj0.shape = 1;
                     bank.oams[(int)numOAM.Value].obj1.size = 2;
                     break;
+
                 case 7:
                     bank.oams[(int)numOAM.Value].obj0.shape = 1;
                     bank.oams[(int)numOAM.Value].obj1.size = 3;
                     break;
+
                 case 8:
                     bank.oams[(int)numOAM.Value].obj0.shape = 2;
                     bank.oams[(int)numOAM.Value].obj1.size = 0;
                     break;
+
                 case 9:
                     bank.oams[(int)numOAM.Value].obj0.shape = 2;
                     bank.oams[(int)numOAM.Value].obj1.size = 1;
                     break;
+
                 case 10:
                     bank.oams[(int)numOAM.Value].obj0.shape = 2;
                     bank.oams[(int)numOAM.Value].obj1.size = 2;
                     break;
+
                 case 11:
                     bank.oams[(int)numOAM.Value].obj0.shape = 2;
                     bank.oams[(int)numOAM.Value].obj1.size = 3;
@@ -408,8 +397,7 @@ namespace Ekona.Images.Dialogs
             Update_Image();
         }
 
-        private void btnAddOAM_Click(object sender, EventArgs e)
-        {
+        private void btnAddOAM_Click(object sender, EventArgs e) {
             int length = bank.oams.Length;
 
             OAM[] newOAM = new OAM[length + 1];
@@ -418,13 +406,11 @@ namespace Ekona.Images.Dialogs
             newOAM[length] = new OAM();
             newOAM[length].obj0.yOffset = -128;
             newOAM[length].obj1.xOffset = -256;
-            if (checkAddFirst.Checked)
-            {
+            if (checkAddFirst.Checked) {
                 newOAM[length].num_cell = 0;            // Set this OAM as the first, with more priority in this layer so visible
                 for (int i = 0; i < length; i++)        // And increment the number of each OAM to fix that
                     newOAM[i].num_cell++;
-            }
-            else
+            } else
                 newOAM[length].num_cell = (ushort)length;   // Set to the background of the layer
             bank.oams = newOAM;
             OAM oam = newOAM[length];
@@ -443,8 +429,8 @@ namespace Ekona.Images.Dialogs
             Read_Info((int)numOAM.Value);
             Update_Image();
         }
-        private void btnRemOAM_Click(object sender, EventArgs e)
-        {
+
+        private void btnRemOAM_Click(object sender, EventArgs e) {
             OAM[] newOAM = new OAM[bank.oams.Length - 1];
             int j = 0;
             for (int i = 0; i < bank.oams.Length; i++)
@@ -458,8 +444,7 @@ namespace Ekona.Images.Dialogs
             Update_Image();
         }
 
-        private void numObj_ValueChanged(object sender, EventArgs e)
-        {
+        private void numObj_ValueChanged(object sender, EventArgs e) {
             if (stop)
                 return;
 
@@ -471,6 +456,5 @@ namespace Ekona.Images.Dialogs
             Read_Info((int)numOAM.Value);
             Update_Image();
         }
-
     }
 }

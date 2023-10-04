@@ -1,29 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using System.IO;
 
 namespace MKDS_Course_Editor {
+
     public partial class nclr_e : Form {
-        int r = 255;
-        int g = 255;
-        int b = 255;
-        List<Color> colors = new List<Color>();
-        bool bpp8_ = false;
-        uint unknown1;
+        private int r = 255;
+        private int g = 255;
+        private int b = 255;
+        private List<Color> colors = new List<Color>();
+        private bool bpp8_ = false;
+        private uint unknown1;
+
         public nclr_e(Color[] c, bool bpp8, uint unknown) {
             colors.AddRange(c);
             bpp8_ = bpp8;
             unknown1 = unknown;
         }
-        public nclr_e() {
 
+        public nclr_e() {
         }
+
         public int decodeColor(int value, CColorFormat format) {
             int[] res = format.getResolution();
             int rgb = Convert.ToInt32(0xff000000);
@@ -61,6 +59,7 @@ namespace MKDS_Course_Editor {
 
             return rgb;
         }
+
         public CColorFormat BGR555 = new CColorFormat("BGR555", 10, 16, new int[] {
         3, 2, 1, 5, 5, 5
     });
@@ -158,6 +157,5 @@ namespace MKDS_Course_Editor {
             private int depth;
             private int[] res;
         }
-
     }
 }

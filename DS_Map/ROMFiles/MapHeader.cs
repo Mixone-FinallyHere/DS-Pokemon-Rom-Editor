@@ -1,11 +1,10 @@
-using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 using static DSPRE.RomInfo;
 
 namespace DSPRE.ROMFiles {
     /* ---------------------- HEADER DATA STRUCTURE (DPPt):----------------------------
-        
+
        0x0  //  byte:       Area data value
        0x1  //  byte:       Unknown value
        0x2  //  ushort:     Matrix number
@@ -18,8 +17,8 @@ namespace DSPRE.ROMFiles {
        0x10 //  ushort:     Event file number
 
        * D/P:
-       0x12 //  ushort:     Index of map name in Text Archive #382 (US version)   
-       
+       0x12 //  ushort:     Index of map name in Text Archive #382 (US version)
+
        * Plat:
        0x12 //  byte:       Index of map name in Text Archive #382 (US version)
        0x13 //  byte:       Map name textbox type value
@@ -39,7 +38,7 @@ namespace DSPRE.ROMFiles {
        -----------------    8: ?
 
     /* ---------------------- HEADER DATA STRUCTURE (HGSS):----------------------------
-        
+
        0x0  //  byte:       Wild Pokémon file number
        0x1  //  byte:       Area data value
        0x2  //  byte:       ?
@@ -62,7 +61,7 @@ namespace DSPRE.ROMFiles {
        -----------------    1: Allow Fly
        -----------------    2: Allow Esc. Rope
        -----------------    3: Allow Running
-       -----------------    4: Allow Bike 
+       -----------------    4: Allow Bike
        -----------------    5: Battle BG b4
        -----------------    6: Battle BG b3
        -----------------    7: Battle BG b2
@@ -72,7 +71,7 @@ namespace DSPRE.ROMFiles {
        -----------------    1: ?
        -----------------    2: ?
        -----------------    3: ?
-       -----------------    4: Allow Fly 
+       -----------------    4: Allow Fly
        -----------------    5: Allow Esc. Rope
        -----------------    6: ?
        -----------------    7: Allow Bicycle
@@ -100,17 +99,19 @@ namespace DSPRE.ROMFiles {
             LevelScriptID,
             MatrixID,
             MusicDayID,
+
             //MusicDayName,
             MusicNightID,
+
             //MusicNightName,
             ScriptFileID,
+
             TextArchiveID,
             WeatherID,
         };
 
-
-
         #region Fields (10)
+
         public byte areaDataID { get; set; }
         public byte cameraAngleID { get; set; }
         public ushort eventFileID { get; set; }
@@ -125,9 +126,11 @@ namespace DSPRE.ROMFiles {
         public byte weatherID { get; set; }
         public byte flags { get; set; }
         public ushort wildPokemon { get; set; }
-        #endregion Fields
+
+        #endregion Fields (10)
 
         #region Methods (1)
+
         public static MapHeader LoadFromByteArray(byte[] headerData, ushort headerNumber, gFamEnum gameFamily = gFamEnum.NULL) {
             /* Encapsulate header data into the class appropriate for the gameVersion */
             if (headerData.Length < MapHeader.length) {
@@ -142,36 +145,43 @@ namespace DSPRE.ROMFiles {
             switch (gameFamily) {
                 case gFamEnum.DP:
                     return new HeaderDP(headerNumber, new MemoryStream(headerData));
+
                 case gFamEnum.Plat:
                     return new HeaderPt(headerNumber, new MemoryStream(headerData));
+
                 default:
                     return new HeaderHGSS(headerNumber, new MemoryStream(headerData));
             }
         }
+
         public static MapHeader LoadFromFile(string filename, ushort headerNumber, long offsetInFile, gFamEnum gameFamily = gFamEnum.NULL) {
             /* Calculate header offset and load data */
             byte[] headerData = DSUtils.ReadFromFile(filename, offsetInFile, MapHeader.length);
             return LoadFromByteArray(headerData, headerNumber, gameFamily);
         }
+
         public static MapHeader LoadFromARM9(ushort headerNumber, gFamEnum gameFamily = gFamEnum.NULL) {
             long headerOffset = RomInfo.headerTableOffset + MapHeader.length * headerNumber;
             return LoadFromFile(RomInfo.arm9Path, headerNumber, headerOffset, gameFamily);
         }
 
-
-        #endregion
+        #endregion Methods (1)
     }
 
     /// <summary>
     /// Class to store map header data from Pokémon D and P
     /// </summary>
     public class HeaderDP : MapHeader {
+
         #region Fields (5)
+
         public byte unknown1 { get; set; }
         public ushort locationName { get; set; }
-        #endregion Fields
+
+        #endregion Fields (5)
 
         #region Constructors (1)
+
         public HeaderDP(ushort headerNumber, Stream data) {
             this.ID = headerNumber;
             using (BinaryReader reader = new BinaryReader(data)) {
@@ -195,9 +205,11 @@ namespace DSPRE.ROMFiles {
                 flags = (byte)(mapSettings >> 4 & 0b_1111);
             }
         }
-        #endregion Constructors
+
+        #endregion Constructors (1)
 
         #region Methods (1)
+
         public override byte[] ToByteArray() {
             MemoryStream newData = new MemoryStream();
             using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -221,20 +233,25 @@ namespace DSPRE.ROMFiles {
             }
             return newData.ToArray();
         }
-        #endregion
+
+        #endregion Methods (1)
     }
 
     /// <summary>
     /// Class to store map header data from Pokémon Plat
     /// </summary>
     public class HeaderPt : MapHeader {
+
         #region Fields (5)
+
         public byte areaIcon { get; set; }
         public byte locationName { get; set; }
         public byte unknown1 { get; set; }
-        #endregion Fields
+
+        #endregion Fields (5)
 
         #region Constructors (1)
+
         public HeaderPt(ushort headerNumber, Stream data) {
             this.ID = headerNumber;
             using (BinaryReader reader = new BinaryReader(data)) {
@@ -258,15 +275,16 @@ namespace DSPRE.ROMFiles {
                     locationSpecifier = (byte)(mapSettings & 0b_1111_111);
                     battleBackground = (byte)(mapSettings >> 7 & 0b_1111_1);
                     flags = (byte)(mapSettings >> 12 & 0b_1111);
-
                 } catch (EndOfStreamException) {
                     MessageBox.Show("Error loading header " + ID + '.', "Unexpected EOF", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
-        #endregion Constructors
+
+        #endregion Constructors (1)
 
         #region Methods(1)
+
         public override byte[] ToByteArray() {
             MemoryStream newData = new MemoryStream();
             using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -290,14 +308,17 @@ namespace DSPRE.ROMFiles {
             }
             return newData.ToArray();
         }
-        #endregion
+
+        #endregion Methods(1)
     }
 
     /// <summary>
     /// Class to store map header data from Pokémon HG and SS
     /// </summary>
     public class HeaderHGSS : MapHeader {
+
         #region Fields (7)
+
         public byte areaIcon { get; set; }
         public byte followMode { get; set; }
         public byte locationName { get; set; }
@@ -307,9 +328,11 @@ namespace DSPRE.ROMFiles {
         public byte worldmapX { get; set; } //6 bits only
         public byte worldmapY { get; set; } //6 bits only
         public bool kantoFlag { get; set; }
-        #endregion
+
+        #endregion Fields (7)
 
         #region Constructors (1)
+
         public HeaderHGSS(ushort headerNumber, Stream data) {
             this.ID = headerNumber;
             using (BinaryReader reader = new BinaryReader(data)) {
@@ -344,16 +367,17 @@ namespace DSPRE.ROMFiles {
                     followMode = (byte)((last32 >> 18) & 0b_11); //get 2 bits after the first 17
                     battleBackground = (byte)((last32 >> 20) & 0b_1111_1); //get 5 bits after the first 19
                     flags = (byte)(last32 >> 25 & 0b_1111_111); //get 7 bits after the first 24
-
                 } catch (EndOfStreamException) {
                     MessageBox.Show("Error loading header " + ID + '.', "Unexpected EOF", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     ID = ushort.MaxValue;
                 }
             }
         }
-        #endregion Constructors
+
+        #endregion Constructors (1)
 
         #region Methods(1)
+
         public override byte[] ToByteArray() {
             MemoryStream newData = new MemoryStream();
             using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -390,6 +414,7 @@ namespace DSPRE.ROMFiles {
             }
             return newData.ToArray();
         }
-        #endregion
+
+        #endregion Methods(1)
     }
 }

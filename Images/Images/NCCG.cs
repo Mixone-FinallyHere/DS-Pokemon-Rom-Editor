@@ -1,23 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Drawing;
-using System.Windows.Forms;
-using Ekona;
+﻿using Ekona;
 using Ekona.Images;
+using System;
+using System.IO;
 
-namespace Images
-{
-    public class NCCG : ImageBase
-    {
-        sNCCG nccg;
+namespace Images {
 
-        public NCCG(string file, int id, string fileName) : base(file, id, fileName) { }
+    public class NCCG : ImageBase {
+        private sNCCG nccg;
 
-        public override void Read(string file)
-        {
+        public NCCG(string file, int id, string fileName) : base(file, id, fileName) {
+        }
+
+        public override void Read(string file) {
             // Image with:
             // Horizontal as tile form
             BinaryReader br = new BinaryReader(File.OpenRead(file));
@@ -52,8 +46,7 @@ namespace Images
             nccg.link.size = br.ReadUInt32();
             nccg.link.link = new String(br.ReadChars((int)nccg.link.size - 0x08));
 
-            if (nccg.generic.nSection == 4)
-            {
+            if (nccg.generic.nSection == 4) {
                 // CMNT section
                 nccg.cmnt.type = br.ReadChars(4);
                 nccg.cmnt.size = br.ReadUInt32();
@@ -67,48 +60,44 @@ namespace Images
                 TileForm.Horizontal, false);
         }
 
-        public override void Write(string fileOut, PaletteBase palette)
-        {
+        public override void Write(string fileOut, PaletteBase palette) {
             Console.WriteLine("Write Tiles - NCCG");
         }
 
-        public struct sNCCG
-        {
+        public struct sNCCG {
             public NitroHeader generic;
             public CHAR charS;
             public ATTR attr;
             public LINK link;
             public CMNT cmnt;
 
-            public struct CHAR
-            {
+            public struct CHAR {
                 public char[] type;
                 public uint size;
                 public uint width;
                 public uint height;
                 public uint depth;
             }
-            public struct ATTR
-            {
+
+            public struct ATTR {
                 public char[] type;
                 public uint size;
                 public uint width;
                 public uint height;
                 public byte[] unknown;
             }
-            public struct LINK
-            {
+
+            public struct LINK {
                 public char[] type;
                 public uint size;
                 public string link;
             }
-            public struct CMNT
-            {
+
+            public struct CMNT {
                 public char[] type;
                 public uint size;
                 public byte[] unknown;
             }
         }
     }
-
 }

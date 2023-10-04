@@ -12,27 +12,25 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * By: pleoNeX
- * 
+ *
  */
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
+
 using Ekona;
 using Ekona.Images;
+using System;
+using System.IO;
 
-namespace Images
-{
-    public class NCSC : MapBase
-    {
-        public NCSC(string file, int id, string fileName = "") : base(file, id, fileName) { }
+namespace Images {
 
-        public override void Read(string file)
-        {
+    public class NCSC : MapBase {
+
+        public NCSC(string file, int id, string fileName = "") : base(file, id, fileName) {
+        }
+
+        public override void Read(string file) {
             BinaryReader br = new BinaryReader(File.OpenRead(file));
             sNCSC ncsc = new sNCSC();
 
@@ -57,12 +55,10 @@ namespace Images
                 map[i] = Actions.MapInfo(br.ReadUInt16());
 
             // Read other sections
-            for (int n = 1; n < ncsc.generic.nSection; n++)
-            {
+            for (int n = 1; n < ncsc.generic.nSection; n++) {
                 String type = new String(br.ReadChars(4));
 
-                switch (type)
-                {
+                switch (type) {
                     case "ESCR":
 
                         ncsc.escr.id = "ESCR".ToCharArray();
@@ -119,12 +115,11 @@ namespace Images
             br.Close();
             Set_Map(map, false, (int)ncsc.scrn.width, (int)ncsc.scrn.height);
         }
-        public override void Write(string fileOut, ImageBase image, PaletteBase palette)
-        {
+
+        public override void Write(string fileOut, ImageBase image, PaletteBase palette) {
         }
 
-        public struct sNCSC
-        {
+        public struct sNCSC {
             public NitroHeader generic;
             public SCRN scrn;
             public ESCR escr;
@@ -134,8 +129,7 @@ namespace Images
             public LINK link;
             public CMNT cmnt;
 
-            public struct SCRN
-            {
+            public struct SCRN {
                 public char[] id;
                 public uint size;
                 public uint width;
@@ -143,8 +137,8 @@ namespace Images
                 public uint unknown1;
                 public uint unknown2;
             }
-            public struct ESCR
-            {
+
+            public struct ESCR {
                 public char[] id;
                 public uint size;
                 public uint width;
@@ -154,34 +148,34 @@ namespace Images
 
                 public uint[] unknownData;
             }
-            public struct CLRF
-            {
+
+            public struct CLRF {
                 public char[] id;
                 public uint size;
                 public uint width;
                 public uint height;
                 public byte[] unknown;
             }
-            public struct CLRC
-            {
+
+            public struct CLRC {
                 public char[] id;
                 public uint size;
                 public byte[] unknown;
             }
-            public struct GRID
-            {
+
+            public struct GRID {
                 public char[] id;
                 public uint size;
                 public byte[] unknown;
             }
-            public struct LINK
-            {
+
+            public struct LINK {
                 public char[] id;
                 public uint size;
                 public string link;
             }
-            public struct CMNT
-            {
+
+            public struct CMNT {
                 public char[] id;
                 public uint size;
                 public byte[] unknown;

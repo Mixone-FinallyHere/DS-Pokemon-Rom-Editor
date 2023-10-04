@@ -17,48 +17,43 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace NSMBe4
-{
-    class ImageTiler
-    {
-        int tileCount = 32 * 32;
+namespace NSMBe4 {
 
-        Tile[] tiles;
+    internal class ImageTiler {
+        private int tileCount = 32 * 32;
+
+        private Tile[] tiles;
         public int[,] tileMap;
-        float[,] tileDiffs;
+        private float[,] tileDiffs;
         public Bitmap tileBuffer;
         private List<TileDiff> diffs;
-        int width;
-        int height;
+        private int width;
+        private int height;
 
-        public ImageTiler(Bitmap b, int tilenr)
-        {
+        public ImageTiler(Bitmap b, int tilenr) {
             //if (b.Size != new Size(512, 512))
-             //   throw new Exception("Wrong image size");
+            //   throw new Exception("Wrong image size");
 
             //ProgressWindow p = new ProgressWindow(LanguageManager.Get("BgImport", "Importing"));
             //p.Show();
 
             //p.SetMax(tileCount);
-            tileMap = new int[b.Width/8, b.Height/8];
+            tileMap = new int[b.Width / 8, b.Height / 8];
             tileDiffs = new float[tileCount, tileCount];
             tiles = new Tile[tileCount];
             diffs = new List<TileDiff>();
-            tileCount = (b.Width/8) * (b.Height/8);
+            tileCount = (b.Width / 8) * (b.Height / 8);
             width = b.Width / 8;
             height = b.Height / 8;
 
             //LOAD TILES
             //p.WriteLine("1/5: Loading tiles...");
             int tileNum = 0;
-            for (int xt = 0; xt < b.Width/8; xt++)
-            {
-                for (int yt = 0; yt < b.Height/8; yt++)
-                {
+            for (int xt = 0; xt < b.Width / 8; xt++) {
+                for (int yt = 0; yt < b.Height / 8; yt++) {
                     //                    Console.Out.WriteLine("Tile " + xt + " " + yt + ", " + tileNum);
                     tiles[tileNum] = new Tile(b, xt * 8, yt * 8);
                     tileMap[xt, yt] = tileNum;
@@ -71,19 +66,16 @@ namespace NSMBe4
             //p.setValue(0);
             //p.SetMax(64 * 64);
             //p.WriteLine("2/5: Computing tile differences...");
-            for (int xt = 0; xt < (b.Height/8) * (b.Width/8); xt++)
-            {
+            for (int xt = 0; xt < (b.Height / 8) * (b.Width / 8); xt++) {
                 //p.setValue(xt);
                 if (tiles[xt] is null) continue;
 
-                for (int yt = 0; yt < xt; yt++)
-                {
+                for (int yt = 0; yt < xt; yt++) {
                     if (tiles[yt] is null) continue;
                     float diff = tiles[xt].difference(tiles[yt]);
                     if (diff < 0.5)
                         mergeTiles(xt, yt);
-                    else
-                    {
+                    else {
                         TileDiff td = new TileDiff();
                         td.diff = diff;
                         td.t1 = xt;
@@ -101,17 +93,14 @@ namespace NSMBe4
             //REDUCE TILE COUNT
             int used = countUsedTiles();
             int mustRemove = used - tilenr;
-            if (used > tilenr)
-            {
+            if (used > tilenr) {
                 //p.setValue(0);
                 //p.SetMax(mustRemove);
             }
 
             List<TileDiff>.Enumerator en = diffs.GetEnumerator();
-            if (tilenr != 0)
-            {
-                while (used > tilenr)
-                {
+            if (tilenr != 0) {
+                while (used > tilenr) {
                     en.MoveNext();
                     TileDiff td = en.Current;
                     int t1 = td.t1;
@@ -130,7 +119,7 @@ namespace NSMBe4
             //p.WriteLine("5/5: Buiding tile map...");
             /*
             //DEBUG, DEBUG...
-            
+
             for (int yt = 0; yt < 64; yt++)
             {
                 for (int xt = 0; xt < 64; xt++)
@@ -158,10 +147,8 @@ namespace NSMBe4
             tileBuffer = new Bitmap(countUsedTiles() * 8, 8, PixelFormat.Format32bppArgb);
             int[] newTileNums = new int[tileCount];
             int nt = 0;
-            for (int t = 0; t < tileCount; t++)
-            {
-                if (tiles[t] != null)
-                {
+            for (int t = 0; t < tileCount; t++) {
+                if (tiles[t] != null) {
                     newTileNums[t] = nt;
                     for (int x = 0; x < 8; x++)
                         for (int y = 0; y < 8; y++)
@@ -172,15 +159,14 @@ namespace NSMBe4
 
             //            new ImagePreviewer(tileBuffer).Show();
 
-            for (int xt = 0; xt < b.Width/8; xt++)
-                for (int yt = 0; yt < b.Height/8; yt++)
+            for (int xt = 0; xt < b.Width / 8; xt++)
+                for (int yt = 0; yt < b.Height / 8; yt++)
                     tileMap[xt, yt] = newTileNums[tileMap[xt, yt]];
 
             //p.WriteLine("Done! You can close this window now.");
         }
 
-        private void mergeTiles(int t1, int t2)
-        {
+        private void mergeTiles(int t1, int t2) {
             Console.Out.WriteLine("Used: " + countUsedTiles() + ", replacing " + t2 + " with " + t1);
             tiles[t1].merge(tiles[t2]);
             //                fillDiffs(best1);
@@ -193,8 +179,7 @@ namespace NSMBe4
             tiles[t2] = null;
         }
 
-        private int countUsedTiles()
-        {
+        private int countUsedTiles() {
             int c = 0;
             for (int i = 0; i < tileCount; i++)
                 if (tiles[i] != null)
@@ -209,10 +194,8 @@ namespace NSMBe4
          * if not, returns -1
          */
 
-        private int fillDiffs(int tile)
-        {
-            for (int t = 0; t < tileCount; t++)
-            {
+        private int fillDiffs(int tile) {
+            for (int t = 0; t < tileCount; t++) {
                 if (t == tile) continue;
                 if (tiles[t] is null) continue;
                 float diff = tiles[tile].difference(tiles[t]);
@@ -230,8 +213,7 @@ namespace NSMBe4
             return -1;
         }
 
-        private static float colorDifference(Color a, Color b)
-        {
+        private static float colorDifference(Color a, Color b) {
             if (a.A != b.A) return 10000f;
 
             float res = 0;
@@ -246,8 +228,7 @@ namespace NSMBe4
             return res;
         }
 
-        private static float colorMatrixDiff(Color[,] a, Color[,] b)
-        {
+        private static float colorMatrixDiff(Color[,] a, Color[,] b) {
             float res = 0;
             for (int x = 0; x < a.GetLength(0); x++)
                 for (int y = 0; y < a.GetLength(1); y++)
@@ -256,13 +237,10 @@ namespace NSMBe4
             return res / a.Length;
         }
 
-
-        private static float colorMatrixBorderDiff(Color[,] a, Color[,] b)
-        {
+        private static float colorMatrixBorderDiff(Color[,] a, Color[,] b) {
             int l = a.GetLength(0) - 1;
             float res = 0;
-            for (int x = 0; x < a.GetLength(0); x++)
-            {
+            for (int x = 0; x < a.GetLength(0); x++) {
                 res += colorDifference(a[x, 0], b[x, 0]);
                 res += colorDifference(a[x, l], b[x, l]);
                 res += colorDifference(a[0, x], b[0, x]);
@@ -272,12 +250,10 @@ namespace NSMBe4
             return res / l * 2;
         }
 
-        private static Color[,] colorMatrixReduce(Color[,] m)
-        {
+        private static Color[,] colorMatrixReduce(Color[,] m) {
             Color[,] r = new Color[m.GetLength(0) / 2, m.GetLength(1) / 2];
             for (int x = 0; x < m.GetLength(0) / 2; x++)
-                for (int y = 0; y < m.GetLength(1) / 2; y++)
-                {
+                for (int y = 0; y < m.GetLength(1) / 2; y++) {
                     r[x, y] = colorMean(
                         colorMean(m[x * 2, y * 2], m[x * 2, y * 2 + 1], 1, 1),
                         colorMean(m[x * 2 + 1, y * 2], m[x * 2 + 1, y * 2 + 1], 1, 1), 1, 1
@@ -285,13 +261,12 @@ namespace NSMBe4
                 }
             return r;
         }
-        private static int mean(int a, int b, int wa, int wb)
-        {
+
+        private static int mean(int a, int b, int wa, int wb) {
             return (wa * a + wb * b) / (wa + wb);
         }
 
-        public static Color colorMean(Color a, Color b, int wa, int wb)
-        {
+        public static Color colorMean(Color a, Color b, int wa, int wb) {
             if (a.A == 0) return b;
             if (b.A == 0) return a;
 
@@ -300,29 +275,23 @@ namespace NSMBe4
                                   mean(a.B, b.B, wa, wb));
         }
 
-        private class TileDiff : IComparable<TileDiff>
-        {
+        private class TileDiff : IComparable<TileDiff> {
             public float diff;
             public int t1, t2;
 
-            public int CompareTo(TileDiff t)
-            {
+            public int CompareTo(TileDiff t) {
                 return diff.CompareTo(t.diff);
             }
         }
 
-
-        private class Tile
-        {
+        private class Tile {
             public Color[,] data, d1, d2;
             public int count = 1;
 
-            public Tile(Bitmap b, int xp, int yp)
-            {
+            public Tile(Bitmap b, int xp, int yp) {
                 data = new Color[8, 8];
                 for (int x = 0; x < 8; x++)
-                    for (int y = 0; y < 8; y++)
-                    {
+                    for (int y = 0; y < 8; y++) {
                         Color c = b.GetPixel(x + xp, y + yp);
                         if (c.A < 128)
                             data[x, y] = Color.Transparent;
@@ -332,13 +301,12 @@ namespace NSMBe4
                 makeReductions();
             }
 
-            private void makeReductions()
-            {
+            private void makeReductions() {
                 d1 = colorMatrixReduce(data);
                 d2 = colorMatrixReduce(d1);
             }
-            public float difference(Tile b)
-            {
+
+            public float difference(Tile b) {
                 float res = 0;
                 res += colorMatrixBorderDiff(data, b.data) * 5;
                 res += colorMatrixDiff(d2, b.d2);
@@ -347,13 +315,12 @@ namespace NSMBe4
                 return res;
             }
 
-            public void merge(Tile b)
-            {
+            public void merge(Tile b) {
                 for (int x = 0; x < 8; x++)
                     for (int y = 0; y < 8; y++)
                         data[x, y] = colorMean(data[x, y], b.data[x, y], count, b.count);
                 count += b.count;
-                           //   makeReductions();
+                //   makeReductions();
             }
         }
     }

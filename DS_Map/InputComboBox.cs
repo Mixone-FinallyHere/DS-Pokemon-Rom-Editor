@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 
 namespace DSPRE {
+
     public partial class InputComboBox : ComboBox {
         private Color normalColor;
 
@@ -25,6 +26,7 @@ namespace DSPRE {
                 SelectedIndex = index;
             }
         }
+
         protected override void OnKeyDown(KeyEventArgs e) {
             base.OnKeyDown(e);
 
@@ -32,6 +34,7 @@ namespace DSPRE {
                 UpdateText();
             }
         }
+
         protected override void OnLeave(EventArgs e) {
             base.OnLeave(e);
             UpdateText();

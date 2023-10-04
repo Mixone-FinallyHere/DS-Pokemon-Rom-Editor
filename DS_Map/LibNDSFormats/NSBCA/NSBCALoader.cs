@@ -1,18 +1,18 @@
-﻿using System;
+﻿using LibNDSFormats.NSBMD;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using LibNDSFormats.NSBMD;
 
 namespace LibNDSFormats.NSBCA {
+
     /// <summary>
 	/// Loader for NSBCA files & data.
 	/// </summary>
     public static class NSBCALoader {
+
         #region Methods (2)
 
-        // Public Methods (2) 
+        // Public Methods (2)
 
         /// <summary>
         /// Load NSBTX from stream.
@@ -173,13 +173,13 @@ namespace LibNDSFormats.NSBCA {
                     }
                     animation[j] = anim;
                 }
-
             }
             reader.Close();
             //free(dataoffset);
             return animation;
         }
-        static Int32 getdword(byte[] b) {
+
+        private static Int32 getdword(byte[] b) {
             Int32 v;
             v = b[0];
             v |= b[1] << 8;
@@ -187,12 +187,14 @@ namespace LibNDSFormats.NSBCA {
             v |= b[3] << 24;
             return v;
         }
-        static Int32 getword(byte[] b) {
+
+        private static Int32 getword(byte[] b) {
             Int32 v;
             v = b[0];
             v |= b[1] << 8;
             return v;
         }
-        #endregion Methods
+
+        #endregion Methods (2)
     }
 }

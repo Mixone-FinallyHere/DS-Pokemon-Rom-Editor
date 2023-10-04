@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace LibNDSFormats.NSBMD
-{
-    public class NSBMDTexture
-    {
+namespace LibNDSFormats.NSBMD {
+
+    public class NSBMDTexture {
         public int format;
         public int height;
         public byte repeat;

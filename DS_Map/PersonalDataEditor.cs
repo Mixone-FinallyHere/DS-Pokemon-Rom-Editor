@@ -4,10 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows.Controls;
 using System.Windows.Forms;
 
 namespace DSPRE {
+
     public partial class PersonalDataEditor : Form {
         private bool disableHandlers = false;
 
@@ -21,7 +21,7 @@ namespace DSPRE {
         private static readonly string formName = "Personal Data Editor";
 
         public PersonalDataEditor(string[] itemNames, string[] abilityNames) {
-            this.fileNames = RomInfo.GetPokemonNames().ToArray();;
+            this.fileNames = RomInfo.GetPokemonNames().ToArray(); ;
 
             InitializeComponent();
 
@@ -44,9 +44,8 @@ namespace DSPRE {
             eggGroup2InputCombobox.DataSource = new BindingSource(listEggGroups, string.Empty);
 
             growthCurveInputComboBox.Items.AddRange(Enum.GetNames(typeof(PokemonGrowthCurve)));
-            
-            dexColorInputComboBox.Items.AddRange(Enum.GetNames(typeof(PokemonDexColor)));
 
+            dexColorInputComboBox.Items.AddRange(Enum.GetNames(typeof(PokemonDexColor)));
 
             /* ---------------- */
             int count = RomInfo.GetPersonalFilesCount();
@@ -59,7 +58,6 @@ namespace DSPRE {
                 fileNames.Add(fileNames[extraEntry.monId] + " - " + extraEntry.description);
             }
 
-            
             this.fileNames = fileNames.ToArray();
             monNumberNumericUpDown.Maximum = fileNames.Count - 1;
             pokemonNameInputComboBox.Items.AddRange(this.fileNames);
@@ -67,9 +65,9 @@ namespace DSPRE {
 
             disableHandlers = false;
 
-
             pokemonNameInputComboBox.SelectedIndex = 1;
         }
+
         private void setDirty(bool status) {
             if (status) {
                 dirty = true;
@@ -79,6 +77,7 @@ namespace DSPRE {
                 this.Text = formName;
             }
         }
+
         private void baseHpNumericUpDown_ValueChanged(object sender, EventArgs e) {
             if (disableHandlers) {
                 return;
@@ -94,6 +93,7 @@ namespace DSPRE {
             currentLoadedFile.baseAtk = (byte)baseAtkNumericUpDown.Value;
             setDirty(true);
         }
+
         private void baseDefNumericUpDown_ValueChanged(object sender, EventArgs e) {
             if (disableHandlers) {
                 return;
@@ -174,7 +174,6 @@ namespace DSPRE {
             setDirty(true);
         }
 
-
         private void type1InputComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             if (disableHandlers) {
                 return;
@@ -254,10 +253,11 @@ namespace DSPRE {
                 case (byte)PokemonGender.Male:
                 case (byte)PokemonGender.Female:
                     return $"100% {Enum.GetName(typeof(PokemonGender), vec)}";
+
                 case (byte)PokemonGender.Unknown:
                     return "Gender Unknown";
-                default: 
-                    {
+
+                default: {
                         vec++;
                         float femaleProb = 100 * ((float)vec / 256);
                         return $"{100 - femaleProb}% Male\n\n{femaleProb}% Female";
@@ -272,6 +272,7 @@ namespace DSPRE {
             currentLoadedFile.firstAbility = (byte)ability1InputComboBox.SelectedIndex;
             setDirty(true);
         }
+
         private void ability2InputComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             if (disableHandlers) {
                 return;
@@ -279,6 +280,7 @@ namespace DSPRE {
             currentLoadedFile.secondAbility = (byte)ability2InputComboBox.SelectedIndex;
             setDirty(true);
         }
+
         private void eggGroup1InputCombobox_SelectedIndexChanged(object sender, EventArgs e) {
             if (disableHandlers) {
                 return;
@@ -327,7 +329,6 @@ namespace DSPRE {
             setDirty(true);
         }
 
-
         private void addMachineButton_Click(object sender, EventArgs e) {
             int elemAdd = addableMachinesListBox.SelectedIndex;
             if (elemAdd < 0) {
@@ -341,7 +342,7 @@ namespace DSPRE {
 
             int count = addableMachinesListBox.Items.Count;
             if (count > 0) {
-                addableMachinesListBox.SelectedIndex = Math.Min(count-1, elemAdd);
+                addableMachinesListBox.SelectedIndex = Math.Min(count - 1, elemAdd);
             }
             setDirty(true);
         }
@@ -385,10 +386,12 @@ namespace DSPRE {
             RebuildMachinesListBoxes();
             setDirty(true);
         }
+
         private void saveDataButton_Click(object sender, EventArgs e) {
             currentLoadedFile.SaveToFileDefaultDir(currentLoadedId, true);
             setDirty(false);
         }
+
         //-------------------------------
         private bool CheckDiscardChanges() {
             if (!dirty) {
@@ -403,7 +406,6 @@ namespace DSPRE {
             monNumberNumericUpDown.Value = currentLoadedId;
             pokemonNameInputComboBox.SelectedIndex = currentLoadedId;
 
-
             return false;
         }
 
@@ -417,26 +419,24 @@ namespace DSPRE {
                 int newNumber = pokemonNameInputComboBox.SelectedIndex;
                 monNumberNumericUpDown.Value = newNumber;
                 ChangeLoadedFile(newNumber);
-               
             }
             disableHandlers = false;
         }
 
         private void monNumberNumericUpDown_ValueChanged(object sender, EventArgs e) {
-            if (disableHandlers) { 
-                return; 
+            if (disableHandlers) {
+                return;
             }
 
             disableHandlers = true;
             if (CheckDiscardChanges()) {
-
                 int newNumber = (int)monNumberNumericUpDown.Value;
                 pokemonNameInputComboBox.SelectedIndex = newNumber;
                 ChangeLoadedFile(newNumber);
-                
             }
             disableHandlers = false;
         }
+
         private void ChangeLoadedFile(int toLoad) {
             currentLoadedId = toLoad;
             currentLoadedFile = new PokemonPersonalData(currentLoadedId);
@@ -522,7 +522,7 @@ namespace DSPRE {
             addableMachinesListBox.EndUpdate();
             addedMachinesListBox.EndUpdate();
 
-            if (keepAddableSelection) { 
+            if (keepAddableSelection) {
                 int addableCount = addableMachinesListBox.Items.Count;
                 if (addableCount > 0) {
                     addableMachinesListBox.SelectedItem = addableSel;
@@ -540,6 +540,7 @@ namespace DSPRE {
             string item = diff > 0 ? "HM " + diff : "TM " + n;
             return item;
         }
+
         private static int IndexFromMachineName(string machineName) {
             // Split the machineName to get the prefix (TM or HM) and the number
             string[] parts = machineName.Split(' ');

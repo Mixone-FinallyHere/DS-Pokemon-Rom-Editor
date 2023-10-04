@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 
 namespace DSPRE.Resources {
+
     public partial class CommandsDatabase : Form {
         private DataGridViewRow currentrow;
         private Dictionary<ushort, string> namesDict;
@@ -46,7 +47,7 @@ namespace DSPRE.Resources {
             }
 
             DataGridViewRowCollection list = table.Rows;
-            for (ushort i = 0; i < list.Count; i++) { //loop through 
+            for (ushort i = 0; i < list.Count; i++) { //loop through
                 DataGridViewRow r = list[i];
                 ushort currentID = i;
 
@@ -84,16 +85,18 @@ namespace DSPRE.Resources {
         private void startSearchButtonScripts_Click(object sender, EventArgs e) {
             StartSearch(scriptcmdDataGridView, scriptcmdSearchTextBox, scriptRadioButtons);
         }
+
         private void startSearchButtonActions_Click(object sender, EventArgs e) {
             StartSearch(actionDataGridView, actioncmdSearchTextBox, actionRadioButtons);
         }
+
         private void StartSearch(DataGridView table, TextBox searchBox, List<RadioButton> rbl) {
             try {
                 if (rbl[0].Checked) { //Contains
                     scanAllRows(table,
                         (x) => x.Value.ToString().IndexOf(searchBox.Text, StringComparison.InvariantCultureIgnoreCase) >= 0);
                 } else if (rbl[1].Checked) { //StartsWith
-                    scanAllRows(table, 
+                    scanAllRows(table,
                         (x) => x.Value.ToString().StartsWith(searchBox.Text, StringComparison.InvariantCultureIgnoreCase));
                 } else if (rbl[2].Checked) { //Exact Match
                     scanAllRows(table,

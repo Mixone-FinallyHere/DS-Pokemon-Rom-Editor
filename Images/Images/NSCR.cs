@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using Ekona;
+﻿using Ekona;
 using Ekona.Images;
+using System;
+using System.IO;
+using System.Linq;
 
-namespace Images
-{
-    public class NSCR : MapBase
-    {
-        sNSCR nscr;
+namespace Images {
 
-        public NSCR(string file, int id, string fileName = "") : base(file, id, fileName) { }
+    public class NSCR : MapBase {
+        private sNSCR nscr;
 
-        public override void Read(string fileIn)
-        {
+        public NSCR(string file, int id, string fileName = "") : base(file, id, fileName) {
+        }
+
+        public override void Read(string fileIn) {
             BinaryReader br = new BinaryReader(File.OpenRead(fileIn));
             nscr = new sNSCR();
 
@@ -45,8 +42,8 @@ namespace Images
 
             Set_Map(nscr.nrcs.mapData, true, nscr.nrcs.width, nscr.nrcs.height);
         }
-        public override void Write(string fileOut, ImageBase image, PaletteBase palette)
-        {
+
+        public override void Write(string fileOut, ImageBase image, PaletteBase palette) {
             Update_Struct();
             BinaryWriter bw = new BinaryWriter(File.OpenWrite(fileOut));
 
@@ -66,8 +63,7 @@ namespace Images
             bw.Write(nscr.nrcs.padding);
             bw.Write(nscr.nrcs.data_size);
 
-            for (int i = 0; i < nscr.nrcs.mapData.Length; i++)
-            {
+            for (int i = 0; i < nscr.nrcs.mapData.Length; i++) {
                 int npalette = nscr.nrcs.mapData[i].nPalette << 12;
                 int yFlip = nscr.nrcs.mapData[i].yFlip << 11;
                 int xFlip = nscr.nrcs.mapData[i].xFlip << 10;
@@ -77,11 +73,9 @@ namespace Images
 
             bw.Flush();
             bw.Close();
-
         }
 
-        private void Update_Struct()
-        {
+        private void Update_Struct() {
             nscr.nrcs.width = (ushort)Width;
             nscr.nrcs.height = (ushort)Height;
             nscr.nrcs.mapData = Map;
@@ -95,8 +89,7 @@ namespace Images
             public NitroHeader header;
             public NRCS nrcs;
 
-            public struct NRCS
-            {
+            public struct NRCS {
                 public char[] id;                   // NRCS = 0x4E524353
                 public UInt32 section_size;
                 public UInt16 width;
@@ -105,7 +98,6 @@ namespace Images
                 public UInt32 data_size;
                 public NTFS[] mapData;
             }
-
         }
     }
 }

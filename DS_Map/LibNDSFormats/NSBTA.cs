@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 namespace MKDS_Course_Editor.NSBTA {
+
     public class NSBTA {
+
         public struct NSBTA_File {
             public header Header;
+
             public struct header {
                 public string ID;
                 public byte[] Magic;
@@ -17,13 +18,17 @@ namespace MKDS_Course_Editor.NSBTA {
                 public Int16 nSection;
                 public Int32[] Section_Offset;
             }
+
             public srt0 SRT0;
+
             public struct srt0 //Scale Rotation and Translation
             {
                 public string ID;
                 public Int32 Size;
+
                 //3D Info Structure
                 public byte dummy;
+
                 public byte num_objs;
                 public short section_size;
                 public UnknownBlock unknownBlock;
@@ -38,6 +43,7 @@ namespace MKDS_Course_Editor.NSBTA {
                     public short[] unknown1;
                     public short[] unknown2;
                 }
+
                 public struct Info {
                     public short header_size;
                     public short data_size;
@@ -49,14 +55,18 @@ namespace MKDS_Course_Editor.NSBTA {
                     }
                 }
             }
+
             public M_AT MAT;
+
             public struct M_AT {
                 public string ID;
                 public Int16 Unknown1;
                 public byte Unknown2;
                 public byte Unknown3;
+
                 //3D Info Structure
                 public byte dummy;
+
                 public byte num_objs;
                 public short section_size;
                 public UnknownBlock unknownBlock;
@@ -71,6 +81,7 @@ namespace MKDS_Course_Editor.NSBTA {
                     public short[] unknown1;
                     public short[] unknown2;
                 }
+
                 public struct Info {
                     public short header_size;
                     public short data_size;
@@ -86,7 +97,9 @@ namespace MKDS_Course_Editor.NSBTA {
                     }
                 }
             }
+
             public srtData[] SRTData;
+
             public struct srtData {
                 public decimal[] scaleS;
                 public decimal[] scaleT;
@@ -197,7 +210,6 @@ namespace MKDS_Course_Editor.NSBTA {
                             } else {
                                 ns.SRTData[i].translateS = new decimal[ns.MAT.infoBlock.Data[i].frame[3]];
                                 ns.MAT.infoBlock.Data[i].frameStep[3] = Math.Abs(ns.MAT.infoBlock.Data[i].var1[3] >> 1);
-
                             }
                             if (ns.MAT.infoBlock.Data[i].var1[4] > 1) {
                                 ns.SRTData[i].translateT = new decimal[1];

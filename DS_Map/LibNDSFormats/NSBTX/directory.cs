@@ -17,12 +17,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace NSMBe4.DSFileSystem
-{
-    public class Directory
-    {
+namespace NSMBe4.DSFileSystem {
+
+    public class Directory {
         private bool isSystemFolderP;
         public bool isSystemFolder { get { return isSystemFolderP; } }
 
@@ -40,8 +38,7 @@ namespace NSMBe4.DSFileSystem
 
         private Filesystem parent;
 
-        public Directory(Filesystem parent, Directory parentDir, bool system, string name, int id)
-        {
+        public Directory(Filesystem parent, Directory parentDir, bool system, string name, int id) {
             this.parent = parent;
             this.parentDirP = parentDir;
             this.isSystemFolderP = system;
@@ -49,13 +46,11 @@ namespace NSMBe4.DSFileSystem
             this.idP = id;
         }
 
-        public void dumpFiles()
-        {
+        public void dumpFiles() {
             dumpFiles(2);
         }
 
-        public void dumpFiles(int ind)
-        {
+        public void dumpFiles(int ind) {
             for (int i = 0; i < ind; i++)
                 Console.Out.Write(" ");
             Console.Out.WriteLine("[DIR" + id + "] " + name);
@@ -65,8 +60,7 @@ namespace NSMBe4.DSFileSystem
                 f.dumpFile(ind + 4);
         }
 
-        public string getPath()
-        {
+        public string getPath() {
             if (parentDir is null)
                 return "FS";
             else

@@ -2,6 +2,7 @@ using System.IO;
 using static DSPRE.RomInfo;
 
 namespace DSPRE.ROMFiles {
+
     /// <summary>
     /// Class to store area data in Pokémon NDS games
     /// </summary>
@@ -10,15 +11,18 @@ namespace DSPRE.ROMFiles {
         internal static readonly byte TYPE_OUTDOOR = 1;
 
         #region Fields (2)
+
         public ushort buildingsTileset;
         public ushort mapTileset;
         public ushort dynamicTextureType;
         public ushort unknown1;
         public byte areaType = TYPE_OUTDOOR; //HGSS ONLY
         public ushort lightType; //using an overabundant size. HGSS only needs a byte
-        #endregion
+
+        #endregion Fields (2)
 
         #region Constructors (1)
+
         public AreaData(Stream data) {
             using (BinaryReader reader = new BinaryReader(data)) {
                 buildingsTileset = reader.ReadUInt16();
@@ -34,10 +38,14 @@ namespace DSPRE.ROMFiles {
                 }
             }
         }
-        public AreaData (byte ID) : this(new FileStream(RomInfo.gameDirs[DirNames.areaData].unpackedDir + "//" + ID.ToString("D4"), FileMode.Open)) {}
-        #endregion
+
+        public AreaData(byte ID) : this(new FileStream(RomInfo.gameDirs[DirNames.areaData].unpackedDir + "//" + ID.ToString("D4"), FileMode.Open)) {
+        }
+
+        #endregion Constructors (1)
 
         #region Methods (1)
+
         public override byte[] ToByteArray() {
             MemoryStream newData = new MemoryStream();
             using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -63,6 +71,7 @@ namespace DSPRE.ROMFiles {
         public void SaveToFileExplorePath(string suggestedFileName, bool showSuccessMessage = true) {
             SaveToFileExplorePath("Gen IV Area Data File", "bin", suggestedFileName, showSuccessMessage);
         }
-        #endregion
+
+        #endregion Methods (1)
     }
 }

@@ -1,8 +1,6 @@
 using DSPRE.Resources;
-using ScintillaNET;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -10,11 +8,14 @@ using static DSPRE.ROMFiles.ScriptFile;
 using static DSPRE.RomInfo;
 
 namespace DSPRE.ROMFiles {
+
     /// <summary>
     /// Class to store script file data in Pokémon NDS games
     /// </summary>
     public class ScriptFile : RomFile {
+
         #region Constants
+
         //this enum doesn't really make much sense now but it will, once scripts can be called and jumped to
         public enum containerTypes { Function, Action, Script };
 
@@ -23,9 +24,10 @@ namespace DSPRE.ROMFiles {
             public uint offsetInFile;
         }
 
-        #endregion
+        #endregion Constants
 
         #region Fields (3)
+
         public List<CommandContainer> allScripts = new List<CommandContainer>();
         public List<CommandContainer> allFunctions = new List<CommandContainer>();
         public List<ActionContainer> allActions = new List<ActionContainer>();
@@ -33,7 +35,8 @@ namespace DSPRE.ROMFiles {
         public bool isLevelScript = new bool();
 
         public static readonly char[] specialChars = { 'x', 'X', '#', '.', '_' };
-        #endregion
+
+        #endregion Fields (3)
 
         #region Constructors (1)
 
@@ -148,17 +151,19 @@ namespace DSPRE.ROMFiles {
                 }
             }
         }
+
         public ScriptFile(int fileID, bool readFunctions = true, bool readActions = true) :
             this(new FileStream(RomInfo.gameDirs[DirNames.scripts].unpackedDir + "\\" + fileID.ToString("D4"), FileMode.Open), readFunctions, readActions) {
-
             this.fileID = fileID;
         }
+
         public ScriptFile(List<CommandContainer> scripts, List<CommandContainer> functions, List<ActionContainer> movements, int fileID = -1) {
             allScripts = scripts;
             allFunctions = functions;
             allActions = movements;
             isLevelScript = false;
         }
+
         public ScriptFile(IEnumerable<string> scriptLines, IEnumerable<string> functionLines, IEnumerable<string> actionLines, int fileID = -1) {
             //TODO: give user the possibility to jump to/call a script
             //once it's done, this Predicate below will be the only one needed, since there will be no distinction between
@@ -202,9 +207,11 @@ namespace DSPRE.ROMFiles {
 
             this.fileID = fileID;
         }
-        #endregion
+
+        #endregion Constructors (1)
 
         #region Methods (1)
+
         private ScriptCommand ReadCommand(BinaryReader dataReader, ref List<int> functionOffsets, ref List<int> actionOffsets) {
             ushort id = dataReader.ReadUInt16();
             List<byte[]> parameterList = new List<byte[]>();
@@ -215,9 +222,10 @@ namespace DSPRE.ROMFiles {
                 case gFamEnum.Plat:
                     switch (id) {
                         case 0x16: //Jump
-                        case 0x1A: //Call 
+                        case 0x1A: //Call
                             ProcessRelativeJump(dataReader, ref parameterList, ref functionOffsets);
                             break;
+
                         case 0x17: //JumpIfObjID
                         case 0x18: //JumpIfBgID
                         case 0x19: //JumpIfPlayerDir
@@ -229,12 +237,14 @@ namespace DSPRE.ROMFiles {
                             parameterList.Add(new byte[] { dataReader.ReadByte() });
                             ProcessRelativeJump(dataReader, ref parameterList, ref functionOffsets);
                             break;
+
                         case 0x5E: // Movement
                         case 0x2A1: // Movement2
                             //in the case of Movement, the first param is an overworld ID
                             parameterList.Add(BitConverter.GetBytes(dataReader.ReadUInt16()));
                             ProcessRelativeJump(dataReader, ref parameterList, ref actionOffsets);
                             break;
+
                         case 0x1CF:
                         case 0x1D0:
                         case 0x1D1: {
@@ -245,6 +255,7 @@ namespace DSPRE.ROMFiles {
                                 }
                             }
                             break;
+
                         case 0x21D: {
                                 ushort parameter1 = dataReader.ReadUInt16();
                                 parameterList.Add(BitConverter.GetBytes(parameter1));
@@ -257,15 +268,18 @@ namespace DSPRE.ROMFiles {
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         break;
+
                                     case 4:
                                     case 5:
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         break;
+
                                     case 6:
                                         break;
                                 }
                             }
                             break;
+
                         case 0x235: {
                                 short parameter1 = dataReader.ReadInt16();
                                 parameterList.Add(BitConverter.GetBytes(parameter1));
@@ -277,19 +291,23 @@ namespace DSPRE.ROMFiles {
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         break;
+
                                     case 0x4:
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         break;
+
                                     case 0x0:
                                     case 0x6:
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         break;
+
                                     default:
                                         break;
                                 }
                             }
                             break;
+
                         case 0x23E: {
                                 short parameter1 = dataReader.ReadInt16();
                                 parameterList.Add(BitConverter.GetBytes(parameter1));
@@ -299,16 +317,19 @@ namespace DSPRE.ROMFiles {
                                     case 0x3:
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         break;
+
                                     case 0x5:
                                     case 0x6:
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         break;
+
                                     default:
                                         break;
                                 }
                             }
                             break;
+
                         case 0x2C4: {
                                 byte parameter1 = dataReader.ReadByte();
                                 parameterList.Add(new byte[] { parameter1 });
@@ -317,6 +338,7 @@ namespace DSPRE.ROMFiles {
                                 }
                             }
                             break;
+
                         case 0x2C5: {
                                 if (RomInfo.gameVersion == gVerEnum.Platinum) {
                                     parameterList.Add(dataReader.ReadBytes(2));
@@ -326,6 +348,7 @@ namespace DSPRE.ROMFiles {
                                 }
                             }
                             break;
+
                         case 0x2C6:
                         case 0x2C9:
                         case 0x2CA:
@@ -343,17 +366,20 @@ namespace DSPRE.ROMFiles {
                                 goto default;
                             }
                             break;
+
                         default:
                             addParametersToList(ref parameterList, id, dataReader);
                             break;
                     }
                     break;
+
                 case gFamEnum.HGSS:
                     switch (id) {
                         case 0x16: //Jump
-                        case 0x1A: //Call 
+                        case 0x1A: //Call
                             ProcessRelativeJump(dataReader, ref parameterList, ref functionOffsets);
                             break;
+
                         case 0x17: //JumpIfObjID
                         case 0x18: //JumpIfBgID
                         case 0x19: //JumpIfPlayerDir
@@ -362,10 +388,12 @@ namespace DSPRE.ROMFiles {
                             parameterList.Add(new byte[] { dataReader.ReadByte() }); //in the case of JumpIf and CallIf, the first param is a comparisonOperator
                             ProcessRelativeJump(dataReader, ref parameterList, ref functionOffsets);
                             break;
+
                         case 0x5E: // Movement
                             parameterList.Add(BitConverter.GetBytes(dataReader.ReadUInt16())); //in the case of Movement, the first param is an overworld ID
                             ProcessRelativeJump(dataReader, ref parameterList, ref actionOffsets);
                             break;
+
                         case 0x190:
                         case 0x191:
                         case 0x192: {
@@ -376,6 +404,7 @@ namespace DSPRE.ROMFiles {
                                 }
                             }
                             break;
+
                         case 0x1D1: // Number of parameters differ depending on the first parameter value
                             {
                                 short parameter1 = dataReader.ReadInt16();
@@ -388,20 +417,25 @@ namespace DSPRE.ROMFiles {
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         break;
+
                                     case 0x4:
                                     case 0x5:
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         break;
+
                                     case 0x6:
                                         break;
+
                                     case 0x7:
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         break;
+
                                     default:
                                         break;
                                 }
                             }
                             break;
+
                         case 0x1E9: // Number of parameters differ depending on the first parameter value
                             {
                                 short parameter1 = dataReader.ReadInt16();
@@ -409,26 +443,32 @@ namespace DSPRE.ROMFiles {
                                 switch (parameter1) {
                                     case 0x0:
                                         break;
+
                                     case 0x1:
                                     case 0x2:
                                     case 0x3:
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         break;
+
                                     case 0x4:
                                         break;
+
                                     case 0x5:
                                     case 0x6:
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         parameterList.Add(dataReader.ReadBytes(2));
                                         break;
+
                                     case 0x7:
                                     case 0x8:
                                         break;
+
                                     default:
                                         break;
                                 }
                             }
                             break;
+
                         default:
                             addParametersToList(ref parameterList, id, dataReader);
                             break;
@@ -472,6 +512,7 @@ namespace DSPRE.ROMFiles {
                 return;
             }
         }
+
         private void AddReference(ref List<ScriptReference> references, ushort commandID, List<byte[]> parameterList, int pos, CommandContainer cont) {
             if (ScriptDatabase.commandsWithRelativeJump.TryGetValue(commandID, out int parameterWithRelativeJump)) {
                 uint invokedID = BitConverter.ToUInt32(parameterList[parameterWithRelativeJump], 0);  // Jump, Call
@@ -483,6 +524,7 @@ namespace DSPRE.ROMFiles {
                 }
             }
         }
+
         private List<CommandContainer> ReadCommandsFromLines(List<string> linelist, containerTypes containerType, Func<List<(int linenum, string text)>, int, ushort?, bool> endConditions) {
             List<(int linenum, string text)> lineSource = new List<(int linenum, string text)>();
 
@@ -597,7 +639,6 @@ namespace DSPRE.ROMFiles {
                         }
 
                         cmdList.Add(toAdd);
-
                     } while (!lineSource[i++].text.IgnoreCaseEquals(RomInfo.ScriptActionNamesDict[0x00FE]));
 
                     ls.Add(new ActionContainer(actionNumber, actionCommandsList: cmdList));
@@ -614,6 +655,7 @@ namespace DSPRE.ROMFiles {
         }
 
         #region Output
+
         public override byte[] ToByteArray() {
             MemoryStream newData = new MemoryStream();
             using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -695,7 +737,7 @@ namespace DSPRE.ROMFiles {
                             }
                         } else {
                             int functionUsescript = currentFunction.usedScript - 1;
-                            
+
                             //Find script with same ID as the function's referenced UseScript
                             int scriptUsedByFunction = scriptOffsets.FindIndex(ind => ind.ID == currentFunction.usedScript);
 
@@ -738,7 +780,6 @@ namespace DSPRE.ROMFiles {
                         writer.Write(scriptOffsets[i].offsetInFile - (uint)writer.BaseStream.Position - 0x4);
                     }
 
-
                     SortedSet<uint> undeclaredFuncs = new SortedSet<uint>();
                     SortedSet<uint> undeclaredActions = new SortedSet<uint>();
 
@@ -751,7 +792,7 @@ namespace DSPRE.ROMFiles {
                         writer.BaseStream.Position = refList[i].invokedAt; //place seek head on parameter that is supposed to store the jump address
                         ContainerReference result;
 
-                        if (refList[i].typeOfInvoked is containerTypes.Action) { //isApplyMovement 
+                        if (refList[i].typeOfInvoked is containerTypes.Action) { //isApplyMovement
                             result = actionOffsets.Find(entry => entry.ID == refList[i].invokedID);
 
                             if (result.Equals(default(ContainerReference))) {
@@ -770,13 +811,11 @@ namespace DSPRE.ROMFiles {
                                 int relativeOffset = (int)(result.offsetInFile - refList[i].invokedAt - 4);
                                 writer.Write(relativeOffset);
 
-
                                 if (FunctionIsInvoked(refList, uninvokedFuncs, refList[i].invokedID, 0)) {
                                     uninvokedFuncs.Remove(refList[i].invokedID);
                                 }
 
-
-                                //if (refList[i].callerType != containerTypes.Function || 
+                                //if (refList[i].callerType != containerTypes.Function ||
                                 //    (refList[i].callerType == refList[i].invokedType && refList[i].callerID == refList[i].invokedID) ||
                                 //    !uninvokedFuncs.Contains(refList[i].callerID)) { //remove reference if caller is a script, or if caller calls itself, or if caller is a function that's been invoked already
                                 //    uninvokedFuncs.Remove(refList[i].invokedID);
@@ -844,7 +883,7 @@ namespace DSPRE.ROMFiles {
 
             if (!uninvokedFuncsSet.Contains(funcID)) {
                 Console.WriteLine("Function " + funcID + " has already been invoked before. Nothing to check.");
-                return true; //Abort 
+                return true; //Abort
             }
 
             if (refList is null || refList.Count <= 0) {
@@ -879,6 +918,7 @@ namespace DSPRE.ROMFiles {
         public bool SaveToFileDefaultDir(int IDtoReplace, bool showSuccessMessage = true) {
             return SaveToFileDefaultDir(DirNames.scripts, IDtoReplace, showSuccessMessage);
         }
+
         public void SaveToFileExplorePath(string suggestedFileName, bool blindmode) {
             SaveFileDialog sf = new SaveFileDialog {
                 Filter = "Gen IV Script File (*.scr)|*.scr"
@@ -905,8 +945,10 @@ namespace DSPRE.ROMFiles {
                 this.SaveToFile(sf.FileName, showSuccessMessage: true);
             }
         }
-        #endregion
-        #endregion
+
+        #endregion Output
+
+        #endregion Methods (1)
     }
 
     internal class ScriptReference {

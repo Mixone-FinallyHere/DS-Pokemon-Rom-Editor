@@ -12,30 +12,28 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *   by pleoNeX
- * 
- */ 
+ *
+ */
+
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
 
-namespace Ekona
-{
-    public struct sFile
-    {
-            public UInt32 offset;           // Offset where the files inside of the file in path
-            public UInt32 size;             // Length of the file
-            public string name;             // File name
-            public UInt16 id;               // Internal id
-            public string path;             // Path where the file is
-            public Format format;           // Format file 
-            public Object tag;              // Extra information
+namespace Ekona {
+
+    public struct sFile {
+        public UInt32 offset;           // Offset where the files inside of the file in path
+        public UInt32 size;             // Length of the file
+        public string name;             // File name
+        public UInt16 id;               // Internal id
+        public string path;             // Path where the file is
+        public Format format;           // Format file
+        public Object tag;              // Extra information
     }
-    public struct sFolder
-    {
+
+    public struct sFolder {
         public List<sFile> files;           // List of files
         public List<sFolder> folders;      // List of folders
         public string name;                // Folder name
@@ -43,9 +41,7 @@ namespace Ekona
         public Object tag;                 // Extra information
     }
 
-
-    public enum Format
-    {
+    public enum Format {
         Palette,
         Tile,
         Map,
@@ -64,6 +60,7 @@ namespace Ekona
         Model3D,
         Texture
     }
+
     public enum FormatCompress // From DSDecmp
     {
         LZOVL, // keep this as the first one, as only the end of a file may be LZ-ovl-compressed (and overlay files are oftenly double-compressed)
@@ -85,6 +82,7 @@ namespace Ekona
         public byte yFlip;
         public ushort nTile;
     }
+
     public struct NTFT              // Nintendo Tile Format Tile
     {
         public byte[] tiles;

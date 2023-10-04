@@ -1,13 +1,12 @@
-﻿using DSPRE;
-using DSPRE.ROMFiles;
+﻿using DSPRE.ROMFiles;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using static DSPRE.ROMFiles.EventFile;
 
 namespace DSPRE {
-    public partial class EventFileImport : Form { 
+
+    public partial class EventFileImport : Form {
         private static readonly int eventTypesCount = Enum.GetValues(typeof(serializationOrder)).Length;
 
         private readonly bool[] toImport = new bool[eventTypesCount];
@@ -17,10 +16,12 @@ namespace DSPRE {
         public readonly int[][] userSelected = new int[eventTypesCount][];
 
         private bool _blankCurrentEvents;
+
         public bool blankCurrentEvents {
             get { return _blankCurrentEvents; }
             set { _blankCurrentEvents = value; }
         }
+
         public EventFileImport(EventFile ef) {
             InitializeComponent();
             blankCurrentEvents = blankCurrentEventFileCheckbox.Checked;
@@ -92,9 +93,11 @@ namespace DSPRE {
                 checkButtons[typeIndex / 2, i].Enabled = v;
             }
         }
+
         private void checkAllButtonClicked(object sender, EventArgs e) {
             listBoxes[tableLayoutPanel1.GetPositionFromControl(sender as Button).Column / 2].SetAllItemsChecked(true);
         }
+
         private void uncheckAllButtonClicked(object sender, EventArgs e) {
             listBoxes[tableLayoutPanel1.GetPositionFromControl(sender as Button).Column / 2].SetAllItemsChecked(false);
         }

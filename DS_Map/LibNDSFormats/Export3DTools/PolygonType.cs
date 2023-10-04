@@ -1,13 +1,9 @@
-﻿namespace MKDS_Course_Editor.Export3DTools
-{
-    using System;
+﻿namespace MKDS_Course_Editor.Export3DTools {
 
-    public enum PolygonType
-    {
+    public enum PolygonType {
         Triangle,
         Quad,
         TriangleStrip,
         QuadStrip
     }
 }
-

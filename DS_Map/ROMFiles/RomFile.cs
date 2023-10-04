@@ -4,10 +4,12 @@ using System.Windows.Forms;
 using static DSPRE.RomInfo;
 
 namespace DSPRE.ROMFiles {
+
     public abstract class RomFile {
+
         public abstract byte[] ToByteArray();
+
         public bool SaveToFile(string path, bool showSuccessMessage = true) {
-            
             byte[] romFileToByteArray = ToByteArray();
             if (romFileToByteArray is null) {
                 Console.WriteLine(GetType().Name + " couldn't be saved!");
@@ -22,10 +24,12 @@ namespace DSPRE.ROMFiles {
 
             return true;
         }
+
         protected internal bool SaveToFileDefaultDir(DirNames dir, int IDtoReplace, bool showSuccessMessage = true) {
             string path = RomInfo.gameDirs[dir].unpackedDir + "\\" + IDtoReplace.ToString("D4");
             return this.SaveToFile(path, showSuccessMessage);
         }
+
         protected internal void SaveToFileExplorePath(string fileType, string fileExtension, string suggestedFileName, bool showSuccessMessage = true) {
             fileExtension = "*." + fileExtension;
 

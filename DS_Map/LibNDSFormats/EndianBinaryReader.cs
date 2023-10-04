@@ -15,9 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Text;
-using System.Runtime.InteropServices;
 
 namespace System.IO {
+
     public sealed class EndianBinaryReader : IDisposable {
         private bool disposed;
         private byte[] buffer;

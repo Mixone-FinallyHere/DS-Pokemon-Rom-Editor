@@ -4,22 +4,24 @@
 using System;
 using System.Collections.Generic;
 
-namespace LibNDSFormats.NSBMD
-{
-	/// <summary>
-	/// Type for NSBMD objects.
-	/// </summary>
-    public class NSBMDObject
-    {
-        #region Fields (7) 
+namespace LibNDSFormats.NSBMD {
+
+    /// <summary>
+    /// Type for NSBMD objects.
+    /// </summary>
+    public class NSBMDObject {
+
+        #region Fields (7)
 
         private readonly float[] _transVect = new float[3];
         private float _x;
         private float _y;
         private float _z;
         private const float FACTOR1 = 1f;
+
         // StackID used by this object
         public int RestoreID = -1;
+
         // rotation
         public int StackID = -1;
 
@@ -35,9 +37,11 @@ namespace LibNDSFormats.NSBMD
         public bool isBillboard = false;
         public bool isYBillboard = false;
 
-        #endregion Fields 
+        #endregion Fields (7)
 
-        #region Properties (12) 
+
+
+        #region Properties (12)
 
         public bool IsRotated { get; set; }
         public bool IsRotated2 { get; set; }
@@ -54,7 +58,6 @@ namespace LibNDSFormats.NSBMD
 
         public int Pivot { get; set; }
 
-
         // applies to rotation matrix
         public float RotA { get; set; }
 
@@ -64,41 +67,35 @@ namespace LibNDSFormats.NSBMD
         // Name of this object
         public bool Trans { get; set; }
 
-        public float[] TransVect
-        {
+        public float[] TransVect {
             get { return _transVect; }
         }
 
-        public float X
-        {
+        public float X {
             get { return _x; }
-            set
-            {
+            set {
                 _x = value;
-                TransVect[0] = value/FACTOR1;
+                TransVect[0] = value / FACTOR1;
             }
         }
 
-        public float Y
-        {
+        public float Y {
             get { return _y; }
-            set
-            {
+            set {
                 _y = value;
-                TransVect[1] = value/FACTOR1;
+                TransVect[1] = value / FACTOR1;
             }
         }
 
-        public float Z
-        {
+        public float Z {
             get { return _z; }
-            set
-            {
+            set {
                 _z = value;
-                TransVect[2] = value/FACTOR1;
+                TransVect[2] = value / FACTOR1;
             }
         }
 
-        #endregion Properties 
+        #endregion Properties (12)
+
     }
 }

@@ -12,44 +12,42 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * By: pleoNeX
- * 
+ *
  */
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
 using System.Drawing;
 
-namespace Ekona.Images
-{
-    public abstract class MapBase
-    {
+namespace Ekona.Images {
+
+    public abstract class MapBase {
 
         #region Variables
+
         protected IPluginHost pluginHost;
         protected int id = -1;
         protected string fileName;
-        bool loaded;
+        private bool loaded;
 
-        Byte[] original;
-        int startByte;
+        private Byte[] original;
+        private int startByte;
 
-        NTFS[] map;
-        int width, height;
-        bool canEdit;
+        private NTFS[] map;
+        private int width, height;
+        private bool canEdit;
 
-        Object obj;
-        #endregion
+        private Object obj;
 
-        public MapBase()
-        {
+        #endregion Variables
+
+        public MapBase() {
         }
-        public MapBase(string fileIn, int id, string fileName = "")
-        {
+
+        public MapBase(string fileIn, int id, string fileName = "") {
             this.id = id;
             if (fileName == "")
                 this.fileName = System.IO.Path.GetFileName(fileIn);
@@ -58,8 +56,8 @@ namespace Ekona.Images
 
             Read(fileIn);
         }
-        public MapBase(string fileIn, int id,  IPluginHost pluginHost, string fileName = "")
-        {
+
+        public MapBase(string fileIn, int id, IPluginHost pluginHost, string fileName = "") {
             this.pluginHost = pluginHost;
             this.id = id;
             if (fileName == "")
@@ -69,17 +67,17 @@ namespace Ekona.Images
 
             Read(fileIn);
         }
-        public MapBase(NTFS[] mapInfo, bool editable, int width = 0, int height = 0, string fileName = "")
-        {
+
+        public MapBase(NTFS[] mapInfo, bool editable, int width = 0, int height = 0, string fileName = "") {
             this.fileName = fileName;
             Set_Map(mapInfo, editable, width, height);
         }
 
         public abstract void Read(string fileIn);
+
         public abstract void Write(string fileOut, ImageBase image, PaletteBase palette);
 
-        public Image Get_Image(ImageBase image, PaletteBase palette)
-        {
+        public Image Get_Image(ImageBase image, PaletteBase palette) {
             if (image.FormTile == TileForm.Lineal)
                 image.FormTile = TileForm.Horizontal;
 
@@ -100,8 +98,7 @@ namespace Ekona.Images
             return newImage.Get_Image(palette);
         }
 
-        public void Set_Map(NTFS[] mapInfo, bool editable, int width = 0, int height = 0)
-        {
+        public void Set_Map(NTFS[] mapInfo, bool editable, int width = 0, int height = 0) {
             this.map = mapInfo;
             this.canEdit = editable;
             this.width = width;
@@ -116,8 +113,8 @@ namespace Ekona.Images
                 data.AddRange(BitConverter.GetBytes(Actions.MapInfo(map[i])));
             original = data.ToArray();
         }
-        public void Set_Map(MapBase new_map)
-        {
+
+        public void Set_Map(MapBase new_map) {
             this.map = new_map.Map;
             this.width = new_map.Width;
             this.height = new_map.Height;
@@ -132,9 +129,7 @@ namespace Ekona.Images
             original = data.ToArray();
         }
 
-
-        private void Change_StartByte(int newStart)
-        {
+        private void Change_StartByte(int newStart) {
             if (newStart < 0 || newStart == startByte || newStart >= original.Length)
                 return;
             startByte = newStart;
@@ -143,52 +138,49 @@ namespace Ekona.Images
             Array.Copy(original, startByte, newData, 0, newData.Length);
             map = new NTFS[newData.Length / 2];
 
-            for (int i = 0; i < map.Length; i ++)
-            {
+            for (int i = 0; i < map.Length; i++) {
                 map[i] = Actions.MapInfo(BitConverter.ToUInt16(newData, i * 2));
             }
         }
 
         #region Properties
-        public int ID
-        {
+
+        public int ID {
             get { return id; }
         }
-        public String FileName
-        {
+
+        public String FileName {
             get { return fileName; }
             set { fileName = value; }
         }
-        public bool Loaded
-        {
+
+        public bool Loaded {
             get { return loaded; }
         }
-        public bool CanEdit
-        {
+
+        public bool CanEdit {
             get { return canEdit; }
         }
 
-        public int StartByte
-        {
+        public int StartByte {
             get { return startByte; }
             set { Change_StartByte(value); }
         }
-        public int Height
-        {
+
+        public int Height {
             get { return height; }
             set { height = value; }
         }
-        public int Width
-        {
+
+        public int Width {
             get { return width; }
             set { width = value; }
         }
-        public NTFS[] Map
-        {
+
+        public NTFS[] Map {
             get { return map; }
         }
-        #endregion
 
+        #endregion Properties
     }
-
 }

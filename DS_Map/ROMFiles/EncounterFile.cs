@@ -6,7 +6,7 @@ using static DSPRE.RomInfo;
 
 namespace DSPRE.ROMFiles {
     /* ---------------------- WILD POKÉMON DATA STRUCTURE (DPPt):----------------------------
-        
+
        0x0  //  byte:       Walking encounter rate
        0x4  //  byte:       Level of
        0x2  //  ushort:     Matrix number
@@ -19,8 +19,8 @@ namespace DSPRE.ROMFiles {
        0x10 //  ushort:     Event file number
 
        * Diamond/Pearl:
-       0x12 //  ushort:     Index of map name in Text Archive #382 (US version)   
-       
+       0x12 //  ushort:     Index of map name in Text Archive #382 (US version)
+
        * Platinum:
        0x12 //  byte:       Index of map name in Text Archive #382 (US version)
        0x13 //  byte:       Map name textbox type value
@@ -40,7 +40,7 @@ namespace DSPRE.ROMFiles {
        -----------------    8: ?
 
     /* ---------------------- WILD POKÉMON DATA STRUCTURE (HGSS):----------------------------
-        
+
        0x0  //  byte:       Wild Pokemon file number
        0x1  //  byte:       Area data value
        0x2  //  byte:       ?
@@ -76,6 +76,7 @@ namespace DSPRE.ROMFiles {
     public abstract class EncounterFile : RomFile {
         public const string msgFixed = " (already fixed)";
         public const string extension = "wld";
+
         #region Fields (19)
 
         /* Encounter rates */
@@ -102,9 +103,11 @@ namespace DSPRE.ROMFiles {
         public ushort[] superRodPokemon = new ushort[5];
         public ushort[] surfPokemon = new ushort[5];
         public ushort[] swarmPokemon { get; set; }  //2 for DPPt, 4 for HGSS
-        #endregion
+
+        #endregion Fields (19)
 
         #region Methods (1)
+
         public void SaveToFileDefaultDir(int IDtoReplace, bool showSuccessMessage = true) {
             SaveToFileDefaultDir(DirNames.encounters, IDtoReplace, showSuccessMessage);
         }
@@ -119,21 +122,24 @@ namespace DSPRE.ROMFiles {
             fullError += errorSections;
 
             fullError += Environment.NewLine + "It is recommended that you check them before resaving.";
-            
+
             if (errorSections.Contains(msgFixed)) {
                 fullError += Environment.NewLine + "Fields marked as " + '\'' + msgFixed + '\'' + " have been repaired with a value of 0.";
             }
 
             MessageBox.Show(fullError, "Encounter File error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
-        #endregion
+
+        #endregion Methods (1)
     }
 
     /// <summary>
     /// Class to store wild Pokemon data from Pokemon Diamond, Pearl and Platinum
     /// </summary>
     public class EncounterFileDPPt : EncounterFile {
-        #region Fields (9)       
+
+        #region Fields (9)
+
         /* Field encounters */
         public uint[] radarPokemon = new uint[4];
         public uint[] walkingPokemon = new uint[12];
@@ -148,9 +154,11 @@ namespace DSPRE.ROMFiles {
         public uint[] emeraldPokemon = new uint[2];
         public uint[] fireRedPokemon = new uint[2];
         public uint[] leafGreenPokemon = new uint[2];
-        #endregion
+
+        #endregion Fields (9)
 
         #region Constructors (1)
+
         public EncounterFileDPPt(Stream data) {
             using (BinaryReader reader = new BinaryReader(data)) {
                 List<string> fieldsWithErrors = new List<string>();
@@ -317,13 +325,17 @@ namespace DSPRE.ROMFiles {
             }
         }
 
-        public EncounterFileDPPt(int ID) : this(new FileStream(RomInfo.gameDirs[DirNames.encounters].unpackedDir + "\\" + ID.ToString("D4"), FileMode.Open)) { }
+        public EncounterFileDPPt(int ID) : this(new FileStream(RomInfo.gameDirs[DirNames.encounters].unpackedDir + "\\" + ID.ToString("D4"), FileMode.Open)) {
+        }
+
         public EncounterFileDPPt() {
             swarmPokemon = new ushort[2];
         }
-        #endregion Constructors
+
+        #endregion Constructors (1)
 
         #region Methods (1)
+
         public override byte[] ToByteArray() {
             MemoryStream newData = new MemoryStream();
             using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -417,17 +429,21 @@ namespace DSPRE.ROMFiles {
             }
             return newData.ToArray();
         }
+
         public void SaveToFileExplorePath(string suggestedFileName, bool showSuccessMessage = true) {
             SaveToFileExplorePath("DPPt Encounter File", EncounterFile.extension, suggestedFileName, showSuccessMessage);
         }
-        #endregion
+
+        #endregion Methods (1)
     }
 
     /// <summary>
     /// Class to store wild Pokemon data from Pokemon HeartGold and SoulSilver
     /// </summary>
     public class EncounterFileHGSS : EncounterFile {
+
         #region Fields (9)
+
         public byte rockSmashRate;
         public ushort[] morningPokemon = new ushort[12];
         public ushort[] dayPokemon = new ushort[12];
@@ -437,9 +453,11 @@ namespace DSPRE.ROMFiles {
         public ushort[] rockSmashPokemon = new ushort[2];
         public byte[] rockSmashMinLevels = new byte[2];
         public byte[] rockSmashMaxLevels = new byte[2];
-        #endregion
+
+        #endregion Fields (9)
 
         #region Constructors
+
         public EncounterFileHGSS(Stream data) {
             using (BinaryReader reader = new BinaryReader(data)) {
                 List<string> fieldsWithErrors = new List<string>();
@@ -459,28 +477,28 @@ namespace DSPRE.ROMFiles {
                     fieldsWithErrors.Add("Surf rate" + msgFixed);
                 }
 
-                try { 
+                try {
                     rockSmashRate = reader.ReadByte();
                 } catch {
                     rockSmashRate = 0x00;
                     fieldsWithErrors.Add("Rock Smash rate" + msgFixed);
                 }
 
-                try { 
+                try {
                     oldRodRate = reader.ReadByte();
                 } catch {
                     oldRodRate = 0x00;
                     fieldsWithErrors.Add("Old Rod rate" + msgFixed);
                 }
 
-                try { 
+                try {
                     goodRodRate = reader.ReadByte();
                 } catch {
                     goodRodRate = 0x00;
                     fieldsWithErrors.Add("Good Rod rate" + msgFixed);
                 }
 
-                try { 
+                try {
                     superRodRate = reader.ReadByte();
                 } catch {
                     superRodRate = 0x00;
@@ -491,7 +509,7 @@ namespace DSPRE.ROMFiles {
 
                 /* Walking encounters levels */
                 for (int i = 0; i < 12; i++) {
-                    try { 
+                    try {
                         walkingLevels[i] = reader.ReadByte();
                     } catch {
                         walkingLevels[i] = 0x00;
@@ -511,7 +529,7 @@ namespace DSPRE.ROMFiles {
 
                 /* Day walking encounters */
                 for (int i = 0; i < 12; i++) {
-                    try { 
+                    try {
                         dayPokemon[i] = reader.ReadUInt16();
                     } catch {
                         dayPokemon[i] = 0x00;
@@ -521,7 +539,7 @@ namespace DSPRE.ROMFiles {
 
                 /* Night walking encounters */
                 for (int i = 0; i < 12; i++) {
-                    try { 
+                    try {
                         nightPokemon[i] = reader.ReadUInt16();
                     } catch {
                         nightPokemon[i] = 0x00;
@@ -540,7 +558,7 @@ namespace DSPRE.ROMFiles {
                 }
 
                 for (int i = 0; i < 2; i++) {
-                    try {  
+                    try {
                         sinnohMusicPokemon[i] = reader.ReadUInt16();
                     } catch {
                         sinnohMusicPokemon[i] = 0x00;
@@ -684,13 +702,18 @@ namespace DSPRE.ROMFiles {
                 }
             }
         }
-        public EncounterFileHGSS(int ID) : this(new FileStream(RomInfo.gameDirs[DirNames.encounters].unpackedDir + "\\" + ID.ToString("D4"), FileMode.Open)) { }
+
+        public EncounterFileHGSS(int ID) : this(new FileStream(RomInfo.gameDirs[DirNames.encounters].unpackedDir + "\\" + ID.ToString("D4"), FileMode.Open)) {
+        }
+
         public EncounterFileHGSS() {
             swarmPokemon = new ushort[4];
         }
-        #endregion
+
+        #endregion Constructors
 
         #region Methods(1)
+
         public override byte[] ToByteArray() {
             MemoryStream newData = new MemoryStream();
             using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -710,7 +733,7 @@ namespace DSPRE.ROMFiles {
                 }
 
                 /* Morning walking encounters */
-                for (int i = 0; i < 12; i++) { 
+                for (int i = 0; i < 12; i++) {
                     writer.Write(morningPokemon[i]);
                 }
 
@@ -779,6 +802,7 @@ namespace DSPRE.ROMFiles {
         public void SaveToFileExplorePath(string suggestedFileName, bool showSuccessMessage = true) {
             SaveToFileExplorePath("HGSS Encounter File", EncounterFile.extension, suggestedFileName, showSuccessMessage);
         }
-        #endregion
+
+        #endregion Methods(1)
     }
 }

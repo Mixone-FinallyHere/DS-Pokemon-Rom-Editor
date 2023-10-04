@@ -4,17 +4,17 @@
 // Copyright (C) 2012
 //
 //   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by 
+//   it under the terms of the GNU General Public License as published by
 //   the Free Software Foundation, either version 3 of the License, or
 //   (at your option) any later version.
 //
-//   This program is distributed in the hope that it will be useful, 
+//   This program is distributed in the hope that it will be useful,
 //   but WITHOUT ANY WARRANTY; without even the implied warranty of
 //   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details. 
+//   GNU General Public License for more details.
 //
 //   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 // </copyright>
 
@@ -24,29 +24,25 @@
 // -----------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
+using System.Text;
 
-namespace Ekona.Helper
-{
+namespace Ekona.Helper {
+
     /// <summary>
     /// Specification from http://msdn.microsoft.com/en-us/library/dd871305%28v=prot.13%29.aspx
     /// </summary>
-    public class LNK
-    {
-        SHELL_LINK lnk;
+    public class LNK {
+        private SHELL_LINK lnk;
 
-        public LNK(string fileIn)
-        {
+        public LNK(string fileIn) {
             Read(fileIn);
         }
 
-        private void Read(string fileIn)
-        {
+        private void Read(string fileIn) {
             BinaryReader br = new BinaryReader(File.OpenRead(fileIn));
             lnk = new SHELL_LINK();
-            
+
             lnk.header = Read_Header(br);
 
             if (lnk.header.linkFlags.hasLinkTargetIDList)
@@ -61,8 +57,7 @@ namespace Ekona.Helper
             br = null;
         }
 
-        private SHELL_LINK_HEADER Read_Header(BinaryReader br)
-        {
+        private SHELL_LINK_HEADER Read_Header(BinaryReader br) {
             SHELL_LINK_HEADER header = new SHELL_LINK_HEADER();
 
             header.headerSize = br.ReadUInt32();
@@ -90,8 +85,8 @@ namespace Ekona.Helper
 
             return header;
         }
-        private LINK_FLAGS Read_LinkFlags(uint value)
-        {
+
+        private LINK_FLAGS Read_LinkFlags(uint value) {
             LINK_FLAGS flags = new LINK_FLAGS();
 
             flags.hasLinkTargetIDList = Get_Boolean(value); value >>= 1;
@@ -123,8 +118,8 @@ namespace Ekona.Helper
 
             return flags;
         }
-        private FILE_ATTRIBUTE_FLAGS Read_FileAttribute(uint value)
-        {
+
+        private FILE_ATTRIBUTE_FLAGS Read_FileAttribute(uint value) {
             FILE_ATTRIBUTE_FLAGS flags = new FILE_ATTRIBUTE_FLAGS();
 
             flags.readOnly = Get_Boolean(value); value >>= 1;
@@ -146,8 +141,7 @@ namespace Ekona.Helper
             return flags;
         }
 
-        private LINKTARGET_IDLIST Read_LinkIDList(BinaryReader br)
-        {
+        private LINKTARGET_IDLIST Read_LinkIDList(BinaryReader br) {
             LINKTARGET_IDLIST idlist = new LINKTARGET_IDLIST();
 
             idlist.IDListSize = br.ReadUInt16();
@@ -155,14 +149,13 @@ namespace Ekona.Helper
 
             return idlist;
         }
-        private IDLIST Read_IDList(BinaryReader br)
-        {
+
+        private IDLIST Read_IDList(BinaryReader br) {
             IDLIST idlist = new IDLIST();
             idlist.itemIDList = new List<ITEM_IDLIST>();
 
             ushort size = br.ReadUInt16();
-            while (size != 0)
-            {
+            while (size != 0) {
                 ITEM_IDLIST item = new ITEM_IDLIST();
                 item.itemIDSize = size;
                 item.data = br.ReadBytes(size - 2);
@@ -174,8 +167,8 @@ namespace Ekona.Helper
 
             return idlist;
         }
-        private LINKINFO Read_LinkInfo(BinaryReader br)
-        {
+
+        private LINKINFO Read_LinkInfo(BinaryReader br) {
             LINKINFO info = new LINKINFO();
             uint info_pos = (uint)br.BaseStream.Position;
 
@@ -191,14 +184,12 @@ namespace Ekona.Helper
             info.commonNetworkRelativeLinkOffset = br.ReadUInt32();
             info.commonPathSuffixOffset = br.ReadUInt32();
 
-            if (info.linkInfoHeaderSize >= 0x24)
-            {
+            if (info.linkInfoHeaderSize >= 0x24) {
                 info.localBasePathOffsetUnicode = br.ReadUInt32();
                 info.commonPathSuffixOffsetUnicode = br.ReadUInt32();
             }
 
-            if (info.volumeIDAndLocalBasePath)
-            {     
+            if (info.volumeIDAndLocalBasePath) {
                 // Volume ID
                 uint volumeID_pos = info_pos + info.volumeIDOffset;
                 br.BaseStream.Position = volumeID_pos;
@@ -211,8 +202,7 @@ namespace Ekona.Helper
 
                 if (info.volumeID.volumeLabelOffset != 0x14)
                     info.volumeID.data = Get_String(br, false, volumeID_pos + info.volumeID.volumeLabelOffset);
-                else
-                {
+                else {
                     info.volumeID.volumeLabelOffsetUnicode = br.ReadUInt32();
                     info.volumeID.data = Get_String(br, true, volumeID_pos + info.volumeID.volumeLabelOffsetUnicode);
                 }
@@ -221,8 +211,7 @@ namespace Ekona.Helper
                 info.localBasePath = Get_String(br, false, info_pos + info.localBasePathOffset);
             }
 
-            if (info.commonNetworkRelativeLinkAndPathSuffix)
-            {
+            if (info.commonNetworkRelativeLinkAndPathSuffix) {
                 // Common Network Relative Link
                 uint cnrl_pos = info_pos + info.commonNetworkRelativeLinkOffset;
                 info.cnrl = new COMMON_NETWORK_RELATIVE_LINK();
@@ -238,8 +227,7 @@ namespace Ekona.Helper
                 if (info.cnrl.validNetType)
                     info.cnrl.networkProviderType = (PROVIDER_TYPE)networkprovider;
 
-                if (info.cnrl.netNameOffset > 0x14)
-                {
+                if (info.cnrl.netNameOffset > 0x14) {
                     info.cnrl.netNameOffsetUnicode = br.ReadUInt32();
                     info.cnrl.deviceNameOffsetUnicode = br.ReadUInt32();
                 }
@@ -247,8 +235,7 @@ namespace Ekona.Helper
                 info.cnrl.netName = Get_String(br, false, cnrl_pos + info.cnrl.netNameOffset);
                 if (info.cnrl.validDevice)
                     info.cnrl.deviceName = Get_String(br, false, cnrl_pos + info.cnrl.deviceNameOffset);
-                if (info.cnrl.netNameOffset > 0x14)
-                {
+                if (info.cnrl.netNameOffset > 0x14) {
                     info.cnrl.netNameUnicode = Get_String(br, true, cnrl_pos + info.cnrl.netNameOffsetUnicode);
                     info.cnrl.deviceNameUnicode = Get_String(br, true, cnrl_pos + info.cnrl.deviceNameOffsetUnicode);
                 }
@@ -263,36 +250,31 @@ namespace Ekona.Helper
 
             return info;
         }
-        private STRING_DATA Read_StringData(BinaryReader br)
-        {
+
+        private STRING_DATA Read_StringData(BinaryReader br) {
             STRING_DATA sdata = new STRING_DATA();
 
-            if (lnk.header.linkFlags.hasName)
-            {
+            if (lnk.header.linkFlags.hasName) {
                 sdata.nameString = new NAME_STRING();
                 sdata.nameString.countCharacters = br.ReadUInt16();
                 sdata.nameString.value = Get_String(br, sdata.nameString.countCharacters, true);
             }
-            if (lnk.header.linkFlags.hasRelativePath)
-            {
+            if (lnk.header.linkFlags.hasRelativePath) {
                 sdata.relativePath = new RELATIVE_PATH();
                 sdata.relativePath.countCharacters = br.ReadUInt16();
                 sdata.relativePath.value = Get_String(br, sdata.relativePath.countCharacters, true);
             }
-            if (lnk.header.linkFlags.hasWorkingDir)
-            {
+            if (lnk.header.linkFlags.hasWorkingDir) {
                 sdata.workingDir = new WORKING_DIR();
                 sdata.workingDir.countCharacters = br.ReadUInt16();
                 sdata.workingDir.value = Get_String(br, sdata.workingDir.countCharacters, true);
             }
-            if (lnk.header.linkFlags.hasArguments)
-            {
+            if (lnk.header.linkFlags.hasArguments) {
                 sdata.commandLineArgs = new COMMAND_LINE_ARGUMENTS();
                 sdata.commandLineArgs.countCharacters = br.ReadUInt16();
                 sdata.commandLineArgs.value = Get_String(br, sdata.commandLineArgs.countCharacters, true);
             }
-            if (lnk.header.linkFlags.hasIconLocation)
-            {
+            if (lnk.header.linkFlags.hasIconLocation) {
                 sdata.iconLocation = new ICON_LOCATION();
                 sdata.iconLocation.countCharacters = br.ReadUInt16();
                 sdata.iconLocation.value = Get_String(br, sdata.iconLocation.countCharacters, true);
@@ -300,22 +282,20 @@ namespace Ekona.Helper
 
             return sdata;
         }
-        private EXTRA_DATA Read_Extra(BinaryReader br)
-        {
+
+        private EXTRA_DATA Read_Extra(BinaryReader br) {
             EXTRA_DATA extra = new EXTRA_DATA();
 
             for (; ; )
             {
                 uint size = br.ReadUInt32();
-                if (size < 0x04)
-                {
+                if (size < 0x04) {
                     extra.terminal.terminal = size;
                     return extra;
                 }
 
                 uint sign = br.ReadUInt32();
-                switch (sign)
-                {
+                switch (sign) {
                     case 0xA0000001:
                         extra.environment.blockSize = size;
                         extra.environment.blockSignature = sign;
@@ -395,7 +375,7 @@ namespace Ekona.Helper
                     case 0xA0000008:
                         extra.shim.blockSize = size;
                         extra.shim.blockSignature = sign;
-                        extra.shim.layerName = Get_String(br, (int)extra.shim.blockSize - 8,  true);
+                        extra.shim.layerName = Get_String(br, (int)extra.shim.blockSize - 8, true);
                         break;
 
                     case 0xA0000009:
@@ -420,19 +400,18 @@ namespace Ekona.Helper
             }
         }
 
-        private bool Get_Boolean(uint value)
-        {
+        private bool Get_Boolean(uint value) {
             uint v = value & 1;
             return (v == 0 ? false : true);
         }
-        private string Get_String(BinaryReader br, bool unicode, uint offset = 0)
-        {
+
+        private string Get_String(BinaryReader br, bool unicode, uint offset = 0) {
             if (offset != 0)
                 br.BaseStream.Position = offset;
 
             string t = "";
             char c;
-            for ( ; ; )
+            for (; ; )
             {
                 if (unicode)
                     c = Encoding.Unicode.GetChars(br.ReadBytes(2))[0];
@@ -447,16 +426,15 @@ namespace Ekona.Helper
 
             return t;
         }
-        private string Get_String(BinaryReader br, int size, bool unicode)
-        {
+
+        private string Get_String(BinaryReader br, int size, bool unicode) {
             if (!unicode)
                 return new string(Encoding.Default.GetChars(br.ReadBytes(size)));
             else
                 return new string(Encoding.Unicode.GetChars(br.ReadBytes(size * 2)));
         }
 
-        public static bool Check(string fileIn)
-        {
+        public static bool Check(string fileIn) {
             BinaryReader br = new BinaryReader(File.OpenRead(fileIn));
 
             uint hsize = br.ReadUInt32();
@@ -474,18 +452,17 @@ namespace Ekona.Helper
             return true;
         }
 
-        public string Path
-        {
+        public string Path {
             get { return lnk.info.commonPathSuffix + lnk.info.localBasePath; }
         }
-        public FILE_ATTRIBUTE_FLAGS FileAttribute
-        {
+
+        public FILE_ATTRIBUTE_FLAGS FileAttribute {
             get { return lnk.header.fileAttributes; }
         }
 
         #region Structures
-        public struct SHELL_LINK
-        {
+
+        public struct SHELL_LINK {
             public SHELL_LINK_HEADER header;
             public LINKTARGET_IDLIST idlist;    // Optional
             public LINKINFO info;               // Optional
@@ -493,8 +470,7 @@ namespace Ekona.Helper
             public EXTRA_DATA extra;          // Optional
         }
 
-        public struct SHELL_LINK_HEADER
-        {
+        public struct SHELL_LINK_HEADER {
             public uint headerSize;             // Must be 0x4C
             public byte[] linkCLSID;            // Must be 00021401-0000-0000-C000-000000000046.
             public LINK_FLAGS linkFlags;
@@ -510,6 +486,7 @@ namespace Ekona.Helper
             public uint reserved2;              // Must be 00
             public uint reserved3;              // Must be 00
         }
+
         public struct LINK_FLAGS  // 4 bytes
         {
             public bool hasLinkTargetIDList;
@@ -540,6 +517,7 @@ namespace Ekona.Helper
             public bool preferEnvironmentPath;
             public bool keepLocalIDListForUNCTarget;
         }
+
         public struct FILE_ATTRIBUTE_FLAGS  // 4 bytes
         {
             public bool readOnly;
@@ -558,29 +536,30 @@ namespace Ekona.Helper
             public bool not_content_indexed;
             public bool encrypted;
         }
+
         public struct FILE_TIME   // 8 bytes
         {
             // FROM: http://msdn.microsoft.com/en-us/library/cc230273%28v=prot.10%29.aspx
             // "The FILETIME structure is a 64-bit value that represents the number of
             // 100-nanosecond intervals that have elapsed since January 1, 1601, Coordinated Universal Time (UTC)."
-            
+
             //uint dwLowDateTime;
             //uint dwHightDateTime;
             public ulong dateTime;
         }
-        public enum SHOW_COMMAND : uint
-        {
+
+        public enum SHOW_COMMAND : uint {
             SW_SHOWNORMAL = 0x01,       // Default
             SW_SHOWMAXIMIZED = 0x03,
             SW_SHOWMINNOACTIVE = 0x07
         }
+
         public struct HOTKEYS_FLAGS   // 2 bytes
         {
             public LOW_BYTE low;
             public HIGH_BYTE hight;
 
-            public enum LOW_BYTE : byte
-            {
+            public enum LOW_BYTE : byte {
                 K_0 = 0x30,
                 K_1 = 0x31,
                 K_2 = 0x32,
@@ -644,43 +623,45 @@ namespace Ekona.Helper
                 VK_NUMLOCK = 0x90,
                 VK_SCROLL = 0x91
             }
-            public enum HIGH_BYTE : byte
-            {
+
+            public enum HIGH_BYTE : byte {
                 HOTKEYF_SHIFT = 0x01,
                 HOTKEYF_CONTROL = 0x02,
                 HOTKEYF_ALT = 0x04
             }
         }
 
-        public struct LINKTARGET_IDLIST
-        {
+        public struct LINKTARGET_IDLIST {
+
             // The presence of this optional structure is
             // specified by the HasLinkTargetIDList bit
             public ushort IDListSize;
+
             public IDLIST IDList;
         }
-        public struct IDLIST
-        {
+
+        public struct IDLIST {
             public List<ITEM_IDLIST> itemIDList;
             public ushort terminalID;       // Must be 0000
         }
-        public struct ITEM_IDLIST
-        {
+
+        public struct ITEM_IDLIST {
             public ushort itemIDSize;
             public byte[] data;
         }
 
-        public struct LINKINFO
-        {
+        public struct LINKINFO {
             public uint linkInfoSize;
             public uint linkInfoHeaderSize; // 0x1C->no optional fields; >= 0x24 optional fields
 
             // Flags, in total 4 bytes
             public bool volumeIDAndLocalBasePath;
+
             public bool commonNetworkRelativeLinkAndPathSuffix;
 
             // Offsets
             public uint volumeIDOffset;
+
             public uint localBasePathOffset;
             public uint commonNetworkRelativeLinkOffset;
             public uint commonPathSuffixOffset;
@@ -694,8 +675,8 @@ namespace Ekona.Helper
             public string localBasePathUnicode; // UNICODE & NULL-terminated
             public string commonPathSuffixUnicode;  // UNICODE & NULL-terminated
         }
-        public struct VOLUMEID
-        {
+
+        public struct VOLUMEID {
             public uint volumeIDSize;   // MUST be > 0x10
             public DRIVE_TYPE driveType;
             public uint driveSerialNumber;
@@ -703,8 +684,8 @@ namespace Ekona.Helper
             public uint volumeLabelOffsetUnicode;   // UNICODE & NULL-terminated
             public string data;
         }
-        public enum DRIVE_TYPE : uint
-        {
+
+        public enum DRIVE_TYPE : uint {
             DRIVE_UNKNOWN = 0x00,
             DRIVE_NO_ROOT_DIR = 0x01,
             DRIVE_REMOVABLE = 0x02,
@@ -713,16 +694,18 @@ namespace Ekona.Helper
             DRIVE_CDROM = 0x05,
             DRIVE_RAMDISK = 0x06
         }
-        public struct COMMON_NETWORK_RELATIVE_LINK
-        {
+
+        public struct COMMON_NETWORK_RELATIVE_LINK {
             public uint cnrl_size;
 
             // Flags - 4 bytes
             public bool validDevice;
+
             public bool validNetType;
-            
+
             // Offsets
             public uint netNameOffset;
+
             public uint deviceNameOffset;
             public PROVIDER_TYPE networkProviderType;
             public uint netNameOffsetUnicode;
@@ -733,8 +716,8 @@ namespace Ekona.Helper
             public string netNameUnicode;   // Unicode & Null-terminated
             public string deviceNameUnicode;    // Unicode & Null-terminated
         }
-        public enum PROVIDER_TYPE : uint
-        {
+
+        public enum PROVIDER_TYPE : uint {
             WNNC_NET_AVID = 0x001A0000,
             WNNC_NET_DOCUSPACE = 0x001B0000,
             WNNC_NET_MANGOSOFT = 0x001C0000,
@@ -778,42 +761,40 @@ namespace Ekona.Helper
             WNNC_NET_GOOGLE = 0x00430000
         }
 
-        public struct STRING_DATA
-        {
+        public struct STRING_DATA {
             public NAME_STRING nameString;
             public RELATIVE_PATH relativePath;
             public WORKING_DIR workingDir;
             public COMMAND_LINE_ARGUMENTS commandLineArgs;
             public ICON_LOCATION iconLocation;
         }
-        public struct NAME_STRING
-        {
-            public ushort countCharacters;
-            public string value;
-        }
-        public struct RELATIVE_PATH
-        {
-            public ushort countCharacters;
-            public string value;
-        }
-        public struct WORKING_DIR
-        {
-            public ushort countCharacters;
-            public string value;
-        }
-        public struct COMMAND_LINE_ARGUMENTS
-        {
-            public ushort countCharacters;
-            public string value;
-        }
-        public struct ICON_LOCATION
-        {
+
+        public struct NAME_STRING {
             public ushort countCharacters;
             public string value;
         }
 
-        public struct EXTRA_DATA
-        {
+        public struct RELATIVE_PATH {
+            public ushort countCharacters;
+            public string value;
+        }
+
+        public struct WORKING_DIR {
+            public ushort countCharacters;
+            public string value;
+        }
+
+        public struct COMMAND_LINE_ARGUMENTS {
+            public ushort countCharacters;
+            public string value;
+        }
+
+        public struct ICON_LOCATION {
+            public ushort countCharacters;
+            public string value;
+        }
+
+        public struct EXTRA_DATA {
             public CONSOLE_PROPS console;
             public CONSOLE_FE_PROPS consoleFe;
             public DRAWIN_PROPS darwin;
@@ -827,8 +808,8 @@ namespace Ekona.Helper
             public VISTA_AND_ABOVE_IDLIST_PROPS vistaIDList;
             public TERMINAL_BLOCK terminal;
         }
-        public struct CONSOLE_PROPS
-        {
+
+        public struct CONSOLE_PROPS {
             public uint blockSize;              // MUST be 0xCC
             public uint blockSignature;         // MUST be 0xA0000002
             public FILL_ATTRIBUTES fillAttributes;
@@ -855,8 +836,8 @@ namespace Ekona.Helper
             public uint historyNoDup;   // Different to 0 -> Allowed
             public uint[] colorTable;    // RGB 32-bits colors
         }
-        public enum FILL_ATTRIBUTES : ushort
-        {
+
+        public enum FILL_ATTRIBUTES : ushort {
             FOREGROUND_BLUE = 0x01,
             FOREGROUND_GREEN = 0x02,
             FOREGROUND_RED = 0x04,
@@ -866,8 +847,8 @@ namespace Ekona.Helper
             BACKGROUND_RED = 0x40,
             BACKGROUND_INTENSITY = 0x80
         }
-        public enum FONT_FAMILY : uint
-        {
+
+        public enum FONT_FAMILY : uint {
             FF_DONTCARE = 0x00,
             FF_ROMAN = 0x10,
             FF_SWISS = 0x20,
@@ -875,61 +856,61 @@ namespace Ekona.Helper
             FF_SCRIPT = 0x40,
             FF_DECORATIVE = 0x50
         }
-        public struct CONSOLE_FE_PROPS
-        {
+
+        public struct CONSOLE_FE_PROPS {
             public uint blockSize;  // MUST be 0xC
             public uint blockSignature; // MUST be 0xA0000004
             public uint codePage;
         }
-        public struct DRAWIN_PROPS
-        {
+
+        public struct DRAWIN_PROPS {
             public uint blockSize;  // Must be 0x314
             public uint blockSignature; // Must be 0xA0000006
             public string darwinDataAnsi; // 260 bytes, Null-terminated
             public string darwinDataUnicode; // 520 bytes Unicode, Null-terminated
         }
-        public struct ENVIRONMENT_PROPS
-        {
+
+        public struct ENVIRONMENT_PROPS {
             public uint blockSize;  // Must be 0x314
             public uint blockSignature; // Must be 0xA0000001
             public string targetAnsi;   // 260 bytes, null-terminated
             public string targetUnicode;    // 520 bytes, null-terminated, unicode
         }
-        public struct ICON_ENVIRONMENT_PROPS
-        {
+
+        public struct ICON_ENVIRONMENT_PROPS {
             public uint blockSize;      // Must be 0x314
             public uint blockSignature; // Must be 0xA0000007
             public string targetAnsi;   // 260 bytes, null-terminated
             public string targetUnicode;    // 520 bytes, null-terminated, unicode
         }
-        public struct KNOWN_FOLDER_PROPS
-        {
+
+        public struct KNOWN_FOLDER_PROPS {
             public uint blockSize;  // Must be 0x1C
             public uint blockSignature; // Must be 0xA000000B
             public byte[] knownFolderID;
             public uint offset;
         }
-        public struct PROPERTY_STORE_PROPS
-        {
+
+        public struct PROPERTY_STORE_PROPS {
             public uint blockSize;  // Must be >= 0x0C
             public uint blockSignature; // Mst be 0xA0000009
             public byte[] propertyStore;
         }
-        public struct SHIM_PROPS
-        {
+
+        public struct SHIM_PROPS {
             public uint blockSize;      // Must be >= 0x88
             public uint blockSignature; // Must be 0xA0000008
             public string layerName;    // Unicode
         }
-        public struct SPECIAL_FOLDER_PROPS
-        {
+
+        public struct SPECIAL_FOLDER_PROPS {
             public uint blockSize;      // Must be 0x10
             public uint blockSignature; // Must be 0xA0000005
             public uint specialFolderID;
             public uint offset;
         }
-        public struct TRACKER_PROPS
-        {
+
+        public struct TRACKER_PROPS {
             public uint blockSize;      // Must be 0x60
             public uint blockSignature; // Must be 0xA0000003
             public uint length;         // Must be >= 0x58
@@ -938,22 +919,22 @@ namespace Ekona.Helper
             public byte[] droid;        // Two GUID
             public byte[] droidBirth;   // Two GUID
         }
-        public struct VISTA_AND_ABOVE_IDLIST_PROPS
-        {
+
+        public struct VISTA_AND_ABOVE_IDLIST_PROPS {
             public uint blockSize;      // Must be >= 0x0A
             public uint blockSignature; // Must be 0xA000000C
             public IDLIST idlist;
         }
-        public struct TERMINAL_BLOCK
-        {
+
+        public struct TERMINAL_BLOCK {
             public uint terminal;  // Less than 0x04
         }
 
-        static byte[] CLSID = {
-	        0x01, 0x14, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x00, 0x00, 0x00,
-	        0x00, 0x00, 0x00, 0x46
+        private static byte[] CLSID = {
+            0x01, 0x14, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x46
         };
-        #endregion
 
+        #endregion Structures
     }
 }

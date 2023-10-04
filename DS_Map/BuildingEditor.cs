@@ -1,25 +1,26 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using System.Windows.Forms;
-using LibNDSFormats.NSBMD;
+﻿using LibNDSFormats.NSBMD;
 using LibNDSFormats.NSBTX;
-using Microsoft.WindowsAPICodePack.Dialogs;
+using System;
+using System.IO;
+using System.Windows.Forms;
 using Tao.OpenGl;
 using static DSPRE.RomInfo;
 
 namespace DSPRE {
+
     public partial class BuildingEditor : Form {
+
         #region Variables
+
         public static string temp_btxname = "BLDtexture.nsbtx";
         private readonly string folder;
-        bool disableHandlers = new bool();
-        readonly RomInfo rom;
+        private bool disableHandlers = new bool();
+        private readonly RomInfo rom;
 
-        NSBMD currentNSBMD;
-        byte[] currentModelData;
+        private NSBMD currentNSBMD;
+        private byte[] currentModelData;
 
-        readonly NSBMDGlRenderer renderer = new NSBMDGlRenderer();
+        private readonly NSBMDGlRenderer renderer = new NSBMDGlRenderer();
 
         public static float ang = 0.0f;
         public static float dist = 12.8f;
@@ -34,7 +35,8 @@ namespace DSPRE {
         public bool rRot;
         public bool uRot;
         public bool dRot;
-        #endregion
+
+        #endregion Variables
 
         public BuildingEditor(RomInfo romInfo) {
             InitializeComponent();
@@ -58,6 +60,7 @@ namespace DSPRE {
         }
 
         #region Subroutines
+
         private void CreateEmbeddedTexturesFile(int modelID, bool interior) {
             string readingPath = folder + rom.GetBuildingModelsDirPath(interior) + "\\" + modelID.ToString("D4");
 
@@ -70,6 +73,7 @@ namespace DSPRE {
             }
             DSUtils.WriteToFile(Path.GetTempPath() + temp_btxname, texData, fmode: FileMode.Create);
         }
+
         private void FillListBox(bool interior) {
             int modelCount = Directory.GetFiles(folder + rom.GetBuildingModelsDirPath(interior)).Length;
             for (int currentIndex = 0; currentIndex < modelCount; currentIndex++) {
@@ -81,6 +85,7 @@ namespace DSPRE {
                 }
             }
         }
+
         private void FillTexturesBox() {
             int texturesCount = Directory.GetFiles(folder + RomInfo.gameDirs[DirNames.buildingTextures].unpackedDir).Length;
             textureComboBox.Items.Add("Embedded textures");
@@ -89,6 +94,7 @@ namespace DSPRE {
                 textureComboBox.Items.Add("Texture " + i);
             }
         }
+
         private void LoadModelTextures(int fileID) {
             string path;
             if (fileID > -1) {
@@ -102,6 +108,7 @@ namespace DSPRE {
                 currentNSBMD.MatchTextures();
             } catch { }
         }
+
         private void RenderModel() {
             MKDS_Course_Editor.NSBTA.NSBTA.NSBTA_File bta = new MKDS_Course_Editor.NSBTA.NSBTA.NSBTA_File();
             MKDS_Course_Editor.NSBTP.NSBTP.NSBTP_File btp = new MKDS_Course_Editor.NSBTP.NSBTP.NSBTP_File();
@@ -116,6 +123,7 @@ namespace DSPRE {
             Gl.glScalef(currentNSBMD.models[0].modelScale / 32, currentNSBMD.models[0].modelScale / 32, currentNSBMD.models[0].modelScale / 32);
             renderer.RenderModel("", bta, aniframeS, aniframeS, aniframeS, aniframeS, aniframeS, bca, false, -1, 0.0f, 0.0f, dist, elev, ang, true, btp, currentNSBMD);
         }
+
         private void SetupRenderer(float ang, float dist, float elev, float perspective) {
             Gl.glEnable(Gl.GL_RESCALE_NORMAL);
             Gl.glEnable(Gl.GL_COLOR_MATERIAL);
@@ -153,11 +161,12 @@ namespace DSPRE {
             Gl.glDepthMask(Gl.GL_TRUE);
             Gl.glClear(Gl.GL_COLOR_BUFFER_BIT | Gl.GL_DEPTH_BUFFER_BIT);
         }
-        #endregion
+
+        #endregion Subroutines
 
         private void buildingOpenGLControl_MouseWheel(object sender, MouseEventArgs e) { // Zoom In/Out
             float val = (float)e.Delta / 200;
-            
+
             if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift) {
                 dist += val;
             } else {
@@ -166,6 +175,7 @@ namespace DSPRE {
 
             RenderModel();
         }
+
         private void buildingEditorListBox_SelectedIndexChanged(object sender, EventArgs e) {
             if (disableHandlers || buildingEditorBldListBox.SelectedIndex < 0) {
                 return;
@@ -180,6 +190,7 @@ namespace DSPRE {
             LoadModelTextures(textureComboBox.SelectedIndex - 1);
             RenderModel();
         }
+
         private void exportButton_Click(object sender, EventArgs e) {
             SaveFileDialog em = new SaveFileDialog {
                 Filter = "NSBMD model (*.nsbmd)|*.nsbmd",
@@ -191,6 +202,7 @@ namespace DSPRE {
 
             File.Copy(folder + rom.GetBuildingModelsDirPath(interiorCheckBox.Checked) + "\\" + buildingEditorBldListBox.SelectedIndex.ToString("D4"), em.FileName, true);
         }
+
         private void importButton_Click(object sender, EventArgs e) {
             OpenFileDialog im = new OpenFileDialog {
                 Filter = "NSBMD model (*.nsbmd)|*.nsbmd"
@@ -212,6 +224,7 @@ namespace DSPRE {
                 }
             }
         }
+
         private void interiorCheckBox_CheckedChanged(object sender, EventArgs e) {
             disableHandlers = true;
 
@@ -222,6 +235,7 @@ namespace DSPRE {
 
             buildingEditorBldListBox.SelectedIndex = 0;
         }
+
         private void textureComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             if (disableHandlers) {
                 return;
@@ -229,6 +243,7 @@ namespace DSPRE {
             LoadModelTextures(textureComboBox.SelectedIndex - 1);
             RenderModel();
         }
+
         private void buildingOpenGLControl_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e) {
             byte multiplier = 2;
             if (e.Modifiers == Keys.Shift) {
@@ -242,14 +257,17 @@ namespace DSPRE {
                     rRot = true;
                     lRot = false;
                     break;
+
                 case Keys.Left:
                     rRot = false;
                     lRot = true;
                     break;
+
                 case Keys.Up:
                     dRot = false;
                     uRot = true;
                     break;
+
                 case Keys.Down:
                     dRot = true;
                     uRot = false;
@@ -276,8 +294,8 @@ namespace DSPRE {
 
         private void bldExportDAEbutton_Click(object sender, EventArgs e) {
             DSUtils.ModelToDAE(
-                modelName: buildingEditorBldListBox.SelectedItem.ToString().TrimEnd('\0'), 
-                modelData: currentModelData, 
+                modelName: buildingEditorBldListBox.SelectedItem.ToString().TrimEnd('\0'),
+                modelData: currentModelData,
                 textureData: textureComboBox.SelectedIndex < 1 ? null : File.ReadAllBytes(RomInfo.gameDirs[DirNames.buildingTextures].unpackedDir + "\\" + (textureComboBox.SelectedIndex - 1).ToString("D4"))
             );
         }
@@ -287,12 +305,15 @@ namespace DSPRE {
                 case Keys.Right:
                     rRot = false;
                     break;
+
                 case Keys.Left:
                     lRot = false;
                     break;
+
                 case Keys.Up:
                     uRot = false;
                     break;
+
                 case Keys.Down:
                     dRot = false;
                     break;

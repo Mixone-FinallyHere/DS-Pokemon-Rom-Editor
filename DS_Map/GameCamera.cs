@@ -5,7 +5,6 @@ using System.Windows.Forms;
 using static DSPRE.RomInfo;
 
 public class GameCamera {
-
     public const byte PERSPECTIVE = 0;
     public const byte ORTHO = 1;
 
@@ -20,7 +19,6 @@ public class GameCamera {
 
     public byte unk2 { get; private set; }
 
-
     public ushort fov { get; private set; }
     public uint nearClip { get; private set; }
     public uint farClip { get; private set; }
@@ -34,26 +32,37 @@ public class GameCamera {
             switch (index) {
                 case 0:
                     return distance;
+
                 case 1:
                     return vertRot;
+
                 case 2:
                     return horiRot;
+
                 case 3:
                     return zRot;
+
                 case 4:
                     return perspMode;
+
                 case 5:
                     return fov;
+
                 case 6:
                     return nearClip;
+
                 case 7:
                     return farClip;
+
                 case 8:
                     return xOffset;
+
                 case 9:
                     return yOffset;
+
                 case 10:
                     return zOffset;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -64,33 +73,43 @@ public class GameCamera {
                     case 0:
                         distance = Convert.ToUInt32(value);
                         break;
+
                     case 1:
                         vertRot = Convert.ToInt16(value);
                         break;
+
                     case 2:
                         horiRot = Convert.ToInt16(value);
                         break;
+
                     case 3:
                         zRot = Convert.ToInt16(value);
                         break;
+
                     case 4:
                         perspMode = (byte)(Convert.ToBoolean(value) ? 1 : 0);
                         break;
+
                     case 5:
                         fov = Convert.ToUInt16(value);
                         break;
+
                     case 6:
                         nearClip = Convert.ToUInt32(value);
                         break;
+
                     case 7:
                         farClip = Convert.ToUInt32(value);
                         break;
+
                     case 8:
                         xOffset = Convert.ToInt32(value);
                         break;
+
                     case 9:
                         yOffset = Convert.ToInt32(value);
                         break;
+
                     case 10:
                         zOffset = Convert.ToInt32(value);
                         break;
@@ -107,7 +126,6 @@ public class GameCamera {
                         short unk1 = 0, byte perspMode = PERSPECTIVE, byte unk2 = 0,
                         ushort fov = 1473, uint nearClip = 614400, uint farClip = 0x384000,
                         int? xOffset = null, int? yOffset = null, int? zOffset = null) {
-
         this.distance = distance;
         this.vertRot = vertRot;
         this.horiRot = horiRot;
@@ -156,6 +174,7 @@ public class GameCamera {
             MessageBox.Show("You might have to manually fill in the last three camera fields, since DPPt cameras don't have them.", "DPPt Cam detected", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
+
     public byte[] ToByteArray() {
         MemoryStream newData = new MemoryStream();
         using (BinaryWriter writer = new BinaryWriter(newData)) {
@@ -208,7 +227,7 @@ public class GameCamera {
         dgv.Rows[rowIndex].Cells[colIndex++].Value = nearClip;
         dgv.Rows[rowIndex].Cells[colIndex++].Value = farClip;
 
-        if (colIndex < dgv.Columns.Count-3) {
+        if (colIndex < dgv.Columns.Count - 3) {
             if (xOffset != null) {
                 dgv.Rows[rowIndex].Cells[colIndex++].Value = xOffset;
             }

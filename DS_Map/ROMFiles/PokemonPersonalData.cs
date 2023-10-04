@@ -5,11 +5,13 @@ using System.Linq;
 using static DSPRE.RomInfo;
 
 namespace DSPRE.ROMFiles {
+
     public enum PokemonGender {
         Male = 0,
         Female = 254,
         Unknown = 255
     }
+
     public enum PokemonType {
         Normal = 0,
         Fighting,
@@ -30,6 +32,7 @@ namespace DSPRE.ROMFiles {
         Dragon,
         Dark
     }
+
     public enum PokemonGrowthCurve {
         Erratic = 0,
         Fast,
@@ -57,9 +60,10 @@ namespace DSPRE.ROMFiles {
         Dragon,
         NoBreed,
     };
+
     public enum PokemonDexColor {
         Red = 0,
-        Blue, 
+        Blue,
         Yellow,
         Green,
         Black,
@@ -75,7 +79,7 @@ namespace DSPRE.ROMFiles {
         public static readonly int tmsCount = 92;
         public static readonly int hmsCount = 8;
 
-        public byte baseHP;   
+        public byte baseHP;
         public byte baseAtk;
         public byte baseDef;
         public byte baseSpeed;
@@ -89,7 +93,8 @@ namespace DSPRE.ROMFiles {
         public byte givenExp;
 
         //Part of a u16 bitfield, 2 bits each.
-        public byte evHP;   
+        public byte evHP;
+
         public byte evAtk;
         public byte evDef;
         public byte evSpeed;
@@ -100,21 +105,21 @@ namespace DSPRE.ROMFiles {
         public ushort item1;             // First item that the mon may hold when caught
         public ushort item2;             // Second item that the mon may hold when caught
 
-        public byte genderVec;        
-        public byte eggSteps;      
+        public byte genderVec;
+        public byte eggSteps;
         public byte baseFriendship;
         public PokemonGrowthCurve growthCurve;
 
-        public byte eggGroup1;    
-        public byte eggGroup2;    
-        public byte firstAbility; 
+        public byte eggGroup1;
+        public byte eggGroup2;
+        public byte firstAbility;
         public byte secondAbility;
 
         public byte escapeRate;
         public PokemonDexColor color;// : 7;           // Color (used in Pokedex)
         public bool flip;// : 1;         // Flip Flag
 
-        public SortedSet<byte> machines;            
+        public SortedSet<byte> machines;
 
         public PokemonPersonalData(Stream stream) {
             using (BinaryReader reader = new BinaryReader(stream)) {
@@ -161,7 +166,8 @@ namespace DSPRE.ROMFiles {
             }
         }
 
-        public PokemonPersonalData(int ID) : this(new FileStream(RomInfo.gameDirs[DirNames.personalPokeData].unpackedDir + "\\" + ID.ToString("D4"), FileMode.Open)) { }
+        public PokemonPersonalData(int ID) : this(new FileStream(RomInfo.gameDirs[DirNames.personalPokeData].unpackedDir + "\\" + ID.ToString("D4"), FileMode.Open)) {
+        }
 
         public override byte[] ToByteArray() {
             using (MemoryStream stream = new MemoryStream()) {
@@ -224,7 +230,7 @@ namespace DSPRE.ROMFiles {
 
                 for (int j = 0; j < 32; j++) {
                     if ((currentBitfield & (1 << j)) != 0) {
-                        result.Add((byte)(i * 32 + j+1));
+                        result.Add((byte)(i * 32 + j + 1));
                     }
                 }
             }
@@ -235,7 +241,7 @@ namespace DSPRE.ROMFiles {
         public uint[] SetToBitField(SortedSet<byte> set) {
             if (set == null) {
                 return null;
-            } 
+            }
             if (set.Count == 0) {
                 return new uint[0];
             }
@@ -252,12 +258,13 @@ namespace DSPRE.ROMFiles {
 
             return bitfield;
         }
+
         public void SaveToFileDefaultDir(int IDtoReplace, bool showSuccessMessage = true) {
             SaveToFileDefaultDir(DirNames.personalPokeData, IDtoReplace, showSuccessMessage);
         }
+
         public void SaveToFileExplorePath(string suggestedFileName, bool showSuccessMessage = true) {
             SaveToFileExplorePath("Gen IV Personal Pokémon data", "bin", suggestedFileName, showSuccessMessage);
         }
-
     }
 }

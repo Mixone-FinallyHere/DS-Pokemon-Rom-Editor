@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 
+namespace DSPRE.ROMFiles {
 
-namespace DSPRE.ROMFiles
-{
-    public class SpeciesFile
-    {
+    public class SpeciesFile {
         public byte Ability1;
         public byte Ability2;
         public byte GenderRatioMaleToFemale;
@@ -31,8 +26,7 @@ namespace DSPRE.ROMFiles
         public const int GIRATINA_ID_NUM = 487;
         public const int SHAYMIN_ID_NUM = 492;
 
-        public SpeciesFile(FileStream pokeData)
-        {
+        public SpeciesFile(FileStream pokeData) {
             var pokeDataReader = new BinaryReader(pokeData);
             pokeDataReader.BaseStream.Position = GENDER_RATIO_BYTE_OFFSET;
             GenderRatioMaleToFemale = pokeDataReader.ReadByte();
@@ -44,18 +38,16 @@ namespace DSPRE.ROMFiles
             pokeDataReader.Close();
         }
 
-        public static bool hasMoreThanOneGender(int pokemonID, SpeciesFile[] pokemonSpecies)
-        {
-            switch (pokemonSpecies[pokemonID].GenderRatioMaleToFemale)
-            {
+        public static bool hasMoreThanOneGender(int pokemonID, SpeciesFile[] pokemonSpecies) {
+            switch (pokemonSpecies[pokemonID].GenderRatioMaleToFemale) {
                 case GENDER_RATIO_MALE:
                 case GENDER_RATIO_FEMALE:
                 case GENDER_RATIO_GENDERLESS:
                     return false;
+
                 default:
                     return true;
             }
         }
     }
 }
-

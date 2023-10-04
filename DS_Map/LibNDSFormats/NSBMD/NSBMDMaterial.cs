@@ -2,14 +2,14 @@
 // Code adapted from kiwi.ds' NSBMD Model Viewer.
 
 using System;
-using System.Drawing;
 using System.Collections.Generic;
+using System.Drawing;
 
-namespace LibNDSFormats.NSBMD
-{
-    public class NSBMDMaterial
-    {
-        #region Fields (16) 
+namespace LibNDSFormats.NSBMD {
+
+    public class NSBMDMaterial {
+
+        #region Fields (16)
 
         public int color0;
         public int format;
@@ -45,21 +45,22 @@ namespace LibNDSFormats.NSBMD
         public uint PolyAttrib;
         public int Alpha;
         public bool diffuseColor;
-		public bool shine;
+        public bool shine;
         public float[] mtx = null;
 
-        #endregion Fields 
+        #endregion Fields (16)
 
-        #region Methods (1) 
 
-        // Public Methods (1) 
+
+        #region Methods (1)
+
+        // Public Methods (1)
 
         /// <summary>
         /// Copy data to other NSBMD material
         /// </summary>
         /// <param name="other">Other NSBMD material.</param>
-        public NSBMDMaterial CopyTo(NSBMDMaterial other1)
-        {
+        public NSBMDMaterial CopyTo(NSBMDMaterial other1) {
             NSBMDMaterial other = other1;
             other.texname = texname;
             other.texoffset = texoffset;
@@ -74,6 +75,7 @@ namespace LibNDSFormats.NSBMD
             return other;
         }
 
-        #endregion Methods 
+        #endregion Methods (1)
+
     }
 }

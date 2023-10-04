@@ -12,38 +12,37 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * By: pleoNeX
- * 
+ *
  */
+
+using Ekona;
+using Ekona.Images;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using Ekona;
-using Ekona.Images;
 
-namespace Images
-{
-    public partial class AnimationControl : UserControl
-    {
-        IPluginHost pluginHost;
-        PaletteBase palette;
-        ImageBase image;
-        SpriteBase sprite;
-        NANR ani;
+namespace Images {
 
-        Bitmap[] bitAni;
-        bool isAni;         // If there are animations
-        int imgShow;
+    public partial class AnimationControl : UserControl {
+        private IPluginHost pluginHost;
+        private PaletteBase palette;
+        private ImageBase image;
+        private SpriteBase sprite;
+        private NANR ani;
 
-        public AnimationControl()
-        {
+        private Bitmap[] bitAni;
+        private bool isAni;         // If there are animations
+        private int imgShow;
+
+        public AnimationControl() {
             InitializeComponent();
             Read_Language();
         }
-        public AnimationControl(Bitmap[] anis, int interval)
-        {
+
+        public AnimationControl(Bitmap[] anis, int interval) {
             InitializeComponent();
             Read_Language();
 
@@ -68,8 +67,8 @@ namespace Images
             tempo.Enabled = true;
             tempo.Start();
         }
-        public AnimationControl(IPluginHost pluginHost, NANR ani)
-        {
+
+        public AnimationControl(IPluginHost pluginHost, NANR ani) {
             InitializeComponent();
             Read_Language();
 
@@ -80,8 +79,7 @@ namespace Images
             this.ani = ani;
             isAni = true;
 
-            if (ani.Struct.abnk.nBanks == 0)
-            {
+            if (ani.Struct.abnk.nBanks == 0) {
                 MessageBox.Show("No animations.");
                 isAni = false;
                 tempo.Enabled = false;
@@ -99,7 +97,6 @@ namespace Images
                 checkTransparencia.Enabled = false;
             }
 
-
             for (int i = 0; i < ani.Names.Length; i++)
                 comboAni.Items.Add(ani.Names[i]);
             if (isAni)
@@ -115,22 +112,20 @@ namespace Images
                 aniBox.Image = bitAni[0];
         }
 
-        private void Read_Language()
-        {
+        private void Read_Language() {
             Ekona.Helper.Translation.TranslateControls(this.Controls, "AnimationControl");
             Ekona.Helper.Translation.TranslateControls(this.groupBox2.Controls, "AnimationControl");
         }
 
-        private void ShowInfo()
-        {
+        private void ShowInfo() {
             //listProp.Items[1].SubItems.Add(ani.Struct.abnk.nBanks.ToString());
             //listProp.Items[2].SubItems.Add(ani.Struct.abnk.tFrames.ToString());
             //listProp.Items[3].SubItems.Add("0x" + String.Format("{0:X}", ani.Struct.abnk.constant));
             //listProp.Items[4].SubItems.Add("0x" + String.Format("{0:X}", ani.Struct.abnk.padding));
             ShowInfo(0);
         }
-        private void ShowInfo(int bnk)
-        {
+
+        private void ShowInfo(int bnk) {
             //listProp.Items[6].SubItems[1].Text = bnk.ToString();
             //listProp.Items[7].SubItems[1].Text = ani.Struct.abnk.anis[bnk].nFrames.ToString();
             //listProp.Items[8].SubItems[1].Text = ani.Struct.abnk.anis[bnk].dataType.ToString();
@@ -139,62 +134,59 @@ namespace Images
             //listProp.Items[11].SubItems[1].Text = "0x" + String.Format("{0:X}", ani.Struct.abnk.anis[bnk].unknown3);
             ShowInfo(0, 0);
         }
-        private void ShowInfo(int bnk, int frame)
-        {
+
+        private void ShowInfo(int bnk, int frame) {
             //listProp.Items[13].SubItems[1].Text = frame.ToString();
             //listProp.Items[14].SubItems[1].Text = ani.Struct.abnk.anis[bnk].frames[frame].unknown1.ToString();
             //listProp.Items[15].SubItems[1].Text = "0x" + String.Format("{0:X}", ani.Struct.abnk.anis[bnk].frames[frame].constant);
             //listProp.Items[17].SubItems[1].Text = ani.Struct.abnk.anis[bnk].frames[frame].data.nCell.ToString();
         }
 
-        private void Get_Ani()
-        {
+        private void Get_Ani() {
             if (!isAni)
                 return;
 
             int id = comboAni.SelectedIndex;
             imgShow = 0;
             bitAni = new Bitmap[ani.Struct.abnk.anis[id].nFrames];
-            for (int i = 0; i < ani.Struct.abnk.anis[id].nFrames; i++)
-            {
+            for (int i = 0; i < ani.Struct.abnk.anis[id].nFrames; i++) {
                 bitAni[i] = (Bitmap)sprite.Get_Image(image, palette, ani.Struct.abnk.anis[id].frames[i].data.nCell, 512, 256,
                     checkEntorno.Checked, checkCeldas.Checked, checkNumeros.Checked, checkTransparencia.Checked, checkImage.Checked);
             }
         }
 
-        private void check_CheckedChanged(object sender, EventArgs e)
-        {
+        private void check_CheckedChanged(object sender, EventArgs e) {
             Get_Ani();
             aniBox.Image = bitAni[imgShow];
         }
-        private void comboAni_SelectedIndexChanged(object sender, EventArgs e)
-        {
+
+        private void comboAni_SelectedIndexChanged(object sender, EventArgs e) {
             Get_Ani();
 
             aniBox.Image = bitAni[imgShow];
             ShowInfo(comboAni.SelectedIndex);
         }
-        private void btnStop_Click(object sender, EventArgs e)
-        {
+
+        private void btnStop_Click(object sender, EventArgs e) {
             tempo.Stop();
             btnPlay.Enabled = true;
             btnStop.Enabled = false;
         }
-        private void btnPlay_Click(object sender, EventArgs e)
-        {
+
+        private void btnPlay_Click(object sender, EventArgs e) {
             tempo.Start();
             btnPlay.Enabled = false;
             btnStop.Enabled = true;
         }
-        private void tempo_Tick(object sender, EventArgs e)
-        {
+
+        private void tempo_Tick(object sender, EventArgs e) {
             imgShow += 1;
             if (imgShow >= bitAni.Length)
                 imgShow = 0;
             aniBox.Image = bitAni[imgShow];
         }
-        private void btnNext_Click(object sender, EventArgs e)
-        {
+
+        private void btnNext_Click(object sender, EventArgs e) {
             imgShow += 1;
             if (imgShow >= bitAni.Length)
                 imgShow = 0;
@@ -202,8 +194,8 @@ namespace Images
 
             ShowInfo(comboAni.SelectedIndex, imgShow);
         }
-        private void btnPrevious_Click(object sender, EventArgs e)
-        {
+
+        private void btnPrevious_Click(object sender, EventArgs e) {
             imgShow -= 1;
             if (imgShow < 0)
                 imgShow = bitAni.Length - 1;
@@ -211,13 +203,13 @@ namespace Images
 
             ShowInfo(comboAni.SelectedIndex, imgShow);
         }
-        private void txtTime_TextChanged(object sender, EventArgs e)
-        {
+
+        private void txtTime_TextChanged(object sender, EventArgs e) {
             if (Convert.ToInt32(txtTime.Text) != 0)
                 tempo.Interval = Convert.ToInt32(txtTime.Text);
         }
-        private void btnSave_Click(object sender, EventArgs e)
-        {
+
+        private void btnSave_Click(object sender, EventArgs e) {
             SaveFileDialog o = new SaveFileDialog();
             o.AddExtension = true;
             o.CheckPathExists = true;
@@ -229,8 +221,7 @@ namespace Images
                 Ekona.Images.Formats.APNG.Create(bitAni, o.FileName, Convert.ToInt32(txtTime.Text) / 10, 0x00);
         }
 
-        private void aniBox_DoubleClick(object sender, EventArgs e)
-        {
+        private void aniBox_DoubleClick(object sender, EventArgs e) {
             Form ventana = new Form();
             ventana.FormBorderStyle = FormBorderStyle.FixedSingle;
             ventana.Size = new System.Drawing.Size(512, 512);
@@ -241,8 +232,7 @@ namespace Images
 
             int id = comboAni.SelectedIndex;
             Bitmap[] animations = new Bitmap[ani.Struct.abnk.anis[id].nFrames];
-            for (int i = 0; i < ani.Struct.abnk.anis[id].nFrames; i++)
-            {
+            for (int i = 0; i < ani.Struct.abnk.anis[id].nFrames; i++) {
                 animations[i] = (Bitmap)sprite.Get_Image(image, palette, ani.Struct.abnk.anis[id].frames[i].data.nCell, 512, 256,
                     checkEntorno.Checked, checkCeldas.Checked, checkNumeros.Checked, checkTransparencia.Checked, checkImage.Checked);
             }

@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace DSPRE.Resources {
+
     public static class TextDatabase {
+
         public static Dictionary<int, string> readTextDictionary = new Dictionary<int, string>() {
             [0x0000] = "\\x0000",
             [0x0001] = "\\x0001",
@@ -3694,6 +3694,7 @@ namespace DSPRE.Resources {
             [0x0E80] = "锥",
             [0x0E81] = "锹",
         };
+
         public static Dictionary<int, int> writeTextDictionary = new Dictionary<int, int>() {
             [32] = 0x01DE,
             [33] = 0x01AB,

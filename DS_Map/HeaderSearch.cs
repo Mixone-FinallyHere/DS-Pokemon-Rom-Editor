@@ -1,15 +1,14 @@
 ﻿using DSPRE.ROMFiles;
-using System.Collections.Generic;
-
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Windows.Forms;
 using static DSPRE.RomInfo;
-using System.Reflection;
-using System.Linq;
 
 namespace DSPRE {
 
     public partial class HeaderSearch : Form {
+
         public static readonly Dictionary<MapHeader.SearchableFields, string> searchableHeaderFieldsDict = new Dictionary<MapHeader.SearchableFields, string>() {
             [MapHeader.SearchableFields.AreaDataID] = "Area Data (ID)",
             [MapHeader.SearchableFields.CameraAngleID] = "Camera Angle (ID)",
@@ -25,9 +24,12 @@ namespace DSPRE {
             [MapHeader.SearchableFields.TextArchiveID] = "Text Archive (ID)",
             [MapHeader.SearchableFields.WeatherID] = "Weather (ID)"
         };
+
         public enum NumOperators : byte {
+
             //Order matters!
             Equal,
+
             Different,
             Less,
             Greater,
@@ -36,8 +38,10 @@ namespace DSPRE {
         };
 
         public enum TextOperators : byte {
+
             //Order matters!
             Contains,
+
             DoesNotContain,
             IsExactly,
             IsNot
@@ -85,6 +89,7 @@ namespace DSPRE {
         }
 
         #region Helper Methods
+
         private void UpdateOperators(ComboBox operatorComboBox, ComboBox fieldToSearchComboBox) {
             operatorComboBox.Items.Clear();
 
@@ -102,13 +107,14 @@ namespace DSPRE {
 
             operatorComboBox.SelectedIndex = 0;
         }
-        #endregion
+
+        #endregion Helper Methods
+
         public static void ResetResults(ListBox headerListBox, List<string> intNames, bool prependNumbers) {
             if (headerListBox.Items.Count < intNames.Count) {
-
                 headerListBox.Enabled = true;
                 headerListBox.Items.Clear();
-                
+
                 if (prependNumbers) {
                     for (int i = 0; i < intNames.Count; i++) {
                         string name = intNames[i];
@@ -119,6 +125,7 @@ namespace DSPRE {
                 }
             }
         }
+
         public static HashSet<string> AdvancedSearch(ushort startID, ushort finalID, List<string> intNames, int fieldToSearch, int oper, string valToSearch) {
             if (fieldToSearch < 0 || oper < 0 || valToSearch == "") {
                 return null;
@@ -135,21 +142,25 @@ namespace DSPRE {
                                     result.Add(i.ToString("D3") + MapHeader.nameSeparator + intNames[i]);
                                 }
                                 break;
+
                             case (int)TextOperators.IsNot:
                                 if (!intNames[i].Equals(valToSearch)) {
                                     result.Add(i.ToString("D3") + MapHeader.nameSeparator + intNames[i]);
                                 }
                                 break;
+
                             case (int)TextOperators.Contains:
                                 if (intNames[i].IndexOf(valToSearch, StringComparison.InvariantCultureIgnoreCase) >= 0) {
                                     result.Add(i.ToString("D3") + MapHeader.nameSeparator + intNames[i]);
                                 }
                                 break;
+
                             case (int)TextOperators.DoesNotContain:
                                 if (intNames[i].IndexOf(valToSearch, StringComparison.InvariantCultureIgnoreCase) < 0) {
                                     result.Add(i.ToString("D3") + MapHeader.nameSeparator + intNames[i]);
                                 }
                                 break;
+
                             default:
                                 Console.WriteLine("Unrecognized operand!!!");
                                 break;
@@ -157,11 +168,11 @@ namespace DSPRE {
                     }
                     break;
                 //case (int)MapHeader.SearchableFields.MusicDayName:
-                    //Maybe in the future
-                    //break;
+                //Maybe in the future
+                //break;
                 //case (int)MapHeader.SearchableFields.MusicNightName:
-                    //Maybe in the future
-                    //break;
+                //Maybe in the future
+                //break;
                 default:
                     string[] fieldSplit = searchableHeaderFieldsDict[(MapHeader.SearchableFields)fieldToSearch].Split();
 
@@ -185,7 +196,7 @@ namespace DSPRE {
                         } else {
                             h = MapHeader.LoadFromARM9(i);
                         }
-                        
+
                         int headerField = int.Parse(property.GetValue(h, null).ToString());
 
                         switch (oper) {
@@ -194,31 +205,37 @@ namespace DSPRE {
                                     result.Add(i.ToString("D3") + MapHeader.nameSeparator + intNames[i]);
                                 }
                                 break;
+
                             case (int)NumOperators.Equal:
                                 if (headerField == numToSearch) {
                                     result.Add(i.ToString("D3") + MapHeader.nameSeparator + intNames[i]);
                                 }
                                 break;
-                            case (int)NumOperators.Greater: 
+
+                            case (int)NumOperators.Greater:
                                 if (headerField > numToSearch) {
                                     result.Add(i.ToString("D3") + MapHeader.nameSeparator + intNames[i]);
                                 }
                                 break;
+
                             case (int)NumOperators.LessOrEqual:
                                 if (headerField <= numToSearch) {
                                     result.Add(i.ToString("D3") + MapHeader.nameSeparator + intNames[i]);
                                 }
                                 break;
+
                             case (int)NumOperators.GreaterOrEqual:
                                 if (headerField >= numToSearch) {
                                     result.Add(i.ToString("D3") + MapHeader.nameSeparator + intNames[i]);
                                 }
                                 break;
+
                             case (int)NumOperators.Different:
                                 if (headerField != numToSearch) {
                                     result.Add(i.ToString("D3") + MapHeader.nameSeparator + intNames[i]);
                                 }
                                 break;
+
                             default:
                                 Console.WriteLine("Unrecognized operand!!!");
                                 break;
@@ -228,6 +245,7 @@ namespace DSPRE {
             }
             return result;
         }
+
         private void startSearchButton_Click(object sender, EventArgs e) {
             StartSearch(showDialog: true);
         }
@@ -243,7 +261,7 @@ namespace DSPRE {
 
             HashSet<string> result;
             headerListBox.Items.Clear();
-            
+
             try {
                 result = AdvancedSearch(0, (ushort)intNames.Count, intNames, fieldToSearch1ComboBox.SelectedIndex, operator1ComboBox.SelectedIndex, valueTextBox.Text);
             } catch (FormatException) {
@@ -279,19 +297,22 @@ namespace DSPRE {
                 StartSearch(showDialog: false);
             } else if (e.KeyCode == Keys.Enter) {
                 StartSearch(showDialog: true);
-            }    
+            }
         }
+
         private void headerSearchResetButton_Click(object sender, EventArgs e) {
             ResetResults(headerListBox, intNames, prependNumbers: true);
             valueTextBox.Clear();
             statusLabel.Text = "Ready";
         }
+
         private void fieldToSearch1ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             UpdateOperators(operator1ComboBox, fieldToSearch1ComboBox);
             if (autoSearchCB.Checked) {
                 StartSearch(showDialog: false);
             }
         }
+
         private void operator1ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             if (autoSearchCB.Checked) {
                 StartSearch(showDialog: false);

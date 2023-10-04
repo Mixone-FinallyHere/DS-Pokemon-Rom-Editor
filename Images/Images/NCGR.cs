@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Text;
-using Ekona;
+﻿using Ekona;
 using Ekona.Images;
+using System;
+using System.IO;
+using System.Linq;
 
-namespace Images
-{
-    public class NCGR : ImageBase
-    {
-        sNCGR ncgr;
+namespace Images {
 
-        public NCGR(string file, int id, string fileName = "") : base(file, id, fileName) { }
+    public class NCGR : ImageBase {
+        private sNCGR ncgr;
 
-        public override void Read(string fileIn)
-        {
+        public NCGR(string file, int id, string fileName = "") : base(file, id, fileName) {
+        }
+
+        public override void Read(string fileIn) {
             BinaryReader br = new BinaryReader(File.OpenRead(fileIn));
             ncgr = new sNCGR();
 
@@ -47,8 +44,7 @@ namespace Images
             ncgr.rahc.unknown3 = br.ReadUInt32();
             ncgr.rahc.data = br.ReadBytes((int)ncgr.rahc.size_tiledata);
 
-            if (ncgr.rahc.nTilesX != 0xFFFF)
-            {
+            if (ncgr.rahc.nTilesX != 0xFFFF) {
                 ncgr.rahc.nTilesX *= 8;
                 ncgr.rahc.nTilesY *= 8;
             }
@@ -66,17 +62,16 @@ namespace Images
             br.Close();
             Set_Tiles(ncgr.rahc.data, ncgr.rahc.nTilesX, ncgr.rahc.nTilesY, ncgr.rahc.depth, ncgr.order, true);
 
-            if (ncgr.rahc.nTilesX == 0xFFFF)
-            {
-                System.Drawing.Size size = Actions.Get_Size((int)ncgr.rahc.size_tiledata, BPP); 
+            if (ncgr.rahc.nTilesX == 0xFFFF) {
+                System.Drawing.Size size = Actions.Get_Size((int)ncgr.rahc.size_tiledata, BPP);
                 ncgr.rahc.nTilesX = (ushort)size.Width;
                 ncgr.rahc.nTilesY = (ushort)size.Height;
                 Height = size.Height;
                 Width = size.Width;
             }
         }
-        public override void Write(string fileOut, PaletteBase palette)
-        {
+
+        public override void Write(string fileOut, PaletteBase palette) {
             Update_Struct();
             BinaryWriter bw = new BinaryWriter(File.OpenWrite(fileOut));
 
@@ -102,8 +97,7 @@ namespace Images
             bw.Write(ncgr.rahc.data);
 
             // SOPC section
-            if (ncgr.header.nSection == 2)
-            {
+            if (ncgr.header.nSection == 2) {
                 bw.Write(ncgr.sopc.id);
                 bw.Write(ncgr.sopc.size_section);
                 bw.Write(ncgr.sopc.unknown1);
@@ -115,14 +109,12 @@ namespace Images
             bw.Close();
         }
 
-        private void Update_Struct()
-        {
+        private void Update_Struct() {
             ncgr.rahc.nTilesX = (ushort)(Width / 8);
             ncgr.rahc.nTilesY = (ushort)(Height / 8);
 
             ncgr.rahc.data = Tiles;
-            if (this.FormTile == TileForm.Lineal && ncgr.order == TileForm.Horizontal)
-            {
+            if (this.FormTile == TileForm.Lineal && ncgr.order == TileForm.Horizontal) {
                 ncgr.rahc.data = Actions.HorizontalToLineal(Tiles, ncgr.rahc.nTilesX, ncgr.rahc.nTilesY, BPP, TileSize);
                 Set_Tiles(ncgr.rahc.data, this.Width, this.Height, this.FormatColor, ncgr.order, true);
             }
@@ -143,6 +135,7 @@ namespace Images
             public Object other;
             public UInt32 id;
         }
+
         public struct RAHC  // CHARacter
         {
             public char[] id;               // Always RAHC = 0x52414843
@@ -157,6 +150,7 @@ namespace Images
             public UInt32 unknown3;         // Always 0x18 (24) (data offset?)
             public byte[] data;             // image data
         }
+
         public struct SOPC  // Unknown section
         {
             public char[] id;
@@ -165,6 +159,5 @@ namespace Images
             public UInt16 charSize;
             public UInt16 nChar;
         }
-
     }
 }

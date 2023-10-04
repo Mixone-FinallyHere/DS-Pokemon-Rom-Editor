@@ -1,24 +1,25 @@
 // 4x4 matrix class.
 // Code adapted from kiwi.ds' NSBMD Model Viewer.
 
-using System;
-using System.Diagnostics;
-
 namespace LibNDSFormats.NSBMD {
+
     /// <summary>
     /// 4x4 matrix class.
     /// </summary>
     internal class MTX44 {
-        #region Fields (1) 
+
+        #region Fields (1)
 
         /// <summary>
         /// Float values of matrix.
         /// </summary>
         private float[] _array = new float[4 * 4];
 
-        #endregion Fields 
+        #endregion Fields (1)
 
-        #region Properties (2) 
+
+
+        #region Properties (2)
 
         // TODO: Index check!
 
@@ -42,11 +43,13 @@ namespace LibNDSFormats.NSBMD {
             set { _array[index] = value; }
         }
 
-        #endregion Properties 
+        #endregion Properties (2)
 
-        #region Methods (8) 
 
-        // Public Methods (7) 
+
+        #region Methods (8)
+
+        // Public Methods (7)
 
         /// <summary>
         /// Get float array.
@@ -109,6 +112,7 @@ namespace LibNDSFormats.NSBMD {
 
             return m;
         }
+
         public static MTX44 mtx_Rotate(int pivot, int neg, float a, float b) {
             float[] data = new float[16];
             data[15] = 1.0F;
@@ -258,6 +262,7 @@ namespace LibNDSFormats.NSBMD {
             matr._array = data;
             return matr;
         }
+
         /// <summary>
         /// Multiplicate this matrix with vector.
         /// </summary>
@@ -282,7 +287,6 @@ namespace LibNDSFormats.NSBMD {
                 vtxTrans[i] = c0 + c1 + c2 + c3;
             }
 
-
             return vtxTrans;
         }
 
@@ -299,7 +303,6 @@ namespace LibNDSFormats.NSBMD {
         public void Scale(float x, float y, float z) {
             MTX44 m = new MTX44();
             m.LoadIdentity();
-
 
             m[0] = x;
             m[5] = y;
@@ -325,6 +328,7 @@ namespace LibNDSFormats.NSBMD {
                 m._array[i] = this[i];
         }
 
-        #endregion Methods 
+        #endregion Methods (8)
+
     }
 }

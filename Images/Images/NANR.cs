@@ -1,23 +1,19 @@
-﻿using System;
+﻿using Ekona;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using Ekona;
-using Ekona.Images;
+using System.Linq;
 
-namespace Images
-{
-    public class NANR
-    {
-        IPluginHost pluginHost;
-        string fileName;
-        int id;
+namespace Images {
 
-        sNANR nanr;
+    public class NANR {
+        private IPluginHost pluginHost;
+        private string fileName;
+        private int id;
 
-        public NANR(IPluginHost pluginHost, string file, int id)
-        {
+        private sNANR nanr;
+
+        public NANR(IPluginHost pluginHost, string file, int id) {
             this.pluginHost = pluginHost;
             fileName = Path.GetFileName(file);
             this.id = id;
@@ -25,8 +21,7 @@ namespace Images
             Read(file);
         }
 
-        public void Read(string file)
-        {
+        public void Read(string file) {
             BinaryReader br = new BinaryReader(File.OpenRead(file));
             nanr = new sNANR();
 
@@ -41,6 +36,7 @@ namespace Images
             nanr.header.nSection = br.ReadUInt16();
 
             #region ABNK
+
             // ABNK (Animation BaNK)
             nanr.abnk.id = br.ReadChars(4);
             nanr.abnk.length = br.ReadUInt32();
@@ -53,8 +49,7 @@ namespace Images
             nanr.abnk.anis = new sNANR.Animation[nanr.abnk.nBanks];
 
             // Bank header
-            for (int i = 0; i < nanr.abnk.nBanks; i++)
-            {
+            for (int i = 0; i < nanr.abnk.nBanks; i++) {
                 br.BaseStream.Position = 0x30 + i * 0x10;
 
                 sNANR.Animation ani = new sNANR.Animation();
@@ -67,8 +62,7 @@ namespace Images
                 ani.frames = new sNANR.Frame[ani.nFrames];
 
                 // Frame header
-                for (int j = 0; j < ani.nFrames; j++)
-                {
+                for (int j = 0; j < ani.nFrames; j++) {
                     br.BaseStream.Position = 0x18 + nanr.abnk.offset1 + j * 0x08 + ani.offset_frame;
 
                     sNANR.Frame frame = new sNANR.Frame();
@@ -85,9 +79,11 @@ namespace Images
 
                 nanr.abnk.anis[i] = ani;
             }
-            #endregion
+
+            #endregion ABNK
 
             #region LABL
+
             br.BaseStream.Position = nanr.header.header_size + nanr.abnk.length;
             List<uint> offsets = new List<uint>();
             List<String> names = new List<string>();
@@ -99,11 +95,9 @@ namespace Images
             nanr.labl.section_size = br.ReadUInt32();
 
             // Offset
-            for (int i = 0; i < nanr.abnk.nBanks; i++)
-            {
+            for (int i = 0; i < nanr.abnk.nBanks; i++) {
                 uint offset = br.ReadUInt32();
-                if (offset >= nanr.labl.section_size - 8)
-                {
+                if (offset >= nanr.labl.section_size - 8) {
                     br.BaseStream.Position -= 4;
                     break;
                 }
@@ -113,12 +107,10 @@ namespace Images
             nanr.labl.offset = offsets.ToArray();
 
             // Names
-            for (int i = 0; i < nanr.labl.offset.Length; i++)
-            {
+            for (int i = 0; i < nanr.labl.offset.Length; i++) {
                 names.Add("");
                 byte c = br.ReadByte();
-                while (c != 0x00)
-                {
+                while (c != 0x00) {
                     names[i] += (char)c;
                     c = br.ReadByte();
                 }
@@ -129,39 +121,39 @@ namespace Images
                     nanr.labl.names[i] = names[i];
                 else
                     nanr.labl.names[i] = i.ToString();
-            #endregion
+
+            #endregion LABL
 
             #region UEXT
+
             nanr.uext.id = br.ReadChars(4);
             if (new String(nanr.uext.id) != "TXEU")
                 goto Fin;
 
             nanr.uext.section_size = br.ReadUInt32();
             nanr.uext.unknown = br.ReadUInt32();
-            #endregion
+
+        #endregion UEXT
 
         Fin:
             br.Close();
         }
 
-        public String[] Names
-        {
+        public String[] Names {
             get { return nanr.labl.names; }
         }
-        public sNANR Struct
-        {
+
+        public sNANR Struct {
             get { return nanr; }
         }
 
-        public struct sNANR
-        {
+        public struct sNANR {
             public NitroHeader header;
             public ABNK abnk;
             public LABL labl;
             public UEXT uext;
 
-            public struct ABNK
-            {
+            public struct ABNK {
                 public char[] id;
                 public uint length;
                 public ushort nBanks;
@@ -172,8 +164,8 @@ namespace Images
                 public ulong padding;
                 public Animation[] anis;
             }
-            public struct Animation
-            {
+
+            public struct Animation {
                 public uint nFrames;
                 public ushort dataType;
                 public ushort unknown1;
@@ -182,38 +174,39 @@ namespace Images
                 public uint offset_frame;
                 public Frame[] frames;
             }
-            public struct Frame
-            {
+
+            public struct Frame {
                 public uint offset_data;
                 public ushort unknown1;
                 public ushort constant;
                 public Frame_Data data;
             }
-            public struct Frame_Data
-            {
+
+            public struct Frame_Data {
                 public ushort nCell;
+
                 // DataType 1
                 public ushort[] transform; // See http://nocash.emubase.de/gbatek.htm#lcdiobgrotationscaling
+
                 public short xDisplacement;
                 public short yDisplacement;
+
                 //DataType 2 (the Displacement above)
                 public ushort constant; // 0xBEEF
             }
 
-            public struct LABL
-            {
+            public struct LABL {
                 public char[] id;
                 public UInt32 section_size;
                 public UInt32[] offset;
                 public string[] names;
             }
-            public struct UEXT
-            {
+
+            public struct UEXT {
                 public char[] id;
                 public UInt32 section_size;
                 public UInt32 unknown;
             }
         }
-
     }
 }

@@ -5,7 +5,9 @@ using System.Resources;
 using static DSPRE.RomInfo;
 
 namespace DSPRE.Resources.ROMToolboxDB {
+
     public class ToolboxDB {
+
         internal class ARM9PatchData {
             internal string initString;
             internal string branchString;
@@ -21,11 +23,12 @@ namespace DSPRE.Resources.ROMToolboxDB {
                 ["branchString" + "_" + RomInfo.gFamEnum.HGSS + "_" + RomInfo.gLangEnum.English] = "0F F1 30 FB",
                 ["branchString" + "_" + RomInfo.gFamEnum.HGSS + "_" + RomInfo.gLangEnum.Spanish] = "0F F1 40 FB",
 
-                ["initString" + "_" + RomInfo.gFamEnum.DP] = "FC B5 05 48 C0 46 41 21 09 22 02 4D A8 47 00 20 03 21 FC BD F1 64 00 02 00 80 3C 02",  //Valid for ENG and ESP, also for P            
+                ["initString" + "_" + RomInfo.gFamEnum.DP] = "FC B5 05 48 C0 46 41 21 09 22 02 4D A8 47 00 20 03 21 FC BD F1 64 00 02 00 80 3C 02",  //Valid for ENG and ESP, also for P
                 ["initString" + "_" + RomInfo.gFamEnum.Plat + "_" + RomInfo.gLangEnum.English] = "FC B5 05 48 C0 46 41 21 09 22 02 4D A8 47 00 20 03 21 FC BD A5 6A 00 02 00 80 3C 02",
                 ["initString" + "_" + RomInfo.gFamEnum.Plat + "_" + RomInfo.gLangEnum.Spanish] = "FC B5 05 48 C0 46 41 21 09 22 02 4D A8 47 00 20 03 21 FC BD B9 6A 00 02 00 80 3C 02",
                 ["initString" + "_" + RomInfo.gFamEnum.HGSS] = "FC B5 05 48 C0 46 1C 21 00 22 02 4D A8 47 00 20 03 21 FC BD 09 75 00 02 00 80 3C 02" //Valid for ENG and ESP, also for SS
             };
+
             public static Dictionary<string, uint> arm9ExpansionOffsetsDB = new Dictionary<string, uint>() {
                 ["branchOffset" + "_" + RomInfo.gFamEnum.DP] = 0x02000C80, //Valid also for P
                 ["branchOffset" + "_" + RomInfo.gFamEnum.Plat] = 0x02000CB4,
@@ -38,6 +41,7 @@ namespace DSPRE.Resources.ROMToolboxDB {
                 ["initOffset" + "_" + RomInfo.gFamEnum.HGSS + "_" + RomInfo.gLangEnum.English] = 0x02110334,
                 ["initOffset" + "_" + RomInfo.gFamEnum.HGSS + "_" + RomInfo.gLangEnum.Spanish] = 0x02110354
             };
+
             internal ARM9PatchData() {
                 branchOffset = arm9ExpansionOffsetsDB[nameof(branchOffset) + "_" + RomInfo.gameFamily] - DSUtils.ARM9.address;
                 initOffset = arm9ExpansionOffsetsDB[nameof(initOffset) + "_" + RomInfo.gameFamily + "_" + RomInfo.gameLanguage] - DSUtils.ARM9.address;
@@ -50,6 +54,7 @@ namespace DSPRE.Resources.ROMToolboxDB {
                 }
             }
         }
+
         internal class BDHCAMPatchData {
             internal byte overlayNumber;
 
@@ -72,6 +77,7 @@ namespace DSPRE.Resources.ROMToolboxDB {
                 ["overlayString1"] = "00 4B 18 47 41 9C 3D 02",
                 ["overlayString2"] = "00 4B 18 47 01 9C 3D 02",
             };
+
             public static Dictionary<string, uint> BDHCamOffsetsDB = new Dictionary<string, uint>() {
                 ["branchOffset" + "_" + RomInfo.gFamEnum.Plat + "_" + RomInfo.gLangEnum.English] = 0x0202040C,
                 ["branchOffset" + "_" + RomInfo.gFamEnum.Plat + "_" + RomInfo.gLangEnum.Spanish] = 0x0202047C,
@@ -98,6 +104,7 @@ namespace DSPRE.Resources.ROMToolboxDB {
                         overlayOffset1 = BDHCamOffsetsDB[nameof(overlayOffset1) + "_" + RomInfo.gameFamily + "_" + RomInfo.gameLanguage];
                         overlayOffset2 = BDHCamOffsetsDB[nameof(overlayOffset2) + "_" + RomInfo.gameFamily + "_" + RomInfo.gameLanguage];
                         break;
+
                     case gFamEnum.HGSS:
                         overlayNumber = 1;
                         branchString = BDHCamCodeDB[nameof(branchString) + "_" + RomInfo.gameFamily];
@@ -113,6 +120,7 @@ namespace DSPRE.Resources.ROMToolboxDB {
                 subroutine = (byte[])new ResourceManager("DSPRE.Resources.ROMToolboxDB.BDHCAMPatchDB", Assembly.GetExecutingAssembly()).GetObject(RomInfo.romID + "_cam");
             }
         }
+
         internal class DynamicHeadersPatchData {
             internal uint initOffset;
             internal string initString;
@@ -131,42 +139,54 @@ namespace DSPRE.Resources.ROMToolboxDB {
                 switch (romID) {
                     case "CPUE":
                         return 0x3A024;
+
                     case "CPUS":
                     case "CPUI":
                     case "CPUF":
                     case "CPUD":
                         return 0x3A0C8;
+
                     case "CPUJ":
                         return 0x39BE0;
+
                     case "IPKS":
                         return 0x3B260;
+
                     case "IPKJ":
                     case "IPGJ":
                         return 0x3AE20;
+
                     default:
                         return 0x3B268;
                 }
             }
+
             public static string getDynamicHeadersInitString(string romID) {
                 switch (romID) {
                     case "CPUE":
                         return "00 B5 01 1C 94 20 00 22 CC F7 48 FD 03 1C DE F7 C7 F8 00 BD";
+
                     case "CPUS":
                     case "CPUI":
                     case "CPUF":
                     case "CPUD":
                         return "00 B5 01 1C 94 20 00 22 CC F7 00 FD 03 1C CC F7 74 FC 00 BD";
+
                     case "CPUJ":
                         return "00 B5 01 1C 94 20 00 22 CC F7 0A FF 03 1C DE F7 3D F9 00 BD";
+
                     case "IPKS":
                         return "00 B5 01 1C 32 20 00 22 CC F7 5C F9 03 1C DF F7 4D FC 00 BD";
+
                     case "IPKJ":
                     case "IPGJ":
                         return "00 B5 01 1C 32 20 00 22 CC F7 08 FB 03 1C DF F7 C7 FC 00 BD";
+
                     default:
                         return "00 B5 01 1C 32 20 00 22 CC F7 58 F9 03 1C DF F7 49 FC 00 BD";
                 }
             }
+
             public static Dictionary<gFamEnum, Tuple<uint, uint>[]> dynamicHeadersPointersDB = new Dictionary<gFamEnum, Tuple<uint, uint>[]>() {
                 // format: headerID*18 offset, (ARM9_HEADER_TABLE_OFFSET + n) offset
                 [gFamEnum.Plat] = new Tuple<uint, uint>[] {

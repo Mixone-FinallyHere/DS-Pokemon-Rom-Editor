@@ -12,50 +12,48 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * By: pleoNeX
- * 
+ *
  */
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
 using System.Drawing;
-using System.Windows.Forms;
 
-namespace Ekona.Images
-{
-    public abstract class PaletteBase
-    {
+namespace Ekona.Images {
+
+    public abstract class PaletteBase {
+
         #region Variables
+
         protected IPluginHost pluginHost;
         protected String fileName;
         protected int id = -1;
-        bool loaded;
+        private bool loaded;
 
-        Byte[] original;
-        int startByte;
+        private Byte[] original;
+        private int startByte;
 
         protected Color[][] palette;
-        ColorFormat depth;
-        bool canEdit;
+        private ColorFormat depth;
+        private bool canEdit;
 
         protected Object obj;
-        #endregion
 
-        public PaletteBase()
-        {
+        #endregion Variables
+
+        public PaletteBase() {
             loaded = false;
         }
-        public PaletteBase(Color[][] pal, bool editable, string fileName = "")
-        {
+
+        public PaletteBase(Color[][] pal, bool editable, string fileName = "") {
             this.fileName = fileName;
             Set_Palette(pal, editable);
         }
-        public PaletteBase(string fileIn, int id,  IPluginHost pluginHost, string fileName = "")
-        {
+
+        public PaletteBase(string fileIn, int id, IPluginHost pluginHost, string fileName = "") {
             this.pluginHost = pluginHost;
             if (fileName == "")
                 this.fileName = System.IO.Path.GetFileName(fileIn);
@@ -65,8 +63,8 @@ namespace Ekona.Images
 
             Read(fileIn);
         }
-        public PaletteBase(string fileIn, int id, string fileName = "")
-        {
+
+        public PaletteBase(string fileIn, int id, string fileName = "") {
             if (fileName == "")
                 this.fileName = System.IO.Path.GetFileName(fileIn);
             else
@@ -76,24 +74,22 @@ namespace Ekona.Images
             Read(fileIn);
         }
 
-
         public abstract void Read(string fileIn);
+
         public abstract void Write(string fileOut);
 
-        public Image Get_Image(int index)
-        {
+        public Image Get_Image(int index) {
             if (index >= palette.Length)
                 return null;
 
             return Actions.Get_Image(palette[index]);
         }
 
-        public void FillColors(int maxColors, int pal_index)
-        {
+        public void FillColors(int maxColors, int pal_index) {
             FillColors(maxColors, pal_index, Color.Black);
         }
-        public void FillColors(int maxColors, int pal_index, Color color)
-        {
+
+        public void FillColors(int maxColors, int pal_index, Color color) {
             int old_length = palette[pal_index].Length;
             if (old_length >= maxColors)
                 return;
@@ -107,8 +103,7 @@ namespace Ekona.Images
             palette[pal_index] = newpal;
         }
 
-        private void Change_PaletteDepth(ColorFormat newDepth)
-        {
+        private void Change_PaletteDepth(ColorFormat newDepth) {
             if (newDepth == depth)
                 return;
 
@@ -118,8 +113,8 @@ namespace Ekona.Images
             else
                 palette = Actions.Palette_256To16(palette);
         }
-        private void Change_StartByte(int start)
-        {
+
+        private void Change_StartByte(int start) {
             if (start < 0 || start >= original.Length)
                 return;
 
@@ -138,16 +133,14 @@ namespace Ekona.Images
             int num_colors = (depth == ColorFormat.colors16 ? 0x10 : 0x100);
             bool isExact = (colors.Count % num_colors == 0 ? true : false);
             palette = new Color[(colors.Count / num_colors) + (isExact ? 0 : 1)][];
-            for (int i = 0; i < palette.Length; i++)
-            {
+            for (int i = 0; i < palette.Length; i++) {
                 int palette_length = i * num_colors + num_colors <= colors.Count ? num_colors : colors.Count - i * num_colors;
                 palette[i] = new Color[palette_length];
                 Array.Copy(colors.ToArray(), i * num_colors, palette[i], 0, palette_length);
             }
         }
 
-        public void Set_Palette(Color[][] palette, bool editable)
-        {
+        public void Set_Palette(Color[][] palette, bool editable) {
             this.palette = palette;
             canEdit = editable;
             if (palette[0].Length > 16)
@@ -157,11 +150,9 @@ namespace Ekona.Images
 
             loaded = true;
 
-            if (depth == ColorFormat.colors16 && (palette.Length == 1 && palette[0].Length > 0x10))
-            {
+            if (depth == ColorFormat.colors16 && (palette.Length == 1 && palette[0].Length > 0x10)) {
                 Color[][] newColors = new Color[palette[0].Length / 0x10][];
-                for (int i = 0; i < newColors.Length; i++)
-                {
+                for (int i = 0; i < newColors.Length; i++) {
                     int pal_colors = 0x10;
                     if (i * 0x10 >= palette[0].Length)
                         pal_colors = palette[0].Length - (i - 1) * 0x10;
@@ -178,19 +169,17 @@ namespace Ekona.Images
             original = Actions.ColorToBGR555(colors.ToArray());
             startByte = 0;
         }
-        public void Set_Palette(Color[][] palette, ColorFormat depth, bool editable)
-        {
+
+        public void Set_Palette(Color[][] palette, ColorFormat depth, bool editable) {
             this.palette = palette;
             canEdit = editable;
             this.depth = depth;
 
             loaded = true;
 
-            if (depth == ColorFormat.colors16 && (palette.Length == 1 && palette[0].Length > 0x10))
-            {
+            if (depth == ColorFormat.colors16 && (palette.Length == 1 && palette[0].Length > 0x10)) {
                 Color[][] newColors = new Color[palette[0].Length / 0x10][];
-                for (int i = 0; i < newColors.Length; i++)
-                {
+                for (int i = 0; i < newColors.Length; i++) {
                     int pal_colors = 0x10;
                     if (i * 0x10 >= palette[0].Length)
                         pal_colors = palette[0].Length - (i - 1) * 0x10;
@@ -207,16 +196,16 @@ namespace Ekona.Images
             original = Actions.ColorToBGR555(colors.ToArray());
             startByte = 0;
         }
-        public void Set_Palette(Color[] palette, ColorFormat depth, bool editable)
-        {
+
+        public void Set_Palette(Color[] palette, ColorFormat depth, bool editable) {
             Set_Palette(new Color[][] { palette }, depth, editable);
         }
-        public void Set_Palette(Color[] palette, int index)
-        {
+
+        public void Set_Palette(Color[] palette, int index) {
             this.palette[index] = palette;
         }
-        public void Set_Palette(PaletteBase new_pal)
-        {
+
+        public void Set_Palette(PaletteBase new_pal) {
             this.palette = new_pal.Palette;
             this.depth = new_pal.Depth;
 
@@ -229,8 +218,8 @@ namespace Ekona.Images
             original = Actions.ColorToBGR555(colors.ToArray());
             startByte = 0;
         }
-        public void Set_Palette(Color[][] palette)
-        {
+
+        public void Set_Palette(Color[][] palette) {
             this.palette = palette;
             if (palette[0].Length > 16)
                 depth = ColorFormat.colors256;
@@ -239,12 +228,9 @@ namespace Ekona.Images
 
             loaded = true;
 
-
-            if (depth == ColorFormat.colors16 && (palette.Length == 1 && palette[0].Length > 0x10))
-            {
+            if (depth == ColorFormat.colors16 && (palette.Length == 1 && palette[0].Length > 0x10)) {
                 Color[][] newColors = new Color[palette[0].Length / 0x10][];
-                for (int i = 0; i < newColors.Length; i++)
-                {
+                for (int i = 0; i < newColors.Length; i++) {
                     int pal_colors = 0x10;
                     if (i * 0x10 >= palette[0].Length)
                         pal_colors = palette[0].Length - (i - 1) * 0x10;
@@ -262,8 +248,7 @@ namespace Ekona.Images
             startByte = 0;
         }
 
-        public bool Has_DuplicatedColors(int index)
-        {
+        public bool Has_DuplicatedColors(int index) {
             for (int i = 0; i < palette[index].Length; i++)
                 for (int j = 0; j < palette[index].Length; j++)
                     if (j != i && palette[index][i] == palette[index][j])
@@ -273,28 +258,26 @@ namespace Ekona.Images
         }
 
         #region Properties
-        public int StartByte
-        {
+
+        public int StartByte {
             get { return startByte; }
             set { Change_StartByte(value); }
         }
-        public ColorFormat Depth
-        {
+
+        public ColorFormat Depth {
             get { return depth; }
             set { Change_PaletteDepth(value); }
         }
-        public int NumberOfPalettes
-        {
+
+        public int NumberOfPalettes {
             get { return palette.Length; }
         }
-        public int NumberOfColors
-        {
-            get
-            {
+
+        public int NumberOfColors {
+            get {
                 if (depth == ColorFormat.colors256)
                     return palette[0].Length;
-                else
-                {
+                else {
                     int colors = 0;
                     for (int i = 0; i < palette.Length; i++)
                         colors += palette[i].Length;
@@ -302,33 +285,33 @@ namespace Ekona.Images
                 }
             }
         }
-        public Color[][] Palette
-        {
+
+        public Color[][] Palette {
             get { return palette; }
         }
-        public bool CanEdit
-        {
+
+        public bool CanEdit {
             get { return canEdit; }
         }
-        public bool Loaded
-        {
+
+        public bool Loaded {
             get { return loaded; }
         }
-        public String FileName
-        {
+
+        public String FileName {
             get { return fileName; }
             set { fileName = value; }
         }
-        public int ID
-        {
+
+        public int ID {
             get { return id; }
         }
-        public Byte[] Original
-        {
+
+        public Byte[] Original {
             set { original = value; }
             get { return original; }
         }
-        #endregion
-    }
 
+        #endregion Properties
+    }
 }

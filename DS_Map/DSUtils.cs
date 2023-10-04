@@ -8,45 +8,57 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static DSPRE.RomInfo;
 
 namespace DSPRE {
+
     public static class DSUtils {
         public static readonly string NDSRomFilter = "NDS File (*.nds)|*.nds";
+
         public class EasyReader : BinaryReader {
+
             public EasyReader(string path, long pos = 0) : base(File.OpenRead(path)) {
                 this.BaseStream.Position = pos;
             }
         }
+
         public class EasyWriter : BinaryWriter {
+
             public EasyWriter(string path, long pos = 0, FileMode fmode = FileMode.OpenOrCreate) : base(new FileStream(path, fmode, FileAccess.Write, FileShare.None)) {
                 this.BaseStream.Position = pos;
             }
+
             public void EditSize(int increment) {
                 this.BaseStream.SetLength(this.BaseStream.Length + increment);
             }
         }
+
         public static class ARM9 {
             public static readonly uint address = 0x02000000;
+
             public class Reader : EasyReader {
+
                 public Reader(long pos = 0) : base(arm9Path, pos) {
                     this.BaseStream.Position = pos;
                 }
             }
+
             public class Writer : EasyWriter {
+
                 public Writer(long pos = 0) : base(arm9Path, pos) {
                     this.BaseStream.Position = pos;
                 }
             }
+
             public static void EditSize(int increment) {
                 using (Writer w = new Writer()) {
                     w.EditSize(increment);
                 }
             }
+
             public static bool Decompress(string path) {
                 Process decompress = new Process();
                 decompress.StartInfo.FileName = @"Tools\blz.exe";
@@ -58,6 +70,7 @@ namespace DSPRE {
 
                 return new FileInfo(RomInfo.arm9Path).Length > 0xBC000;
             }
+
             public static bool Compress(string path) {
                 Process compress = new Process();
                 compress.StartInfo.FileName = @"Tools\blz.exe";
@@ -69,18 +82,23 @@ namespace DSPRE {
 
                 return new FileInfo(RomInfo.arm9Path).Length <= 0xBC000;
             }
+
             public static bool CheckCompressionMark() {
                 return BitConverter.ToInt32(DSUtils.ARM9.ReadBytes((uint)(RomInfo.gameFamily == gFamEnum.DP ? 0xB7C : 0xBB4), 4), 0) != 0;
             }
+
             public static byte[] ReadBytes(uint startOffset, long numberOfBytes = 0) {
                 return ReadFromFile(RomInfo.arm9Path, startOffset, numberOfBytes);
             }
+
             public static void WriteBytes(byte[] bytesToWrite, uint destOffset, int indexFirstByteToWrite = 0, int? indexLastByteToWrite = null) {
                 WriteToFile(RomInfo.arm9Path, bytesToWrite, destOffset, indexFirstByteToWrite, indexLastByteToWrite);
             }
+
             public static byte ReadByte(uint startOffset) {
                 return ReadFromFile(RomInfo.arm9Path, startOffset, 1)[0];
             }
+
             public static void WriteByte(byte value, uint destOffset) {
                 WriteToFile(RomInfo.arm9Path, BitConverter.GetBytes(value), destOffset, 0);
             }
@@ -243,6 +261,7 @@ namespace DSPRE {
                 writer.Write(toOutput, indexFirstByteToWrite, indexLastByteToWrite is null ? toOutput.Length - indexFirstByteToWrite : (int)indexLastByteToWrite);
             }
         }
+
         public static byte[] ReadFromFile(string filepath, long startOffset = 0, long numberOfBytes = 0) {
             byte[] buffer = null;
 
@@ -256,6 +275,7 @@ namespace DSPRE {
 
             return buffer;
         }
+
         public static byte[] ReadFromByteArray(byte[] input, long readFrom = 0, long numberOfBytes = 0) {
             byte[] buffer = null;
 
@@ -274,6 +294,7 @@ namespace DSPRE {
             }
             return buffer;
         }
+
         public static int DecompressOverlay(int overlayNumber, bool makeBackup = true) {
             string overlayFilePath = GetOverlayPath(overlayNumber);
 
@@ -301,6 +322,7 @@ namespace DSPRE {
             unpack.WaitForExit();
             return unpack.ExitCode;
         }
+
         public static int CompressOverlay(int overlayNumber) {
             string overlayFilePath = GetOverlayPath(overlayNumber);
 
@@ -320,9 +342,11 @@ namespace DSPRE {
             compress.WaitForExit();
             return compress.ExitCode;
         }
+
         public static string GetOverlayPath(int overlayNumber) {
             return RomInfo.workDir + "overlay" + "\\" + "overlay_" + overlayNumber.ToString("D4") + ".bin";
         }
+
         public static void RestoreOverlayFromCompressedBackup(int overlayNumber, bool eventEditorIsReady) {
             String overlayFilePath = GetOverlayPath(overlayNumber);
 
@@ -347,6 +371,7 @@ namespace DSPRE {
         /**
          * Only checks if the overlay is CONFIGURED as compressed
          **/
+
         public static bool CheckOverlayHasCompressionFlag(int ovNumber) {
             using (BinaryReader f = new BinaryReader(File.OpenRead(RomInfo.overlayTablePath))) {
                 f.BaseStream.Position = ovNumber * 32 + 31; //overlayNumber * size of entry + offset
@@ -357,21 +382,25 @@ namespace DSPRE {
         /**
          * Checks the actual size of the overlay file
          **/
+
         public static bool OverlayIsCompressed(int ovNumber) {
             return (new FileInfo(GetOverlayPath(ovNumber)).Length < GetOverlayUncompressedSize(ovNumber));
         }
+
         public static uint GetOverlayUncompressedSize(int ovNumber) {
             using (BinaryReader f = new BinaryReader(File.OpenRead(RomInfo.overlayTablePath))) {
                 f.BaseStream.Position = ovNumber * 32 + 8; //overlayNumber * size of entry + offset
                 return f.ReadUInt32();
             }
         }
+
         public static uint GetOverlayRAMAddress(int ovNumber) {
             using (BinaryReader f = new BinaryReader(File.OpenRead(RomInfo.overlayTablePath))) {
                 f.BaseStream.Position = ovNumber * 32 + 4; //overlayNumber * size of entry + offset
                 return f.ReadUInt32();
             }
         }
+
         public static void SetOverlayCompressionInTable(int ovNumber, byte compressStatus) {
             if (compressStatus < 0 || compressStatus > 3) {
                 Console.WriteLine("Compression status " + compressStatus + " is invalid. No operation performed.");
@@ -382,6 +411,7 @@ namespace DSPRE {
                 f.Write(compressStatus);
             }
         }
+
         public static void RepackROM(string ndsFileName) {
             Process repack = new Process();
             repack.StartInfo.FileName = @"Tools\ndstool.exe";
@@ -410,10 +440,11 @@ namespace DSPRE {
                 bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
             return bytes;
         }
+
         public static byte[] HexStringToByteArray(string hexString) {
-            //FC B5 05 48 C0 46 41 21 
-            //09 22 02 4D A8 47 00 20 
-            //03 21 FC BD F1 64 00 02 
+            //FC B5 05 48 C0 46 41 21
+            //09 22 02 4D A8 47 00 20
+            //03 21 FC BD F1 64 00 02
             //00 80 3C 02
             if (hexString is null)
                 return null;
@@ -448,6 +479,7 @@ namespace DSPRE {
                 }
             });
         }
+
         public static void ForceUnpackNarcs(List<DirNames> IDs) {
             Parallel.ForEach(IDs, id => {
                 if (gameDirs.TryGetValue(id, out (string packedPath, string unpackedPath) paths)) {
@@ -480,7 +512,6 @@ namespace DSPRE {
 
             MemoryStream output = new MemoryStream();
             using (BinaryWriter writer = new BinaryWriter(output)) {
-
                 writer.Write(nsbmdHeaderData); // Write first header bytes, same for all NSBMD.
                 writer.Write(mdl0Size + 0x14);
                 writer.Write((short)0x10); // Writes BMD0 header size (always 16)
@@ -513,6 +544,7 @@ namespace DSPRE {
                 return output;
             }
         }
+
         public static int CheckNSBMDHeader(byte[] modelFile) {
             using (BinaryReader byteArrReader = new BinaryReader(new MemoryStream(modelFile))) {
                 if (byteArrReader.ReadUInt32() != NSBMD.NDS_TYPE_BMD0) {
@@ -524,6 +556,7 @@ namespace DSPRE {
                 return byteArrReader.ReadInt16() >= 2 ? NSBMD_HAS_TEXTURE : NSBMD_DOESNTHAVE_TEXTURE;
             }
         }
+
         public static byte[] BuildNSBTXHeader(uint texturesSize) {
             MemoryStream ms = new MemoryStream();
 
@@ -532,12 +565,13 @@ namespace DSPRE {
                 bw.Write((ushort)0xFEFF); // Byte order
                 bw.Write((ushort)0x0001); // ???
                 bw.Write(texturesSize); // Write size of textures block
-                bw.Write((short)0x10); //Header size 
+                bw.Write((short)0x10); //Header size
                 bw.Write((short)0x01); //Number of sub-files???
                 bw.Write((uint)0x14); // Offset to sub-file
             }
             return ms.ToArray();
         }
+
         public static byte[] BuildNSBMDwithTextures(byte[] nsbmd, byte[] nsbtx) {
             byte[] wholeMDL0 = GetFirstBlock(nsbmd);
             byte[] wholeTEX0 = GetFirstBlock(nsbtx);
@@ -562,6 +596,7 @@ namespace DSPRE {
             }
             return ms.ToArray();
         }
+
         private static byte[] GetFirstBlock(byte[] NSBFile) {
             int blockSize;
             uint offsetToMainBlock;

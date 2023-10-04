@@ -12,62 +12,77 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *   by pleoNeX
- * 
- */ 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Drawing;
-using Ekona.Images;
+ *
+ */
 
-namespace Ekona
-{
-    public interface IPluginHost
-    {
+using Ekona.Images;
+using System;
+
+namespace Ekona {
+
+    public interface IPluginHost {
+
         Object Get_Object();
 
         ImageBase Get_Image();
+
         PaletteBase Get_Palette();
+
         MapBase Get_Map();
+
         SpriteBase Get_Sprite();
 
         void Set_Object(Object objects);
 
         void Set_Image(ImageBase image);
+
         void Set_Palette(PaletteBase palette);
+
         void Set_Map(MapBase map);
+
         void Set_Sprite(SpriteBase sprite);
 
         string[] PluginList();
+
         Object Call_Plugin(string[] param, int id, int action);
 
         void Set_Files(sFolder folder);
+
         sFolder Get_Files();
+
         sFolder Get_DecompressedFiles(int id);
 
         String Search_File(int id); // Search file by id
+
         sFile Search_File(short id);
+
         sFolder Search_File(string name);
+
         Byte[] Get_Bytes(string path, int offset, int length);
 
         sFolder Search_Folder(int id);
 
         string Get_Language();
+
         string Get_LangXML();
 
         string Get_LanguageFolder();
 
         string Get_TempFile();
+
         string Get_TempFolder();
+
         void Set_TempFolder(string newPath);
+
         void Restore_TempFolder();
 
         void Decompress(string file);
+
         void Decompress(byte[] data);
+
         void Compress(string filein, string fileout, FormatCompress format);
 
         /// <summary>

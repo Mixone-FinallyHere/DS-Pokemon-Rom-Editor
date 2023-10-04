@@ -15,41 +15,32 @@
 *   along with NSMB Editor 5.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
-namespace NSMBe4.DSFileSystem
-{
-    public class ExternalFilesystemSource : FilesystemSource
-    {
+namespace NSMBe4.DSFileSystem {
+
+    public class ExternalFilesystemSource : FilesystemSource {
         public string fileName;
 
-        public ExternalFilesystemSource(string n)
-        {
+        public ExternalFilesystemSource(string n) {
             this.fileName = n;
         }
 
-        public override Stream load()
-        {
+        public override Stream load() {
             s = new MemoryStream(System.IO.File.ReadAllBytes(fileName));
             return s;
         }
 
-        public override void save()
-        {
-            System.IO.File.WriteAllBytes(fileName,((MemoryStream)s).ToArray());
+        public override void save() {
+            System.IO.File.WriteAllBytes(fileName, ((MemoryStream)s).ToArray());
             //just do nothing, any modifications are directly written to disk
         }
 
-        public override void close()
-        {
+        public override void close() {
             s.Close();
         }
 
-        public override string getDescription()
-        {
+        public override string getDescription() {
             return fileName;
         }
     }
