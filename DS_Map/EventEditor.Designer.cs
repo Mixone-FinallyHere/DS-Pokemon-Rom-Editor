@@ -57,10 +57,10 @@
             this.signMatrixXLabel = new System.Windows.Forms.Label();
             this.spawnableYMatrixUpDown = new System.Windows.Forms.NumericUpDown();
             this.signZLabel = new System.Windows.Forms.Label();
-            this.spawnablexMapUpDown = new System.Windows.Forms.NumericUpDown();
+            this.spawnableMapXUpDown = new System.Windows.Forms.NumericUpDown();
             this.spawnableUpDown = new System.Windows.Forms.NumericUpDown();
             this.signMapXLabel = new System.Windows.Forms.Label();
-            this.spawnableYMapUpDown = new System.Windows.Forms.NumericUpDown();
+            this.spawnableMapYUpDown = new System.Windows.Forms.NumericUpDown();
             this.signMapYLabel = new System.Windows.Forms.Label();
             this.removeSpawnableButton = new System.Windows.Forms.Button();
             this.addSpawnableButton = new System.Windows.Forms.Button();
@@ -78,7 +78,7 @@
             this.isItemRadioButton = new System.Windows.Forms.RadioButton();
             this.spriteIDlabel = new System.Windows.Forms.Label();
             this.groupBox17 = new System.Windows.Forms.GroupBox();
-            this.button14 = new System.Windows.Forms.Button();
+            this.centerEventViewOnSelectedEvent = new System.Windows.Forms.Button();
             this.owYMatrixUpDown = new System.Windows.Forms.NumericUpDown();
             this.label12 = new System.Windows.Forms.Label();
             this.owXMatrixUpDown = new System.Windows.Forms.NumericUpDown();
@@ -203,9 +203,9 @@
             this.groupBox5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.spawnableXMatrixUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.spawnableYMatrixUpDown)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.spawnablexMapUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.spawnableMapXUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.spawnableUpDown)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.spawnableYMapUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.spawnableMapYUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.spawnableScriptUpDown)).BeginInit();
             this.overworldsTabPage.SuspendLayout();
             this.groupBox22.SuspendLayout();
@@ -295,6 +295,7 @@
             this.showTriggersCheckBox.TabIndex = 44;
             this.showTriggersCheckBox.Text = "Show Triggers";
             this.showTriggersCheckBox.UseVisualStyleBackColor = true;
+            this.showTriggersCheckBox.CheckedChanged += new System.EventHandler(this.showEventsCheckBoxes_CheckedChanged);
             // 
             // showWarpsCheckBox
             // 
@@ -307,6 +308,7 @@
             this.showWarpsCheckBox.TabIndex = 43;
             this.showWarpsCheckBox.Text = "Show Warps";
             this.showWarpsCheckBox.UseVisualStyleBackColor = true;
+            this.showWarpsCheckBox.CheckedChanged += new System.EventHandler(this.showEventsCheckBoxes_CheckedChanged);
             // 
             // showOwsCheckBox
             // 
@@ -319,6 +321,7 @@
             this.showOwsCheckBox.TabIndex = 42;
             this.showOwsCheckBox.Text = "Show Overworlds";
             this.showOwsCheckBox.UseVisualStyleBackColor = true;
+            this.showOwsCheckBox.CheckedChanged += new System.EventHandler(this.showEventsCheckBoxes_CheckedChanged);
             // 
             // showSpawnablesCheckBox
             // 
@@ -331,6 +334,7 @@
             this.showSpawnablesCheckBox.TabIndex = 41;
             this.showSpawnablesCheckBox.Text = "Show Spawnables";
             this.showSpawnablesCheckBox.UseVisualStyleBackColor = true;
+            this.showSpawnablesCheckBox.CheckedChanged += new System.EventHandler(this.showEventsCheckBoxes_CheckedChanged);
             // 
             // eventAreaDataUpDown
             // 
@@ -343,6 +347,7 @@
             this.eventAreaDataUpDown.Name = "eventAreaDataUpDown";
             this.eventAreaDataUpDown.Size = new System.Drawing.Size(40, 20);
             this.eventAreaDataUpDown.TabIndex = 30;
+            this.eventAreaDataUpDown.ValueChanged += new System.EventHandler(this.eventAreaDataUpDown_ValueChanged);
             // 
             // eventMapTextureLabel
             // 
@@ -387,6 +392,7 @@
             this.eventMatrixYUpDown.Name = "eventMatrixYUpDown";
             this.eventMatrixYUpDown.Size = new System.Drawing.Size(40, 20);
             this.eventMatrixYUpDown.TabIndex = 80;
+            this.eventMatrixYUpDown.ValueChanged += new System.EventHandler(this.eventMatrixCoordsUpDown_ValueChanged);
             // 
             // eventMatrixXUpDown
             // 
@@ -394,6 +400,7 @@
             this.eventMatrixXUpDown.Name = "eventMatrixXUpDown";
             this.eventMatrixXUpDown.Size = new System.Drawing.Size(40, 20);
             this.eventMatrixXUpDown.TabIndex = 79;
+            this.eventMatrixXUpDown.ValueChanged += new System.EventHandler(this.eventMatrixCoordsUpDown_ValueChanged);
             // 
             // eventMatrixYLabel
             // 
@@ -445,6 +452,7 @@
             this.eventMatrixPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.eventMatrixPictureBox.TabIndex = 46;
             this.eventMatrixPictureBox.TabStop = false;
+            this.eventMatrixPictureBox.Click += new System.EventHandler(this.eventMatrixPictureBox_Click);
             // 
             // selectEventComboBox
             // 
@@ -454,6 +462,7 @@
             this.selectEventComboBox.Name = "selectEventComboBox";
             this.selectEventComboBox.Size = new System.Drawing.Size(164, 21);
             this.selectEventComboBox.TabIndex = 70;
+            this.selectEventComboBox.SelectedIndexChanged += new System.EventHandler(this.selectEventComboBox_SelectedIndexChanged);
             // 
             // backgroundMapLabel
             // 
@@ -476,6 +485,7 @@
             this.eventMatrixUpDown.Name = "eventMatrixUpDown";
             this.eventMatrixUpDown.Size = new System.Drawing.Size(40, 20);
             this.eventMatrixUpDown.TabIndex = 65;
+            this.eventMatrixUpDown.ValueChanged += new System.EventHandler(this.eventMatrixUpDown_ValueChanged);
             // 
             // eventsTabControl
             // 
@@ -488,6 +498,7 @@
             this.eventsTabControl.SelectedIndex = 0;
             this.eventsTabControl.Size = new System.Drawing.Size(452, 378);
             this.eventsTabControl.TabIndex = 64;
+            this.eventsTabControl.SelectedIndexChanged += new System.EventHandler(this.eventsTabControl_SelectedIndexChanged);
             // 
             // signsTabPage
             // 
@@ -518,6 +529,7 @@
             this.spawnableTypeComboBox.Name = "spawnableTypeComboBox";
             this.spawnableTypeComboBox.Size = new System.Drawing.Size(205, 21);
             this.spawnableTypeComboBox.TabIndex = 25;
+            this.spawnableTypeComboBox.SelectedIndexChanged += new System.EventHandler(this.spawnableTypeComboBox_SelectedIndexChanged);
             // 
             // label18
             // 
@@ -539,6 +551,7 @@
             this.duplicateSpawnableButton.Text = "Duplicate";
             this.duplicateSpawnableButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.duplicateSpawnableButton.UseVisualStyleBackColor = true;
+            this.duplicateSpawnableButton.Click += new System.EventHandler(this.duplicateSpawnableButton_Click);
             // 
             // groupBox5
             // 
@@ -548,10 +561,10 @@
             this.groupBox5.Controls.Add(this.signMatrixXLabel);
             this.groupBox5.Controls.Add(this.spawnableYMatrixUpDown);
             this.groupBox5.Controls.Add(this.signZLabel);
-            this.groupBox5.Controls.Add(this.spawnablexMapUpDown);
+            this.groupBox5.Controls.Add(this.spawnableMapXUpDown);
             this.groupBox5.Controls.Add(this.spawnableUpDown);
             this.groupBox5.Controls.Add(this.signMapXLabel);
-            this.groupBox5.Controls.Add(this.spawnableYMapUpDown);
+            this.groupBox5.Controls.Add(this.spawnableMapYUpDown);
             this.groupBox5.Controls.Add(this.signMapYLabel);
             this.groupBox5.Location = new System.Drawing.Point(229, 150);
             this.groupBox5.Name = "groupBox5";
@@ -592,6 +605,7 @@
             this.spawnableXMatrixUpDown.Name = "spawnableXMatrixUpDown";
             this.spawnableXMatrixUpDown.Size = new System.Drawing.Size(101, 20);
             this.spawnableXMatrixUpDown.TabIndex = 16;
+            this.spawnableXMatrixUpDown.ValueChanged += new System.EventHandler(this.spawnableMatrixXUpDown_ValueChanged);
             // 
             // signMatrixXLabel
             // 
@@ -613,6 +627,7 @@
             this.spawnableYMatrixUpDown.Name = "spawnableYMatrixUpDown";
             this.spawnableYMatrixUpDown.Size = new System.Drawing.Size(101, 20);
             this.spawnableYMatrixUpDown.TabIndex = 18;
+            this.spawnableYMatrixUpDown.ValueChanged += new System.EventHandler(this.spawnableMatrixYUpDown_ValueChanged);
             // 
             // signZLabel
             // 
@@ -623,22 +638,23 @@
             this.signZLabel.TabIndex = 15;
             this.signZLabel.Text = "Map Z";
             // 
-            // spawnablexMapUpDown
+            // spawnableMapXUpDown
             // 
-            this.spawnablexMapUpDown.Location = new System.Drawing.Point(28, 38);
-            this.spawnablexMapUpDown.Maximum = new decimal(new int[] {
+            this.spawnableMapXUpDown.Location = new System.Drawing.Point(28, 38);
+            this.spawnableMapXUpDown.Maximum = new decimal(new int[] {
             32768,
             0,
             0,
             0});
-            this.spawnablexMapUpDown.Minimum = new decimal(new int[] {
+            this.spawnableMapXUpDown.Minimum = new decimal(new int[] {
             32768,
             0,
             0,
             -2147483648});
-            this.spawnablexMapUpDown.Name = "spawnablexMapUpDown";
-            this.spawnablexMapUpDown.Size = new System.Drawing.Size(36, 20);
-            this.spawnablexMapUpDown.TabIndex = 10;
+            this.spawnableMapXUpDown.Name = "spawnableMapXUpDown";
+            this.spawnableMapXUpDown.Size = new System.Drawing.Size(36, 20);
+            this.spawnableMapXUpDown.TabIndex = 10;
+            this.spawnableMapXUpDown.ValueChanged += new System.EventHandler(this.spawnableMapXUpDown_ValueChanged);
             // 
             // spawnableUpDown
             // 
@@ -656,6 +672,7 @@
             this.spawnableUpDown.Name = "spawnableUpDown";
             this.spawnableUpDown.Size = new System.Drawing.Size(36, 20);
             this.spawnableUpDown.TabIndex = 14;
+            this.spawnableUpDown.ValueChanged += new System.EventHandler(this.spawnableZUpDown_ValueChanged);
             // 
             // signMapXLabel
             // 
@@ -666,17 +683,18 @@
             this.signMapXLabel.TabIndex = 11;
             this.signMapXLabel.Text = "Map X";
             // 
-            // spawnableYMapUpDown
+            // spawnableMapYUpDown
             // 
-            this.spawnableYMapUpDown.Location = new System.Drawing.Point(83, 38);
-            this.spawnableYMapUpDown.Maximum = new decimal(new int[] {
+            this.spawnableMapYUpDown.Location = new System.Drawing.Point(83, 38);
+            this.spawnableMapYUpDown.Maximum = new decimal(new int[] {
             65535,
             0,
             0,
             0});
-            this.spawnableYMapUpDown.Name = "spawnableYMapUpDown";
-            this.spawnableYMapUpDown.Size = new System.Drawing.Size(36, 20);
-            this.spawnableYMapUpDown.TabIndex = 12;
+            this.spawnableMapYUpDown.Name = "spawnableMapYUpDown";
+            this.spawnableMapYUpDown.Size = new System.Drawing.Size(36, 20);
+            this.spawnableMapYUpDown.TabIndex = 12;
+            this.spawnableMapYUpDown.ValueChanged += new System.EventHandler(this.spawnableMapYUpDown_ValueChanged);
             // 
             // signMapYLabel
             // 
@@ -698,6 +716,7 @@
             this.removeSpawnableButton.Text = "Delete";
             this.removeSpawnableButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.removeSpawnableButton.UseVisualStyleBackColor = true;
+            this.removeSpawnableButton.Click += new System.EventHandler(this.removeSpawnableButton_Click);
             // 
             // addSpawnableButton
             // 
@@ -710,6 +729,7 @@
             this.addSpawnableButton.Text = "Add";
             this.addSpawnableButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.addSpawnableButton.UseVisualStyleBackColor = true;
+            this.addSpawnableButton.Click += new System.EventHandler(this.addSpawnableButton_Click);
             // 
             // spawnableDirComboBox
             // 
@@ -719,6 +739,7 @@
             this.spawnableDirComboBox.Name = "spawnableDirComboBox";
             this.spawnableDirComboBox.Size = new System.Drawing.Size(205, 21);
             this.spawnableDirComboBox.TabIndex = 6;
+            this.spawnableDirComboBox.SelectedIndexChanged += new System.EventHandler(this.spawnableDirComboBox_SelectedIndexChanged);
             // 
             // signOrientationLabel
             // 
@@ -749,6 +770,7 @@
             this.spawnableScriptUpDown.Name = "spawnableScriptUpDown";
             this.spawnableScriptUpDown.Size = new System.Drawing.Size(108, 20);
             this.spawnableScriptUpDown.TabIndex = 3;
+            this.spawnableScriptUpDown.ValueChanged += new System.EventHandler(this.spawnableScriptUpDown_ValueChanged);
             // 
             // spawnablesListBox
             // 
@@ -757,6 +779,7 @@
             this.spawnablesListBox.Name = "spawnablesListBox";
             this.spawnablesListBox.Size = new System.Drawing.Size(208, 303);
             this.spawnablesListBox.TabIndex = 0;
+            this.spawnablesListBox.SelectedIndexChanged += new System.EventHandler(this.spawnablesListBox_SelectedIndexChanged);
             // 
             // overworldsTabPage
             // 
@@ -800,6 +823,7 @@
             this.sortOWsByIDDescButton.Text = "Sort Desc";
             this.sortOWsByIDDescButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.sortOWsByIDDescButton.UseVisualStyleBackColor = true;
+            this.sortOWsByIDDescButton.Click += new System.EventHandler(this.sortOWsByIDDescButton_Click);
             // 
             // sortOWsByIDAscButton
             // 
@@ -812,6 +836,7 @@
             this.sortOWsByIDAscButton.Text = "Sort Asc";
             this.sortOWsByIDAscButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.sortOWsByIDAscButton.UseVisualStyleBackColor = true;
+            this.sortOWsByIDAscButton.Click += new System.EventHandler(this.sortOWsByIDAscButton_Click);
             // 
             // groupBox22
             // 
@@ -836,6 +861,7 @@
             this.normalRadioButton.TabStop = true;
             this.normalRadioButton.Text = "None";
             this.normalRadioButton.UseVisualStyleBackColor = true;
+            this.normalRadioButton.CheckedChanged += new System.EventHandler(this.OWTypeChanged);
             // 
             // isTrainerRadioButton
             // 
@@ -846,6 +872,7 @@
             this.isTrainerRadioButton.TabIndex = 16;
             this.isTrainerRadioButton.Text = "Trainer";
             this.isTrainerRadioButton.UseVisualStyleBackColor = true;
+            this.isTrainerRadioButton.CheckedChanged += new System.EventHandler(this.OWTypeChanged);
             // 
             // isItemRadioButton
             // 
@@ -856,6 +883,7 @@
             this.isItemRadioButton.TabIndex = 21;
             this.isItemRadioButton.Text = "Item";
             this.isItemRadioButton.UseVisualStyleBackColor = true;
+            this.isItemRadioButton.CheckedChanged += new System.EventHandler(this.OWTypeChanged);
             // 
             // spriteIDlabel
             // 
@@ -867,7 +895,7 @@
             // 
             // groupBox17
             // 
-            this.groupBox17.Controls.Add(this.button14);
+            this.groupBox17.Controls.Add(this.centerEventViewOnSelectedEvent);
             this.groupBox17.Controls.Add(this.owYMatrixUpDown);
             this.groupBox17.Controls.Add(this.label12);
             this.groupBox17.Controls.Add(this.owXMatrixUpDown);
@@ -879,17 +907,18 @@
             this.groupBox17.TabStop = false;
             this.groupBox17.Text = "Global Coordinates [Matrix]";
             // 
-            // button14
+            // centerEventViewOnSelectedEvent
             // 
-            this.button14.Image = global::DSPRE.Properties.Resources.goToOW;
-            this.button14.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.button14.Location = new System.Drawing.Point(108, 15);
-            this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(63, 39);
-            this.button14.TabIndex = 5;
-            this.button14.Text = "Find";
-            this.button14.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button14.UseVisualStyleBackColor = true;
+            this.centerEventViewOnSelectedEvent.Image = global::DSPRE.Properties.Resources.goToOW;
+            this.centerEventViewOnSelectedEvent.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.centerEventViewOnSelectedEvent.Location = new System.Drawing.Point(108, 15);
+            this.centerEventViewOnSelectedEvent.Name = "centerEventViewOnSelectedEvent";
+            this.centerEventViewOnSelectedEvent.Size = new System.Drawing.Size(63, 39);
+            this.centerEventViewOnSelectedEvent.TabIndex = 5;
+            this.centerEventViewOnSelectedEvent.Text = "Find";
+            this.centerEventViewOnSelectedEvent.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.centerEventViewOnSelectedEvent.UseVisualStyleBackColor = true;
+            this.centerEventViewOnSelectedEvent.Click += new System.EventHandler(this.centerEventViewOnSelectedEvent_Click);
             // 
             // owYMatrixUpDown
             // 
@@ -902,6 +931,7 @@
             this.owYMatrixUpDown.Name = "owYMatrixUpDown";
             this.owYMatrixUpDown.Size = new System.Drawing.Size(35, 20);
             this.owYMatrixUpDown.TabIndex = 6;
+            this.owYMatrixUpDown.ValueChanged += new System.EventHandler(this.owYMatrixUpDown_ValueChanged);
             // 
             // label12
             // 
@@ -923,6 +953,7 @@
             this.owXMatrixUpDown.Name = "owXMatrixUpDown";
             this.owXMatrixUpDown.Size = new System.Drawing.Size(33, 20);
             this.owXMatrixUpDown.TabIndex = 4;
+            this.owXMatrixUpDown.ValueChanged += new System.EventHandler(this.owXMatrixUpDown_ValueChanged);
             // 
             // label11
             // 
@@ -988,6 +1019,7 @@
             this.owXRangeUpDown.Name = "owXRangeUpDown";
             this.owXRangeUpDown.Size = new System.Drawing.Size(38, 20);
             this.owXRangeUpDown.TabIndex = 1;
+            this.owXRangeUpDown.ValueChanged += new System.EventHandler(this.owXRangeUpDown_ValueChanged);
             // 
             // owYRangeUpDown
             // 
@@ -1000,6 +1032,7 @@
             this.owYRangeUpDown.Name = "owYRangeUpDown";
             this.owYRangeUpDown.Size = new System.Drawing.Size(38, 20);
             this.owYRangeUpDown.TabIndex = 2;
+            this.owYRangeUpDown.ValueChanged += new System.EventHandler(this.owYRangeUpDown_ValueChanged);
             // 
             // label4
             // 
@@ -1023,6 +1056,7 @@
             this.owOrientationComboBox.Name = "owOrientationComboBox";
             this.owOrientationComboBox.Size = new System.Drawing.Size(82, 21);
             this.owOrientationComboBox.TabIndex = 5;
+            this.owOrientationComboBox.SelectedIndexChanged += new System.EventHandler(this.owOrientationComboBox_SelectedIndexChanged);
             // 
             // owMovementComboBox
             // 
@@ -1032,6 +1066,7 @@
             this.owMovementComboBox.Name = "owMovementComboBox";
             this.owMovementComboBox.Size = new System.Drawing.Size(211, 21);
             this.owMovementComboBox.TabIndex = 0;
+            this.owMovementComboBox.SelectedIndexChanged += new System.EventHandler(this.owMovementComboBox_SelectedIndexChanged);
             // 
             // positionGroupBox
             // 
@@ -1073,6 +1108,7 @@
             this.owXMapUpDown.Name = "owXMapUpDown";
             this.owXMapUpDown.Size = new System.Drawing.Size(35, 20);
             this.owXMapUpDown.TabIndex = 0;
+            this.owXMapUpDown.ValueChanged += new System.EventHandler(this.owXMapUpDown_ValueChanged);
             // 
             // owZPositionUpDown
             // 
@@ -1090,6 +1126,7 @@
             this.owZPositionUpDown.Name = "owZPositionUpDown";
             this.owZPositionUpDown.Size = new System.Drawing.Size(35, 20);
             this.owZPositionUpDown.TabIndex = 8;
+            this.owZPositionUpDown.ValueChanged += new System.EventHandler(this.owZPositionUpDown_ValueChanged);
             // 
             // owXPositionLabel
             // 
@@ -1116,6 +1153,7 @@
             this.owYMapUpDown.Name = "owYMapUpDown";
             this.owYMapUpDown.Size = new System.Drawing.Size(35, 20);
             this.owYMapUpDown.TabIndex = 2;
+            this.owYMapUpDown.ValueChanged += new System.EventHandler(this.owYMapUpDown_ValueChanged);
             // 
             // label10
             // 
@@ -1163,6 +1201,7 @@
             this.owPartnerTrainerCheckBox.TabIndex = 7;
             this.owPartnerTrainerCheckBox.Text = "Partner";
             this.owPartnerTrainerCheckBox.UseVisualStyleBackColor = true;
+            this.owPartnerTrainerCheckBox.CheckedChanged += new System.EventHandler(this.owPartnerTrainerCheckBox_CheckedChanged);
             // 
             // owItemComboBox
             // 
@@ -1193,6 +1232,7 @@
             this.owTrainerComboBox.Name = "owTrainerComboBox";
             this.owTrainerComboBox.Size = new System.Drawing.Size(173, 21);
             this.owTrainerComboBox.TabIndex = 4;
+            this.owTrainerComboBox.SelectedIndexChanged += new System.EventHandler(this.owTrainerComboBox_SelectedIndexChanged);
             // 
             // owSightRangeLabel
             // 
@@ -1216,6 +1256,7 @@
             this.owSightRangeUpDown.Name = "owSightRangeUpDown";
             this.owSightRangeUpDown.Size = new System.Drawing.Size(48, 20);
             this.owSightRangeUpDown.TabIndex = 2;
+            this.owSightRangeUpDown.ValueChanged += new System.EventHandler(this.owSightRangeUpDown_ValueChanged);
             // 
             // owTrainerLabel
             // 
@@ -1247,6 +1288,7 @@
             this.owScriptNumericUpDown.Name = "owScriptNumericUpDown";
             this.owScriptNumericUpDown.Size = new System.Drawing.Size(54, 20);
             this.owScriptNumericUpDown.TabIndex = 12;
+            this.owScriptNumericUpDown.ValueChanged += new System.EventHandler(this.owScriptNumericUpDown_ValueChanged);
             // 
             // owFlagLabel
             // 
@@ -1268,6 +1310,7 @@
             this.owFlagNumericUpDown.Name = "owFlagNumericUpDown";
             this.owFlagNumericUpDown.Size = new System.Drawing.Size(60, 20);
             this.owFlagNumericUpDown.TabIndex = 10;
+            this.owFlagNumericUpDown.ValueChanged += new System.EventHandler(this.owFlagNumericUpDown_ValueChanged);
             // 
             // owSpriteLabel
             // 
@@ -1286,6 +1329,7 @@
             this.owSpriteComboBox.Name = "owSpriteComboBox";
             this.owSpriteComboBox.Size = new System.Drawing.Size(159, 21);
             this.owSpriteComboBox.TabIndex = 8;
+            this.owSpriteComboBox.SelectedIndexChanged += new System.EventHandler(this.owSpriteComboBox_SelectedIndexChanged);
             // 
             // owIDLabel
             // 
@@ -1307,6 +1351,7 @@
             this.owIDNumericUpDown.Name = "owIDNumericUpDown";
             this.owIDNumericUpDown.Size = new System.Drawing.Size(63, 20);
             this.owIDNumericUpDown.TabIndex = 6;
+            this.owIDNumericUpDown.ValueChanged += new System.EventHandler(this.owIDNumericUpDown_ValueChanged);
             // 
             // duplicateOverworldsButton
             // 
@@ -1319,6 +1364,7 @@
             this.duplicateOverworldsButton.Text = "Duplicate";
             this.duplicateOverworldsButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.duplicateOverworldsButton.UseVisualStyleBackColor = true;
+            this.duplicateOverworldsButton.Click += new System.EventHandler(this.duplicateOverworldsButton_Click);
             // 
             // owSpritePictureBox
             // 
@@ -1341,6 +1387,7 @@
             this.removeOverworldButton.Text = "Delete";
             this.removeOverworldButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.removeOverworldButton.UseVisualStyleBackColor = true;
+            this.removeOverworldButton.Click += new System.EventHandler(this.removeOverworldButton_Click);
             // 
             // addOverworldButton
             // 
@@ -1353,6 +1400,7 @@
             this.addOverworldButton.Text = "Add";
             this.addOverworldButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.addOverworldButton.UseVisualStyleBackColor = true;
+            this.addOverworldButton.Click += new System.EventHandler(this.addOverworldButton_Click);
             // 
             // overworldsListBox
             // 
@@ -1361,6 +1409,7 @@
             this.overworldsListBox.Name = "overworldsListBox";
             this.overworldsListBox.Size = new System.Drawing.Size(180, 160);
             this.overworldsListBox.TabIndex = 3;
+            this.overworldsListBox.SelectedIndexChanged += new System.EventHandler(this.overworldsListBox_SelectedIndexChanged);
             // 
             // warpsTabPage
             // 
@@ -1389,6 +1438,7 @@
             this.duplicateWarpsButton.Text = "Duplicate";
             this.duplicateWarpsButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.duplicateWarpsButton.UseVisualStyleBackColor = true;
+            this.duplicateWarpsButton.Click += new System.EventHandler(this.duplicateWarpsButton_Click);
             // 
             // groupBox11
             // 
@@ -1419,6 +1469,7 @@
             this.eventEditorWarpHeaderListBox.Name = "eventEditorWarpHeaderListBox";
             this.eventEditorWarpHeaderListBox.Size = new System.Drawing.Size(125, 121);
             this.eventEditorWarpHeaderListBox.TabIndex = 30;
+            this.eventEditorWarpHeaderListBox.SelectedIndexChanged += new System.EventHandler(this.eventEditorWarpHeaderListBox_SelectedIndexChanged);
             // 
             // destinationWarpGoToButton
             // 
@@ -1431,6 +1482,7 @@
             this.destinationWarpGoToButton.Text = "Test\r\nWarp";
             this.destinationWarpGoToButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.destinationWarpGoToButton.UseVisualStyleBackColor = true;
+            this.destinationWarpGoToButton.Click += new System.EventHandler(this.goToWarpDestination_Click);
             // 
             // warpAnchorUpDown
             // 
@@ -1443,6 +1495,7 @@
             this.warpAnchorUpDown.Name = "warpAnchorUpDown";
             this.warpAnchorUpDown.Size = new System.Drawing.Size(94, 20);
             this.warpAnchorUpDown.TabIndex = 29;
+            this.warpAnchorUpDown.ValueChanged += new System.EventHandler(this.warpAnchorUpDown_ValueChanged);
             // 
             // warpAnchorLabel
             // 
@@ -1489,7 +1542,7 @@
             this.goToWarpButton.Text = "Go to start \r\ncoordinates";
             this.goToWarpButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.goToWarpButton.UseVisualStyleBackColor = true;
-            this.goToWarpButton.Click += new System.EventHandler(this.goToWarpDestination_Click);
+            this.goToWarpButton.Click += new System.EventHandler(this.centerEventViewOnSelectedEvent_Click);
             // 
             // label9
             // 
@@ -1511,6 +1564,7 @@
             this.warpXMatrixUpDown.Name = "warpXMatrixUpDown";
             this.warpXMatrixUpDown.Size = new System.Drawing.Size(47, 20);
             this.warpXMatrixUpDown.TabIndex = 21;
+            this.warpXMatrixUpDown.ValueChanged += new System.EventHandler(this.warpMatrixXUpDown_ValueChanged);
             // 
             // label15
             // 
@@ -1532,6 +1586,7 @@
             this.warpYMatrixUpDown.Name = "warpYMatrixUpDown";
             this.warpYMatrixUpDown.Size = new System.Drawing.Size(47, 20);
             this.warpYMatrixUpDown.TabIndex = 23;
+            this.warpYMatrixUpDown.ValueChanged += new System.EventHandler(this.warpMatrixYUpDown_ValueChanged);
             // 
             // groupBox12
             // 
@@ -1564,6 +1619,7 @@
             this.warpXMapUpDown.Name = "warpXMapUpDown";
             this.warpXMapUpDown.Size = new System.Drawing.Size(34, 20);
             this.warpXMapUpDown.TabIndex = 10;
+            this.warpXMapUpDown.ValueChanged += new System.EventHandler(this.warpXMapUpDown_ValueChanged);
             // 
             // label24
             // 
@@ -1599,6 +1655,7 @@
             this.warpYMapUpDown.Name = "warpYMapUpDown";
             this.warpYMapUpDown.Size = new System.Drawing.Size(34, 20);
             this.warpYMapUpDown.TabIndex = 12;
+            this.warpYMapUpDown.ValueChanged += new System.EventHandler(this.warpYMapUpDown_ValueChanged);
             // 
             // warpZUpDown
             // 
@@ -1616,6 +1673,7 @@
             this.warpZUpDown.Name = "warpZUpDown";
             this.warpZUpDown.Size = new System.Drawing.Size(34, 20);
             this.warpZUpDown.TabIndex = 14;
+            this.warpZUpDown.ValueChanged += new System.EventHandler(this.warpZUpDown_ValueChanged);
             // 
             // label16
             // 
@@ -1659,6 +1717,7 @@
             this.warpsListBox.Name = "warpsListBox";
             this.warpsListBox.Size = new System.Drawing.Size(177, 290);
             this.warpsListBox.TabIndex = 4;
+            this.warpsListBox.SelectedIndexChanged += new System.EventHandler(this.warpsListBox_SelectedIndexChanged);
             // 
             // triggersTabPage
             // 
@@ -1704,6 +1763,7 @@
             this.expectedVarValueTriggerUpDown.Name = "expectedVarValueTriggerUpDown";
             this.expectedVarValueTriggerUpDown.Size = new System.Drawing.Size(71, 20);
             this.expectedVarValueTriggerUpDown.TabIndex = 37;
+            this.expectedVarValueTriggerUpDown.ValueChanged += new System.EventHandler(this.expectedVarValueTriggerUpDown_ValueChanged);
             // 
             // label19
             // 
@@ -1725,6 +1785,7 @@
             this.triggerVariableWatchedUpDown.Name = "triggerVariableWatchedUpDown";
             this.triggerVariableWatchedUpDown.Size = new System.Drawing.Size(71, 20);
             this.triggerVariableWatchedUpDown.TabIndex = 26;
+            this.triggerVariableWatchedUpDown.ValueChanged += new System.EventHandler(this.triggerVariableWatchedUpDown_ValueChanged);
             // 
             // label28
             // 
@@ -1746,6 +1807,7 @@
             this.triggerScriptUpDown.Name = "triggerScriptUpDown";
             this.triggerScriptUpDown.Size = new System.Drawing.Size(66, 20);
             this.triggerScriptUpDown.TabIndex = 23;
+            this.triggerScriptUpDown.ValueChanged += new System.EventHandler(this.triggerScriptUpDown_ValueChanged);
             // 
             // label27
             // 
@@ -1810,6 +1872,7 @@
             this.triggerWidthUpDown.Name = "triggerWidthUpDown";
             this.triggerWidthUpDown.Size = new System.Drawing.Size(62, 20);
             this.triggerWidthUpDown.TabIndex = 32;
+            this.triggerWidthUpDown.ValueChanged += new System.EventHandler(this.triggerWidthUpDown_ValueChanged);
             // 
             // groupBox15
             // 
@@ -1851,6 +1914,7 @@
             this.triggerXMapUpDown.Name = "triggerXMapUpDown";
             this.triggerXMapUpDown.Size = new System.Drawing.Size(34, 20);
             this.triggerXMapUpDown.TabIndex = 16;
+            this.triggerXMapUpDown.ValueChanged += new System.EventHandler(this.triggerXMapUpDown_ValueChanged);
             // 
             // triggerZUpDown
             // 
@@ -1868,6 +1932,7 @@
             this.triggerZUpDown.Name = "triggerZUpDown";
             this.triggerZUpDown.Size = new System.Drawing.Size(34, 20);
             this.triggerZUpDown.TabIndex = 20;
+            this.triggerZUpDown.ValueChanged += new System.EventHandler(this.triggerZUpDown_ValueChanged);
             // 
             // triggerMapXLabel
             // 
@@ -1889,6 +1954,7 @@
             this.triggerYMapUpDown.Name = "triggerYMapUpDown";
             this.triggerYMapUpDown.Size = new System.Drawing.Size(34, 20);
             this.triggerYMapUpDown.TabIndex = 18;
+            this.triggerYMapUpDown.ValueChanged += new System.EventHandler(this.triggerYMapUpDown_ValueChanged);
             // 
             // triggerYMapLabel
             // 
@@ -1945,6 +2011,7 @@
             this.triggerXMatrixUpDown.Name = "triggerXMatrixUpDown";
             this.triggerXMatrixUpDown.Size = new System.Drawing.Size(37, 20);
             this.triggerXMatrixUpDown.TabIndex = 16;
+            this.triggerXMatrixUpDown.ValueChanged += new System.EventHandler(this.triggerXMatrixUpDown_ValueChanged);
             // 
             // triggerXMatrixLabel
             // 
@@ -1966,6 +2033,7 @@
             this.triggerYMatrixUpDown.Name = "triggerYMatrixUpDown";
             this.triggerYMatrixUpDown.Size = new System.Drawing.Size(37, 20);
             this.triggerYMatrixUpDown.TabIndex = 18;
+            this.triggerYMatrixUpDown.ValueChanged += new System.EventHandler(this.triggerYMatrixUpDown_ValueChanged);
             // 
             // duplicateTriggersButton
             // 
@@ -1978,6 +2046,7 @@
             this.duplicateTriggersButton.Text = "Duplicate";
             this.duplicateTriggersButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.duplicateTriggersButton.UseVisualStyleBackColor = true;
+            this.duplicateTriggersButton.Click += new System.EventHandler(this.duplicateTriggersButton_Click);
             // 
             // removeTriggerButton
             // 
@@ -1990,6 +2059,7 @@
             this.removeTriggerButton.Text = "Delete";
             this.removeTriggerButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.removeTriggerButton.UseVisualStyleBackColor = true;
+            this.removeTriggerButton.Click += new System.EventHandler(this.removeTriggerButton_Click);
             // 
             // addTriggerButton
             // 
@@ -2002,6 +2072,7 @@
             this.addTriggerButton.Text = "Add";
             this.addTriggerButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.addTriggerButton.UseVisualStyleBackColor = true;
+            this.addTriggerButton.Click += new System.EventHandler(this.addTriggerButton_Click);
             // 
             // triggersListBox
             // 
@@ -2010,6 +2081,7 @@
             this.triggersListBox.Name = "triggersListBox";
             this.triggersListBox.Size = new System.Drawing.Size(190, 290);
             this.triggersListBox.TabIndex = 4;
+            this.triggersListBox.SelectedIndexChanged += new System.EventHandler(this.triggersListBox_SelectedIndexChanged);
             // 
             // eventPanel
             // 
@@ -2029,6 +2101,8 @@
             this.eventPictureBox.Size = new System.Drawing.Size(544, 544);
             this.eventPictureBox.TabIndex = 3;
             this.eventPictureBox.TabStop = false;
+            this.eventPictureBox.Click += new System.EventHandler(this.eventPictureBox_Click);
+            this.eventPictureBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.eventPictureBox_MouseMove);
             // 
             // eventOpenGlControl
             // 
@@ -2098,6 +2172,7 @@
             this.removeEventFileButton.Text = "Remove Last";
             this.removeEventFileButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.removeEventFileButton.UseVisualStyleBackColor = true;
+            this.removeEventFileButton.Click += new System.EventHandler(this.removeEventFileButton_Click);
             // 
             // addEventFileButton
             // 
@@ -2110,6 +2185,7 @@
             this.addEventFileButton.Text = "Add Event File";
             this.addEventFileButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.addEventFileButton.UseVisualStyleBackColor = true;
+            this.addEventFileButton.Click += new System.EventHandler(this.addEventFileButton_Click);
             // 
             // eventShiftRightButton
             // 
@@ -2120,6 +2196,7 @@
             this.eventShiftRightButton.Size = new System.Drawing.Size(25, 156);
             this.eventShiftRightButton.TabIndex = 74;
             this.eventShiftRightButton.UseVisualStyleBackColor = true;
+            this.eventShiftRightButton.Click += new System.EventHandler(this.eventShiftRightButton_Click);
             // 
             // eventShiftLeftButton
             // 
@@ -2130,6 +2207,7 @@
             this.eventShiftLeftButton.Size = new System.Drawing.Size(25, 156);
             this.eventShiftLeftButton.TabIndex = 73;
             this.eventShiftLeftButton.UseVisualStyleBackColor = true;
+            this.eventShiftLeftButton.Click += new System.EventHandler(this.eventShiftLeftButton_Click);
             // 
             // eventShiftUpButton
             // 
@@ -2141,6 +2219,7 @@
             this.eventShiftUpButton.TabIndex = 72;
             this.eventShiftUpButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.eventShiftUpButton.UseVisualStyleBackColor = true;
+            this.eventShiftUpButton.Click += new System.EventHandler(this.eventShiftUpButton_Click);
             // 
             // eventShiftDownButton
             // 
@@ -2152,6 +2231,7 @@
             this.eventShiftDownButton.TabIndex = 71;
             this.eventShiftDownButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.eventShiftDownButton.UseVisualStyleBackColor = true;
+            this.eventShiftDownButton.Click += new System.EventHandler(this.eventShiftDownButton_Click);
             // 
             // exportEventFileButton
             // 
@@ -2164,6 +2244,7 @@
             this.exportEventFileButton.Text = "Export";
             this.exportEventFileButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.exportEventFileButton.UseVisualStyleBackColor = true;
+            this.exportEventFileButton.Click += new System.EventHandler(this.exportEventFileButton_Click);
             // 
             // importEventFileButton
             // 
@@ -2176,6 +2257,7 @@
             this.importEventFileButton.Text = "Import";
             this.importEventFileButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.importEventFileButton.UseVisualStyleBackColor = true;
+            this.importEventFileButton.Click += new System.EventHandler(this.importEventFileButton_Click);
             // 
             // saveEventsButton
             // 
@@ -2187,6 +2269,7 @@
             this.saveEventsButton.TabIndex = 67;
             this.saveEventsButton.Text = "Save Event File";
             this.saveEventsButton.UseVisualStyleBackColor = true;
+            this.saveEventsButton.Click += new System.EventHandler(this.saveEventsButton_Click);
             // 
             // EventEditor
             // 
@@ -2238,9 +2321,9 @@
             this.groupBox5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.spawnableXMatrixUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.spawnableYMatrixUpDown)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.spawnablexMapUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.spawnableMapXUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.spawnableUpDown)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.spawnableYMapUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.spawnableMapYUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.spawnableScriptUpDown)).EndInit();
             this.overworldsTabPage.ResumeLayout(false);
             this.overworldsTabPage.PerformLayout();
@@ -2346,10 +2429,10 @@
         private System.Windows.Forms.Label signMatrixXLabel;
         private System.Windows.Forms.NumericUpDown spawnableYMatrixUpDown;
         private System.Windows.Forms.Label signZLabel;
-        private System.Windows.Forms.NumericUpDown spawnablexMapUpDown;
+        private System.Windows.Forms.NumericUpDown spawnableMapXUpDown;
         private System.Windows.Forms.NumericUpDown spawnableUpDown;
         private System.Windows.Forms.Label signMapXLabel;
-        private System.Windows.Forms.NumericUpDown spawnableYMapUpDown;
+        private System.Windows.Forms.NumericUpDown spawnableMapYUpDown;
         private System.Windows.Forms.Label signMapYLabel;
         private System.Windows.Forms.Button removeSpawnableButton;
         private System.Windows.Forms.Button addSpawnableButton;
@@ -2367,7 +2450,7 @@
         private System.Windows.Forms.RadioButton isItemRadioButton;
         private System.Windows.Forms.Label spriteIDlabel;
         private System.Windows.Forms.GroupBox groupBox17;
-        private System.Windows.Forms.Button button14;
+        private System.Windows.Forms.Button centerEventViewOnSelectedEvent;
         private System.Windows.Forms.NumericUpDown owYMatrixUpDown;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.NumericUpDown owXMatrixUpDown;

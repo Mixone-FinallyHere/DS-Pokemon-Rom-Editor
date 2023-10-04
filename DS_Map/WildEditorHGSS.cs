@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
 using static DSPRE.RomInfo;
 
@@ -12,10 +13,15 @@ namespace DSPRE {
         private EncounterFileHGSS currentFile;
         private bool disableHandlers = false;
 
+        public string GetDSPREVersion() {
+            return "" + Assembly.GetExecutingAssembly().GetName().Version.Major + "." + Assembly.GetExecutingAssembly().GetName().Version.Minor +
+                "." + Assembly.GetExecutingAssembly().GetName().Version.Build;
+        }
+
         public WildEditorHGSS(string dirPath, string[] names, int encToOpen, int totalNumHeaderFiles) {
             InitializeComponent();
             encounterFileFolder = dirPath;
-
+            Text = "DSPRE Reloaded " + GetDSPREVersion() + " - HGSS Encounters Editor";
             disableHandlers = true;
 
             MapHeader tempMapHeader;

@@ -303,7 +303,7 @@ namespace DSPRE {
             currentMatrix.SaveToFileDefaultDir(selectMatrixComboBox.SelectedIndex);
             GameMatrix saved = new GameMatrix(selectMatrixComboBox.SelectedIndex);
             selectMatrixComboBox.Items[selectMatrixComboBox.SelectedIndex] = saved.ToString();
-            parent.eventMatrix = saved; // TODO: Replace with EventEditor.cs control
+            (parent.GetEditor("Event") as EventEditor).eventMatrix = saved; // TODO: Replace with EventEditor.cs control
         }
 
         private void headersGridView_SelectionChanged(object sender, EventArgs e) {
