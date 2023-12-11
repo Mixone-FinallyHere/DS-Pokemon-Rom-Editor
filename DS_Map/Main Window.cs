@@ -316,7 +316,7 @@ namespace DSPRE {
 
         public string GetDSPREVersion() {
             return "" + Assembly.GetExecutingAssembly().GetName().Version.Major + "." + Assembly.GetExecutingAssembly().GetName().Version.Minor +
-                "." + Assembly.GetExecutingAssembly().GetName().Version.Build + "-beta";
+                "." + Assembly.GetExecutingAssembly().GetName().Version.Build + "-beta Fixes (o12 + personal)";
         }
 
         private void romToolBoxToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -664,6 +664,13 @@ namespace DSPRE {
                 }
             }
 
+            if (RomInfo.gameFamily != gFamEnum.DP && RomInfo.gameFamily != gFamEnum.Plat) {
+                if (DSUtils.OverlayIsCompressed(12)) {
+                    DSUtils.DecompressOverlay(12);
+                    DSUtils.SetOverlayCompressionInTable(12, 0);
+                }                
+            }
+
             /* Setup essential editors */
             SetupHeaderEditor();
             eventOpenGlControl.InitializeContexts();
@@ -746,6 +753,11 @@ namespace DSPRE {
                 }
             }
 
+            if (DSUtils.CheckOverlayHasCompressionFlag(12)) {
+                if (!DSUtils.OverlayIsCompressed(12)) {
+                    DSUtils.CompressOverlay(12);
+                }
+            }
 
             Update();
 
@@ -8859,6 +8871,7 @@ namespace DSPRE {
         }
         public void RefreshTrainerPartyGUI() {
             for (int i = 0; i < TrainerFile.POKE_IN_PARTY; i++) {
+                (string ability1, string ability2) currentPartyPokemonAbilities = getPokemonAbilityNames(partyPokemonComboboxList[i].SelectedIndex);
                 partyPokemonComboboxList[i].SelectedIndex = currentTrainerFile.party[i].pokeID ?? 0;
                 partyItemsComboboxList[i].SelectedIndex = currentTrainerFile.party[i].heldItem ?? 0;
                 partyLevelUpdownList[i].Value = Math.Max((ushort)1, currentTrainerFile.party[i].level);
@@ -8867,9 +8880,12 @@ namespace DSPRE {
 
                 setTrainerPartyPokemonAbilities(i);
                 setTrainerPartyPokemonForm(i);
-                setTrainerPokemonGender(i);
+                setTrainerPokemonGender(i);               
 
-                if (currentTrainerFile.party[i].genderAndAbilityFlags.HasFlag(PartyPokemon.GenderAndAbilityFlags.ABILITY_SLOT2))
+                //if the name " -" is returned for ability 2 then there is no ability 2
+                if (currentPartyPokemonAbilities.ability2.Equals("-") || currentPartyPokemonAbilities.ability2.Equals(currentPartyPokemonAbilities.ability1) || gameFamily != gFamEnum.HGSS)
+                    partyAbilityComboBoxList[i].SelectedIndex = TRAINER_PARTY_POKEMON_ABILITY_SLOT1_INDEX;
+                else if (currentTrainerFile.party[i].genderAndAbilityFlags.HasFlag(PartyPokemon.GenderAndAbilityFlags.ABILITY_SLOT2))
                     partyAbilityComboBoxList[i].SelectedIndex = TRAINER_PARTY_POKEMON_ABILITY_SLOT2_INDEX;
                 else
                     partyAbilityComboBoxList[i].SelectedIndex = TRAINER_PARTY_POKEMON_ABILITY_SLOT1_INDEX;
@@ -8891,7 +8907,7 @@ namespace DSPRE {
         private void ShowPartyPokemonPic(byte partyPos) {
             ComboBox cb = partyPokemonComboboxList[partyPos];
             int species = cb.SelectedIndex > 0 ? cb.SelectedIndex : 0;
-
+            
             PictureBox pb = partyPokemonPictureBoxList[partyPos];
 
             partyPokemonPictureBoxList[partyPos].Image = DSUtils.GetPokePic(species, pb.Width, pb.Height);
@@ -9387,12 +9403,12 @@ namespace DSPRE {
             (string ability1, string ability2) currentPartyPokemonAbilities = getPokemonAbilityNames(partyPokemonComboboxList[partyPokemonPosition].SelectedIndex);
             partyAbilityComboBoxList[partyPokemonPosition].Items.Clear();
             partyAbilityComboBoxList[partyPokemonPosition].Items.Add(currentPartyPokemonAbilities.ability1);
+            partyAbilityComboBoxList[partyPokemonPosition].Items.Add(currentPartyPokemonAbilities.ability2);
 
             //if the name " -" is returned for ability 2 then there is no ability 2
             if (currentPartyPokemonAbilities.ability2.Equals(" -") || currentPartyPokemonAbilities.ability2.Equals(currentPartyPokemonAbilities.ability1) || gameFamily != gFamEnum.HGSS) {
                 partyAbilityComboBoxList[partyPokemonPosition].Enabled = false;
             } else {
-                partyAbilityComboBoxList[partyPokemonPosition].Items.Add(currentPartyPokemonAbilities.ability2);
                 partyAbilityComboBoxList[partyPokemonPosition].Enabled = true;
             }
 
@@ -10570,9 +10586,7 @@ namespace DSPRE {
             Dictionary<string, Dictionary<string, int>> trainerUsage = new Dictionary<string, Dictionary<string, int>>();
 
             for (int i = 0; i < trainerNames.Length; i++) {
-                if (trainerNames[i].Equals("Angelica") || trainerNames[i].Equals("Mickey")) {
-                    continue;
-                }
+
                 string suffix = "\\" + i.ToString("D4");
 
                 TrainerFile f = new TrainerFile(
@@ -10670,6 +10684,22 @@ namespace DSPRE {
 
             LearnsetEditor le = new LearnsetEditor(moveNames);
             le.ShowDialog();
+
+            statusLabelMessage();
+            Update();
+        }
+
+        private void evolutionEditorToolStripMenuItem_Click(object sender, EventArgs e) {
+            string[] itemNames = RomInfo.GetItemNames();
+
+            statusLabelMessage("Setting up Evolution Data Editor...");
+            Update();
+
+            DSUtils.TryUnpackNarcs(new List<DirNames> { DirNames.personalPokeData, DirNames.evoData, DirNames.monIcons });
+            RomInfo.SetMonIconsPalTableAddress();
+
+            EvolutionDataEditor ede = new EvolutionDataEditor(itemNames);
+            ede.ShowDialog();
 
             statusLabelMessage();
             Update();

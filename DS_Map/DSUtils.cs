@@ -582,7 +582,6 @@ namespace DSPRE {
             PaletteBase paletteBase;
             bool fiveDigits = false; // some extreme future proofing
             string filename = "0000";
-
             try {
                 paletteBase = new NCLR(gameDirs[DirNames.monIcons].unpackedDir + "\\" + filename, 0, filename);
             } catch (FileNotFoundException) {
@@ -610,15 +609,15 @@ namespace DSPRE {
                 iconPalTableOffsetFromFileStart = (int)(RomInfo.monIconPalTableAddress - DSUtils.ARM9.address);
                 iconTablePath = RomInfo.arm9Path;
             }
-
-            using (DSUtils.EasyReader idReader = new DSUtils.EasyReader(iconTablePath, iconPalTableOffsetFromFileStart + species)) {
+            Console.WriteLine("Species " + species);
+            Console.WriteLine("Easy Reader Icon Pallet offset " + iconPalTableOffsetFromFileStart);
+            using (DSUtils.EasyReader idReader = new DSUtils.EasyReader(iconTablePath, iconPalTableOffsetFromFileStart + species)) {                
                 paletteId = idReader.ReadByte();
-            }
+            }            
 
             if (paletteId != 0) {
                 paletteBase.Palette[0] = paletteBase.Palette[paletteId]; // update pal 0 to be the new pal
             }
-
             // grab tiles
             int spriteFileID = species + 7;
             string spriteFilename = spriteFileID.ToString("D" + (fiveDigits ? "5" : "4"));
@@ -628,6 +627,7 @@ namespace DSPRE {
             int ncerFileId = 2;
             string ncerFileName = ncerFileId.ToString("D" + (fiveDigits ? "5" : "4"));
             SpriteBase spriteBase = new NCER(gameDirs[DirNames.monIcons].unpackedDir + "\\" + ncerFileName, 2, ncerFileName);
+            
 
             // copy this from the trainer
             int bank0OAMcount = spriteBase.Banks[0].oams.Length;

@@ -307,7 +307,7 @@ namespace DSPRE {
             if (disableHandlers) {
                 return;
             }
-            currentLoadedFile.item1 = (byte)item1InputComboBox.SelectedIndex;
+            currentLoadedFile.item1 = (UInt16)item1InputComboBox.SelectedIndex;
             setDirty(true);
         }
 
@@ -315,7 +315,7 @@ namespace DSPRE {
             if (disableHandlers) {
                 return;
             }
-            currentLoadedFile.item2 = (byte)item2InputComboBox.SelectedIndex;
+            currentLoadedFile.item2 = (UInt16)item2InputComboBox.SelectedIndex;
             setDirty(true);
         }
 
@@ -437,6 +437,7 @@ namespace DSPRE {
             }
             disableHandlers = false;
         }
+
         private void ChangeLoadedFile(int toLoad) {
             currentLoadedId = toLoad;
             currentLoadedFile = new PokemonPersonalData(currentLoadedId);

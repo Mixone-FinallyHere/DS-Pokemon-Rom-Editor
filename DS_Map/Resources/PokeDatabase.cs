@@ -641,6 +641,7 @@ namespace DSPRE.Resources {
                 ["IPKF"] = gVerEnum.HeartGold,
                 ["IPKD"] = gVerEnum.HeartGold,
                 ["IPKJ"] = gVerEnum.HeartGold,
+                ["IPKK"] = gVerEnum.HeartGold,
 
                 ["IPGE"] = gVerEnum.SoulSilver,
                 ["IPGS"] = gVerEnum.SoulSilver,

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using static DSPRE.DSUtils.ARM9;
 using static DSPRE.RomInfo;
 
 namespace DSPRE.ROMFiles {
@@ -38,7 +39,6 @@ namespace DSPRE.ROMFiles {
         Fast,
         Slow
     }
-
     public enum PokemonEggGroup {
         Unassigned = 0,
         Monster,
@@ -117,8 +117,15 @@ namespace DSPRE.ROMFiles {
         public SortedSet<byte> machines;            
 
         public PokemonPersonalData(Stream stream) {
+            using (BinaryWriter writer = new BinaryWriter(stream))
             using (BinaryReader reader = new BinaryReader(stream)) {
-                // Deserialize the object from binary
+                // Fix if broken
+                if (stream.Length == 42) {
+                    writer.BaseStream.Position = writer.BaseStream.Length;
+                    writer.Write((UInt16)0);
+                    reader.BaseStream.Position = 0;
+                }
+                // Deserialize the object from binary                
                 baseHP = reader.ReadByte();
                 baseAtk = reader.ReadByte();
                 baseDef = reader.ReadByte();
@@ -154,16 +161,28 @@ namespace DSPRE.ROMFiles {
                 //reader.BaseStream.Position += 2; //alignment
 
                 reader.BaseStream.Position += 2; //Alignment
-
                 uint tm1 = reader.ReadUInt32();
-                uint tm2 = reader.ReadUInt32();
-                uint tm3 = reader.ReadUInt32();
+                uint tm2 = reader.ReadUInt32();                   
+                uint tm3 = reader.ReadUInt32();                    
                 uint tm4 = reader.ReadUInt32();
-                machines = BitFieldToSet(new uint[4] { tm1, tm2, tm3, tm4 });
+                machines = BitFieldToSet(new uint[4] { tm1, tm2, tm3, tm4 });               
+                
             }
         }
 
-        public PokemonPersonalData(int ID) : this(new FileStream(RomInfo.gameDirs[DirNames.personalPokeData].unpackedDir + "\\" + ID.ToString("D4"), FileMode.Open)) { }
+        public static void FixAllign(Stream stream) {
+            using (BinaryWriter writer = new BinaryWriter(stream)) {
+                writer.BaseStream.Position = writer.BaseStream.Length;
+                writer.Write((UInt16)0);
+            }
+        }
+
+        public static bool EOF(BinaryReader binaryReader) {
+            var bs = binaryReader.BaseStream;
+            return (bs.Position == bs.Length);
+        }
+
+        public PokemonPersonalData(int ID) : this(new FileStream(RomInfo.gameDirs[DirNames.personalPokeData].unpackedDir + "\\" + ID.ToString("D4"), FileMode.Open, FileAccess.ReadWrite)) { }
 
         public override byte[] ToByteArray() {
             using (MemoryStream stream = new MemoryStream()) {

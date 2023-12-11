@@ -865,6 +865,7 @@
             this.monEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.personalDataEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.learnsetsEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.evolutionEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.essentialToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.simpleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -907,6 +908,7 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.directoryEntry1 = new System.DirectoryServices.DirectoryEntry();
             this.directoryEntry2 = new System.DirectoryServices.DirectoryEntry();
+            this.trainerEditorStatButton = new System.Windows.Forms.Button();
             this.mainTabControl.SuspendLayout();
             this.headerEditorTabPage.SuspendLayout();
             this.worldmapCoordsGroupBox.SuspendLayout();
@@ -2797,8 +2799,8 @@
             // 
             // matrixTabControl
             // 
-            this.matrixTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.matrixTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.matrixTabControl.Controls.Add(this.headersTabPage);
             this.matrixTabControl.Controls.Add(this.heightsTabPage);
@@ -3213,7 +3215,7 @@
             // mapScreenshotButton
             // 
             this.mapScreenshotButton.Image = global::DSPRE.Properties.Resources.cameraIcon;
-            this.mapScreenshotButton.Location = new System.Drawing.Point(1135, 499);
+            this.mapScreenshotButton.Location = new System.Drawing.Point(1138, 6);
             this.mapScreenshotButton.Name = "mapScreenshotButton";
             this.mapScreenshotButton.Size = new System.Drawing.Size(41, 40);
             this.mapScreenshotButton.TabIndex = 39;
@@ -4390,7 +4392,7 @@
             this.radio3D.AutoSize = true;
             this.radio3D.Checked = true;
             this.radio3D.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.radio3D.Location = new System.Drawing.Point(1140, 626);
+            this.radio3D.Location = new System.Drawing.Point(1138, 67);
             this.radio3D.Name = "radio3D";
             this.radio3D.Size = new System.Drawing.Size(31, 23);
             this.radio3D.TabIndex = 26;
@@ -4405,7 +4407,7 @@
             this.radio2D.Appearance = System.Windows.Forms.Appearance.Button;
             this.radio2D.AutoSize = true;
             this.radio2D.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.radio2D.Location = new System.Drawing.Point(1140, 650);
+            this.radio2D.Location = new System.Drawing.Point(1138, 96);
             this.radio2D.Name = "radio2D";
             this.radio2D.Size = new System.Drawing.Size(31, 23);
             this.radio2D.TabIndex = 25;
@@ -4420,7 +4422,7 @@
             this.wireframeCheckBox.Appearance = System.Windows.Forms.Appearance.Button;
             this.wireframeCheckBox.AutoSize = true;
             this.wireframeCheckBox.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.wireframeCheckBox.Location = new System.Drawing.Point(1140, 674);
+            this.wireframeCheckBox.Location = new System.Drawing.Point(1138, 125);
             this.wireframeCheckBox.Name = "wireframeCheckBox";
             this.wireframeCheckBox.Size = new System.Drawing.Size(31, 23);
             this.wireframeCheckBox.TabIndex = 27;
@@ -6850,7 +6852,7 @@
             // 
             // rightClickPicture
             // 
-            this.rightClickPicture.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.rightClickPicture.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.rightClickPicture.Image = global::DSPRE.Properties.Resources.RightClick;
             this.rightClickPicture.ImageLocation = "";
@@ -6863,7 +6865,7 @@
             // 
             // wheelClickPicture
             // 
-            this.wheelClickPicture.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.wheelClickPicture.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.wheelClickPicture.Image = global::DSPRE.Properties.Resources.WheelClick;
             this.wheelClickPicture.ImageLocation = "";
@@ -6876,7 +6878,7 @@
             // 
             // LeftClickPicture
             // 
-            this.LeftClickPicture.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.LeftClickPicture.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LeftClickPicture.Image = global::DSPRE.Properties.Resources.LeftClick;
             this.LeftClickPicture.ImageLocation = "";
@@ -7517,7 +7519,7 @@
             // 
             // panelSearchScriptTextBox
             // 
-            this.panelSearchScriptTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.panelSearchScriptTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelSearchScriptTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.panelSearchScriptTextBox.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -7613,7 +7615,7 @@
             // 
             // panelSearchFunctionTextBox
             // 
-            this.panelSearchFunctionTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.panelSearchFunctionTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelSearchFunctionTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.panelSearchFunctionTextBox.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -7709,7 +7711,7 @@
             // 
             // panelSearchActionTextBox
             // 
-            this.panelSearchActionTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.panelSearchActionTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelSearchActionTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.panelSearchActionTextBox.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -8364,6 +8366,7 @@
             // 
             // trainerEditorTabPage
             // 
+            this.trainerEditorTabPage.Controls.Add(this.trainerEditorStatButton);
             this.trainerEditorTabPage.Controls.Add(this.tableLayoutPanel4);
             this.trainerEditorTabPage.Controls.Add(this.groupBox28);
             this.trainerEditorTabPage.Controls.Add(this.groupBox27);
@@ -11144,7 +11147,8 @@
             // 
             this.monEditorToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.personalDataEditorToolStripMenuItem,
-            this.learnsetsEditorToolStripMenuItem});
+            this.learnsetsEditorToolStripMenuItem,
+            this.evolutionEditorToolStripMenuItem});
             this.monEditorToolStripMenuItem.Enabled = false;
             this.monEditorToolStripMenuItem.Name = "monEditorToolStripMenuItem";
             this.monEditorToolStripMenuItem.Size = new System.Drawing.Size(78, 20);
@@ -11163,6 +11167,13 @@
             this.learnsetsEditorToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.learnsetsEditorToolStripMenuItem.Text = "Learnsets Editor";
             this.learnsetsEditorToolStripMenuItem.Click += new System.EventHandler(this.learnsetsEditorToolStripMenuItem_Click);
+            // 
+            // evolutionEditorToolStripMenuItem
+            // 
+            this.evolutionEditorToolStripMenuItem.Name = "evolutionEditorToolStripMenuItem";
+            this.evolutionEditorToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.evolutionEditorToolStripMenuItem.Text = "Evolution Editor";
+            this.evolutionEditorToolStripMenuItem.Click += new System.EventHandler(this.evolutionEditorToolStripMenuItem_Click);
             // 
             // menuViewToolStripMenuItem
             // 
@@ -11580,6 +11591,19 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
+            // 
+            // trainerEditorStatButton
+            // 
+            this.trainerEditorStatButton.Image = global::DSPRE.Properties.Resources.SearchMiniIcon;
+            this.trainerEditorStatButton.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.trainerEditorStatButton.Location = new System.Drawing.Point(350, 16);
+            this.trainerEditorStatButton.Name = "trainerEditorStatButton";
+            this.trainerEditorStatButton.Size = new System.Drawing.Size(83, 29);
+            this.trainerEditorStatButton.TabIndex = 49;
+            this.trainerEditorStatButton.Text = "Export All";
+            this.trainerEditorStatButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.trainerEditorStatButton.UseVisualStyleBackColor = true;
+            this.trainerEditorStatButton.Click += new System.EventHandler(this.trainerEditorStatButton_Click);
             // 
             // MainProgram
             // 
@@ -12791,5 +12815,7 @@
         private System.Windows.Forms.ToolStripMenuItem learnsetsEditorToolStripMenuItem;
         private System.Windows.Forms.Button setSpawnPointButton;
         private System.Windows.Forms.Button saveMatrixButton;
+        private System.Windows.Forms.ToolStripMenuItem evolutionEditorToolStripMenuItem;
+        private System.Windows.Forms.Button trainerEditorStatButton;
     }
 }

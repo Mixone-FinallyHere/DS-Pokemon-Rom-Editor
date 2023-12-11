@@ -108,11 +108,12 @@ namespace DSPRE {
             Italian,
             Spanish,
             French,
-            German
+            German,
+            Korean
         }
         public enum DirNames : byte {
             personalPokeData,
-
+            evoData,
             synthOverlay,
             dynamicHeaders,
 
@@ -716,6 +717,7 @@ namespace DSPRE {
                     switch (gameLanguage) {
                         case gLangEnum.English:
                         case gLangEnum.Italian:
+                        case gLangEnum.French:
                             monIconPalTableAddress = BitConverter.ToUInt32(DSUtils.ARM9.ReadBytes(0x74408, 4), 0);
                             break;
                         case gLangEnum.German:
@@ -724,8 +726,7 @@ namespace DSPRE {
                             } else {
                                 monIconPalTableAddress = BitConverter.ToUInt32(DSUtils.ARM9.ReadBytes(0x74400, 4), 0);
                             }
-                            break;
-                        case gLangEnum.French:
+                            break;                        
                         case gLangEnum.Spanish:
                             if (gameVersion == gVerEnum.HeartGold) {
                                 monIconPalTableAddress = BitConverter.ToUInt32(DSUtils.ARM9.ReadBytes(0x74400, 4), 0);
@@ -1040,6 +1041,7 @@ namespace DSPRE {
                 case gFamEnum.HGSS:
                     packedDirsDict = new Dictionary<DirNames, string>() {
                         [DirNames.personalPokeData] = @"data\a\0\0\2",
+                        [DirNames.evoData] = @"data\a\0\3\4",
                         [DirNames.synthOverlay] = @"data\a\0\2\8",
                         [DirNames.dynamicHeaders] = @"data\a\0\5\0",
 
