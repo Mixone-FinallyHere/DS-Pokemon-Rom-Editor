@@ -865,7 +865,7 @@
             this.monEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.personalDataEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.learnsetsEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.evolutionEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.evolutionsEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.essentialToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.simpleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -905,10 +905,6 @@
             this.separator_afterMiscButtons = new System.Windows.Forms.ToolStripSeparator();
             this.versionLabel = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.directoryEntry1 = new System.DirectoryServices.DirectoryEntry();
-            this.directoryEntry2 = new System.DirectoryServices.DirectoryEntry();
-            this.trainerEditorStatButton = new System.Windows.Forms.Button();
             this.mainTabControl.SuspendLayout();
             this.headerEditorTabPage.SuspendLayout();
             this.worldmapCoordsGroupBox.SuspendLayout();
@@ -4392,7 +4388,7 @@
             this.radio3D.AutoSize = true;
             this.radio3D.Checked = true;
             this.radio3D.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.radio3D.Location = new System.Drawing.Point(1138, 67);
+            this.radio3D.Location = new System.Drawing.Point(1140, 546);
             this.radio3D.Name = "radio3D";
             this.radio3D.Size = new System.Drawing.Size(31, 23);
             this.radio3D.TabIndex = 26;
@@ -4407,7 +4403,7 @@
             this.radio2D.Appearance = System.Windows.Forms.Appearance.Button;
             this.radio2D.AutoSize = true;
             this.radio2D.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.radio2D.Location = new System.Drawing.Point(1138, 96);
+            this.radio2D.Location = new System.Drawing.Point(1140, 570);
             this.radio2D.Name = "radio2D";
             this.radio2D.Size = new System.Drawing.Size(31, 23);
             this.radio2D.TabIndex = 25;
@@ -4422,7 +4418,7 @@
             this.wireframeCheckBox.Appearance = System.Windows.Forms.Appearance.Button;
             this.wireframeCheckBox.AutoSize = true;
             this.wireframeCheckBox.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.wireframeCheckBox.Location = new System.Drawing.Point(1138, 125);
+            this.wireframeCheckBox.Location = new System.Drawing.Point(1140, 594);
             this.wireframeCheckBox.Name = "wireframeCheckBox";
             this.wireframeCheckBox.Size = new System.Drawing.Size(31, 23);
             this.wireframeCheckBox.TabIndex = 27;
@@ -11148,7 +11144,7 @@
             this.monEditorToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.personalDataEditorToolStripMenuItem,
             this.learnsetsEditorToolStripMenuItem,
-            this.evolutionEditorToolStripMenuItem});
+            this.evolutionsEditorToolStripMenuItem});
             this.monEditorToolStripMenuItem.Enabled = false;
             this.monEditorToolStripMenuItem.Name = "monEditorToolStripMenuItem";
             this.monEditorToolStripMenuItem.Size = new System.Drawing.Size(78, 20);
@@ -11168,12 +11164,12 @@
             this.learnsetsEditorToolStripMenuItem.Text = "Learnsets Editor";
             this.learnsetsEditorToolStripMenuItem.Click += new System.EventHandler(this.learnsetsEditorToolStripMenuItem_Click);
             // 
-            // evolutionEditorToolStripMenuItem
+            // evolutionsEditorToolStripMenuItem
             // 
-            this.evolutionEditorToolStripMenuItem.Name = "evolutionEditorToolStripMenuItem";
-            this.evolutionEditorToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.evolutionEditorToolStripMenuItem.Text = "Evolution Editor";
-            this.evolutionEditorToolStripMenuItem.Click += new System.EventHandler(this.evolutionEditorToolStripMenuItem_Click);
+            this.evolutionsEditorToolStripMenuItem.Name = "evolutionsEditorToolStripMenuItem";
+            this.evolutionsEditorToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.evolutionsEditorToolStripMenuItem.Text = "Evolutions Editor";
+            this.evolutionsEditorToolStripMenuItem.Click += new System.EventHandler(this.evolutionsEditorToolStripMenuItem_Click);
             // 
             // menuViewToolStripMenuItem
             // 
@@ -11588,23 +11584,6 @@
             this.versionLabel.Text = "ROM:";
             this.versionLabel.Visible = false;
             // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.FileName = "openFileDialog1";
-            // 
-            // trainerEditorStatButton
-            // 
-            this.trainerEditorStatButton.Image = global::DSPRE.Properties.Resources.SearchMiniIcon;
-            this.trainerEditorStatButton.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.trainerEditorStatButton.Location = new System.Drawing.Point(350, 16);
-            this.trainerEditorStatButton.Name = "trainerEditorStatButton";
-            this.trainerEditorStatButton.Size = new System.Drawing.Size(83, 29);
-            this.trainerEditorStatButton.TabIndex = 49;
-            this.trainerEditorStatButton.Text = "Export All";
-            this.trainerEditorStatButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.trainerEditorStatButton.UseVisualStyleBackColor = true;
-            this.trainerEditorStatButton.Click += new System.EventHandler(this.trainerEditorStatButton_Click);
-            // 
             // MainProgram
             // 
             this.AllowDrop = true;
@@ -11624,7 +11603,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.MaximizeBox = false;
             this.Name = "MainProgram";
-            this.Text = "DS Pokémon Rom Editor Reloaded 1.10.1 (Nømura, AdAstra/LD3005, Mixone)";
+            this.Text = "DS Pokémon Rom Editor Reloaded 1.11 (Nømura, AdAstra/LD3005, Mixone)";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainProgram_FormClosing);
             this.mainTabControl.ResumeLayout(false);
             this.headerEditorTabPage.ResumeLayout(false);
@@ -12743,9 +12722,6 @@
         private System.Windows.Forms.ToolStripMenuItem essentialToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem simpleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fullViewToolStripMenuItem;
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.DirectoryServices.DirectoryEntry directoryEntry1;
-        private System.DirectoryServices.DirectoryEntry directoryEntry2;
         private System.Windows.Forms.ToolStripMenuItem nSBMDUtilityToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem texturizeNSBMDToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem untexturizeToolStripMenuItem;
@@ -12815,7 +12791,6 @@
         private System.Windows.Forms.ToolStripMenuItem learnsetsEditorToolStripMenuItem;
         private System.Windows.Forms.Button setSpawnPointButton;
         private System.Windows.Forms.Button saveMatrixButton;
-        private System.Windows.Forms.ToolStripMenuItem evolutionEditorToolStripMenuItem;
-        private System.Windows.Forms.Button trainerEditorStatButton;
+        private System.Windows.Forms.ToolStripMenuItem evolutionsEditorToolStripMenuItem;
     }
 }

@@ -65,6 +65,8 @@ namespace DSPRE {
         public static int trainerClassMessageNumber { get; private set; }
         public static int trainerNamesMessageNumber { get; private set; }
         public static int locationNamesTextNumber { get; private set; }
+        public static int trainerNameLenOffset { get; private set; }
+        public static int trainerNameMaxLen { get; private set; }
 
         public static string internalNamesLocation { get; private set; }
         public static readonly byte internalNameLength = 16;
@@ -140,7 +142,8 @@ namespace DSPRE {
             monIcons,
 
             interiorBuildingModels,
-            learnsets
+            learnsets,
+            evolutions
         };
         public static Dictionary<DirNames, (string packedDir, string unpackedDir)> gameDirs { get; private set; }
 
@@ -183,6 +186,7 @@ namespace DSPRE {
             SetLocationNamesTextNumber();
             SetTrainerNamesMessageNumber();
             SetTrainerClassMessageNumber();
+            SetTrainerNameLenOffset();
 
             /* System */
             ScriptCommandParametersDict = BuildCommandParametersDatabase(gameFamily);
@@ -742,7 +746,7 @@ namespace DSPRE {
             }
         }
 
-        private void SetItemScriptFileNumber() {
+        private static void SetItemScriptFileNumber() {
             switch (gameFamily) {
                 case gFamEnum.DP:
                     itemScriptFileNumber = 370;
@@ -755,7 +759,7 @@ namespace DSPRE {
                     break;
             }
         }
-        private void SetNullEncounterID() {
+        private static void SetNullEncounterID() {
             switch (gameFamily) {
                 case gFamEnum.DP:
                 case gFamEnum.Plat:
@@ -767,7 +771,7 @@ namespace DSPRE {
             }
         }
 
-        private void SetAbilityNamesTextNumber() {
+        private static void SetAbilityNamesTextNumber() {
             switch (gameFamily) {
                 case gFamEnum.DP:
                     abilityNamesTextNumber = 552;
@@ -783,7 +787,7 @@ namespace DSPRE {
             }
         }
 
-        private void SetAttackNamesTextNumber() {
+        private static void SetAttackNamesTextNumber() {
             switch (gameFamily) {
                 case gFamEnum.DP:
                     attackNamesTextNumber = 588;
@@ -796,7 +800,7 @@ namespace DSPRE {
                     break;
             }
         }
-        private void SetItemNamesTextNumber() {
+        private static void SetItemNamesTextNumber() {
             switch (gameFamily) {
                 case gFamEnum.DP:
                     itemNamesTextNumber = 344;
@@ -809,7 +813,7 @@ namespace DSPRE {
                     break;
             }
         }
-        private void SetLocationNamesTextNumber() {
+        private static void SetLocationNamesTextNumber() {
             switch (gameFamily) {
                 case gFamEnum.DP:
                     locationNamesTextNumber = 382;
@@ -822,7 +826,7 @@ namespace DSPRE {
                     break;
             }
         }
-        private void SetPokemonNamesTextNumber() {
+        private static void SetPokemonNamesTextNumber() {
             switch (gameFamily) {
                 case gFamEnum.DP:
                     pokemonNamesTextNumbers = new int[2] { 362, 363 };
@@ -835,7 +839,7 @@ namespace DSPRE {
                     break;
             }
         }
-        private void SetTrainerNamesMessageNumber() {
+        private static void SetTrainerNamesMessageNumber() {
             switch (gameFamily) {
                 case gFamEnum.DP:
                     trainerNamesMessageNumber = 559;
@@ -854,7 +858,7 @@ namespace DSPRE {
                     break;
             }
         }
-        private void SetTrainerClassMessageNumber() {
+        private static void SetTrainerClassMessageNumber() {
             switch (gameFamily) {
                 case gFamEnum.DP:
                     trainerClassMessageNumber = 560;
@@ -874,6 +878,86 @@ namespace DSPRE {
             }
         }
 
+        private static void SetTrainerNameLenOffset() {
+            switch (RomInfo.gameFamily) {
+                case gFamEnum.DP:
+                    switch (RomInfo.gameLanguage) {
+                        case gLangEnum.English:
+                            trainerNameLenOffset = 0x6AC32;
+                            break;
+                        case gLangEnum.Italian:
+                            trainerNameLenOffset = 0x6AC6E;
+                            break;
+                        case gLangEnum.Spanish:
+                        case gLangEnum.German:
+                        case gLangEnum.French:
+                            trainerNameLenOffset = 0x6AC8E;
+                            break;
+
+                        case gLangEnum.Japanese: //?
+                        default:
+                            trainerNameLenOffset = -1;
+                            break;
+                    }
+                    break;
+
+                case gFamEnum.Plat:
+                    switch (RomInfo.gameLanguage) {
+                        case gLangEnum.English:
+                            trainerNameLenOffset = 0x791DE;
+                            break;
+                        case gLangEnum.Spanish:
+                        case gLangEnum.Italian:
+                        case gLangEnum.German:
+                        case gLangEnum.French:
+                            trainerNameLenOffset = 0x7927E;
+                            break;
+                        case gLangEnum.Japanese:
+                            trainerNameLenOffset = 0x78AB6;
+                            break;
+
+                        default:
+                            trainerNameLenOffset = -1;
+                            break;
+                    }
+                    break;
+
+                case gFamEnum.HGSS:
+                    if (RomInfo.gameLanguage.Equals(gLangEnum.Japanese)) {
+                        //Jap HGSS
+                        trainerNameLenOffset = 0x7342E;
+                    } else if(gameVersion.Equals(gVerEnum.SoulSilver)){
+                        //All SS languages except Jap
+                        trainerNameLenOffset = 0x72EC2;
+                    } else {
+                        //All HG languages except Jap
+                        switch (RomInfo.gameLanguage) {
+                            case gLangEnum.English:
+                            case gLangEnum.Italian:
+                            case gLangEnum.German:
+                            case gLangEnum.French:
+                                trainerNameLenOffset = 0x7342E;
+                                break;
+                            case gLangEnum.Spanish:
+                                trainerNameLenOffset = 0x73426;
+                                break;
+                        }
+                    }
+                    break;
+            }
+        }
+
+        public static int SetTrainerNameMaxLen() {
+            if(trainerNameLenOffset < 0) {
+                trainerNameMaxLen = TrainerFile.defaultNameLen;
+            } else {
+                using (DSUtils.ARM9.Reader ar = new DSUtils.ARM9.Reader(trainerNameLenOffset)) {
+                    trainerNameMaxLen = ar.ReadByte();
+                }
+            }
+            return trainerNameMaxLen;
+        }
+
         public string GetBuildingModelsDirPath(bool interior) => interior ? gameDirs[DirNames.interiorBuildingModels].unpackedDir : gameDirs[DirNames.exteriorBuildingModels].unpackedDir;
         public string GetRomNameFromWorkdir() => workDir.Substring(0, workDir.Length - folderSuffix.Length - 1);
         public static int GetHeaderCount() => (int)new FileInfo(internalNamesLocation).Length / internalNameLength;
@@ -890,6 +974,8 @@ namespace DSPRE {
         public static string[] GetAttackNames() => new TextArchive(attackNamesTextNumber).messages.ToArray();
         public static int GetLearnsetFilesCount() => Directory.GetFiles(gameDirs[DirNames.learnsets].unpackedDir).Length;
         public static int GetPersonalFilesCount() => Directory.GetFiles(gameDirs[DirNames.personalPokeData].unpackedDir).Length;
+        public static string[] GetEvolutionFilesList() => Directory.GetFiles(gameDirs[DirNames.evolutions].unpackedDir);
+        public static int GetEvolutionFilesCount() => GetEvolutionFilesList().Length;
 
         public int GetAreaDataCount() => Directory.GetFiles(gameDirs[DirNames.areaData].unpackedDir).Length;
         public int GetMapTexturesCount() => Directory.GetFiles(gameDirs[DirNames.mapTextures].unpackedDir).Length;
@@ -972,13 +1058,11 @@ namespace DSPRE {
             switch (gameFamily) {
                 case gFamEnum.DP:
                     string suffix = "";
-                    string pokepersonal = @"data\poketool\personal\personal.narc";
-                    if (!gameLanguage.Equals(gLangEnum.Japanese))
+                    if (!gameLanguage.Equals(gLangEnum.Japanese)) {
                         suffix = "_release";
-                    if (gameVersion == gVerEnum.Pearl)
-                        pokepersonal = @"data\poketool\personal_pearl\personal.narc";
+                    }
+
                     packedDirsDict = new Dictionary<DirNames, string>() {
-                        [DirNames.personalPokeData] = pokepersonal,
                         [DirNames.synthOverlay] = @"data\data\weather_sys.narc",
                         [DirNames.textArchives] = @"data\msgdata\msg.narc",
 
@@ -1003,16 +1087,28 @@ namespace DSPRE {
                         [DirNames.monIcons] = @"data\poketool\icongra\poke_icon.narc",
 
                         [DirNames.encounters] = @"data\fielddata\encountdata\" + char.ToLower(gameVersion.ToString()[0]) + '_' + "enc_data.narc",
-                        [DirNames.learnsets] = workDir + @"data\poketool\personal\wotbl.narc",
+                        [DirNames.learnsets] = @"data\poketool\personal\wotbl.narc",
+                        [DirNames.evolutions] = @"data\poketool\personal\evo.narc",
                     };
+
+                    //Personal Data archive is different for Pearl
+                    string personal = @"data\poketool\personal";
+                    if (gameVersion == gVerEnum.Pearl) {
+                        personal += ("_" + gameVersion.ToString().ToLower());
+                    }
+                    personal += @"\personal.narc";
+                    packedDirsDict[DirNames.personalPokeData] = personal;
+
                     break;
                 case gFamEnum.Plat:
+                    suffix = gameVersion.ToString().Substring(0, 2).ToLower();
+
                     packedDirsDict = new Dictionary<DirNames, string>() {
                         [DirNames.personalPokeData] = @"data\poketool\personal\pl_personal.narc",
                         [DirNames.synthOverlay] = @"data\data\weather_sys.narc",
                         [DirNames.dynamicHeaders] = @"data\debug\cb_edit\d_test.narc",
 
-                        [DirNames.textArchives] = @"data\msgdata\" + gameVersion.ToString().Substring(0, 2).ToLower() + '_' + "msg.narc",
+                        [DirNames.textArchives] = @"data\msgdata\" + suffix + '_' + "msg.narc",
 
                         [DirNames.matrices] = @"data\fielddata\mapmatrix\map_matrix.narc",
 
@@ -1034,8 +1130,9 @@ namespace DSPRE {
 
                         [DirNames.monIcons] = @"data\poketool\icongra\pl_poke_icon.narc",
 
-                        [DirNames.encounters] = @"data\fielddata\encountdata\" + gameVersion.ToString().Substring(0, 2).ToLower() + '_' + "enc_data.narc",
+                        [DirNames.encounters] = @"data\fielddata\encountdata\" + suffix + '_' + "enc_data.narc",
                         [DirNames.learnsets] = @"data\poketool\personal\wotbl.narc",
+                        [DirNames.evolutions] = @"data\poketool\personal\evo.narc",
                     };
                     break;
                 case gFamEnum.HGSS:
@@ -1069,6 +1166,7 @@ namespace DSPRE {
 
                         [DirNames.interiorBuildingModels] = @"data\a\1\4\8",
                         [DirNames.learnsets] = @"data\a\0\3\3",
+                        [DirNames.evolutions] = @"data\a\0\3\4",
                     };
 
                     //Encounter archive is different for SS 

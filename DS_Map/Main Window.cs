@@ -55,7 +55,7 @@ namespace DSPRE {
         public static string gameCode;
         public static byte europeByte;
         RomInfo romInfo;
-        public Dictionary<ushort, ushort> eventToHeader = new Dictionary<ushort, ushort>();
+        public Dictionary<ushort /*evFile*/, ushort /*header*/> eventToHeader = new Dictionary<ushort, ushort>();
 
         #endregion
 
@@ -990,15 +990,15 @@ namespace DSPRE {
             }
 
             // Creating a dictionary linking events to headers to fetch header data for Event Editor
-            for (ushort i = 0; i < internalNames.Count; i++) {
-                MapHeader h;
-                if (ROMToolboxDialog.flag_DynamicHeadersPatchApplied || ROMToolboxDialog.CheckFilesDynamicHeadersPatchApplied()) {
-                    h = MapHeader.LoadFromFile(RomInfo.gameDirs[DirNames.dynamicHeaders].unpackedDir + "\\" + i.ToString("D4"), i, 0);
-                } else {
-                    h = MapHeader.LoadFromARM9(i);
+            if (ROMToolboxDialog.flag_DynamicHeadersPatchApplied || ROMToolboxDialog.CheckFilesDynamicHeadersPatchApplied()) {
+                for (ushort i = 0; i < internalNames.Count; i++) {
+                    MapHeader h = MapHeader.LoadFromFile(RomInfo.gameDirs[DirNames.dynamicHeaders].unpackedDir + "\\" + i.ToString("D4"), i, 0);
+                    eventToHeader[h.eventFileID] = i;
                 }
-                if (!eventToHeader.ContainsKey(h.eventFileID)) {
-                    eventToHeader.Add(h.eventFileID, i);
+            } else {
+                for (ushort i = 0; i < internalNames.Count; i++) {
+                    MapHeader h = MapHeader.LoadFromARM9(i);
+                    eventToHeader[h.eventFileID] = i;
                 }
             }
 
@@ -4621,7 +4621,7 @@ namespace DSPRE {
         }
         #endregion
 
-        #region BDHC Editor
+        #region BDHC I/O
         private void bdhcImportButton_Click(object sender, EventArgs e) {
             OpenFileDialog it = new OpenFileDialog() {
                 Filter = RomInfo.gameFamily == gFamEnum.DP ? MapFile.BDHCFilter : MapFile.BDHCamFilter
@@ -4650,6 +4650,9 @@ namespace DSPRE {
             terrainSizeLBL.Text = currentMapFile.bdhc.Length.ToString() + " B";
             MessageBox.Show("Terrain settings exported successfully!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+        #endregion
+
+        #region Soundplates I/O
         private void soundPlatesImportButton_Click(object sender, EventArgs e) {
             OpenFileDialog it = new OpenFileDialog {
                 Filter = MapFile.BGSFilter
@@ -5530,19 +5533,26 @@ namespace DSPRE {
             FillOverworldsBox();
             FillTriggersBox();
             FillWarpsBox();
-            ushort mapHeader = eventToHeader[(ushort)selectEventComboBox.SelectedIndex];
-            MapHeader h;
-            if (ROMToolboxDialog.flag_DynamicHeadersPatchApplied || ROMToolboxDialog.CheckFilesDynamicHeadersPatchApplied()) {
-                h = MapHeader.LoadFromFile(RomInfo.gameDirs[DirNames.dynamicHeaders].unpackedDir + "\\" + mapHeader.ToString("D4"), mapHeader, 0);
-            } else {
-                h = MapHeader.LoadFromARM9(mapHeader);
-            }
-            eventMatrixUpDown.Value = h.matrixID;
 
-            eventMatrix = new GameMatrix((int)eventMatrixUpDown.Value);
-            eventMatrixXUpDown.Maximum = eventMatrix.width - 1;
-            eventMatrixYUpDown.Maximum = eventMatrix.height - 1;
-            eventAreaDataUpDown.Value = h.areaDataID;
+            if (eventToHeader.TryGetValue((ushort)selectEventComboBox.SelectedIndex, out ushort mapHeader)) {
+                MapHeader h;
+                if (ROMToolboxDialog.flag_DynamicHeadersPatchApplied || ROMToolboxDialog.CheckFilesDynamicHeadersPatchApplied()) {
+                    h = MapHeader.LoadFromFile(RomInfo.gameDirs[DirNames.dynamicHeaders].unpackedDir + "\\" + mapHeader.ToString("D4"), mapHeader, 0);
+                } else {
+                    h = MapHeader.LoadFromARM9(mapHeader);
+                }
+                eventMatrixUpDown.Value = h.matrixID;
+
+                eventMatrix = new GameMatrix((int)eventMatrixUpDown.Value);
+                eventMatrixXUpDown.Maximum = eventMatrix.width - 1;
+                eventMatrixYUpDown.Maximum = eventMatrix.height - 1;
+                eventAreaDataUpDown.Value = h.areaDataID;
+
+                statusLabelMessage($"Detected link between Event File {selectEventComboBox.SelectedIndex} and Header {mapHeader}");
+            } else {
+                statusLabelError($"Could not link Event File {selectEventComboBox.SelectedIndex} to any Header");
+            }
+
             eventEditorFullMapReload((int)eventMatrixXUpDown.Value, (int)eventMatrixYUpDown.Value);
 
             disableHandlers = false;
@@ -8622,6 +8632,8 @@ namespace DSPRE {
         }
         private void SetupTrainerEditor() {
             disableHandlers = true;
+
+            SetTrainerNameMaxLen();
             SetupTrainerClassEncounterMusicTable();
             /* Extract essential NARCs sub-archives*/
             statusLabelMessage("Setting up Trainer Editor...");
@@ -9043,26 +9055,6 @@ namespace DSPRE {
         }
 
         private void trainerSaveCurrentButton_Click(object sender, EventArgs e) {
-            if (!ROMToolboxDialog.flag_TrainerNamesExpanded && trainerNameTextBox.Text.Length > TrainerFile.maxNameLen) {
-                DialogResult d2;
-                MessageBox.Show($"The length of this Trainer name exceeds {TrainerFile.maxNameLen} characters.",
-                    "Trainer data could not be saved!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                d2 = MessageBox.Show("Within the RomToolBox (found near the wild editor) you can expand this limit if you are working on an English or Spanish rom (for now).",
-                "Do you wish to go there now?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (d2 == DialogResult.Yes) {
-                    romToolBoxToolStripMenuItem_Click(null, null);
-                }
-                return;
-            }
-
-            if (trainerNameTextBox.Text.Length > ROMToolboxDialog.expandedTrainerNameLength) {
-                MessageBox.Show($"The length of this Trainer name exceeds {ROMToolboxDialog.expandedTrainerNameLength} characters.",
-                    "Trainer data could not be saved!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-
-            }
-
             currentTrainerFile.trp.partyCount = (byte)partyCountUpDown.Value;
             currentTrainerFile.trp.chooseMoves = trainerMovesCheckBox.Checked;
             currentTrainerFile.trp.chooseItems = trainerItemsCheckBox.Checked;
@@ -9138,7 +9130,20 @@ namespace DSPRE {
             UpdateCurrentTrainerName(newName: trainerNameTextBox.Text);
             UpdateCurrentTrainerShownName();
 
-            MessageBox.Show("Trainer saved successfully!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (trainerNameTextBox.Text.Length > RomInfo.trainerNameMaxLen - 1) { //Subtract 1 to account for special end character. 
+                //Expose a smaller limit to the user
+                if (RomInfo.trainerNameLenOffset >= 0) {
+                    MessageBox.Show($"Trainer File saved successfully. However:\nYou attempted to save a Trainer whose name exceeds {RomInfo.trainerNameMaxLen-1} characters.\nThis may lead to issues in game." +
+                        (ROMToolboxDialog.flag_TrainerNamesExpanded ? "\n\nIt's recommended that you use a shorter name." : "\n\nRefer to the ROM Toolbox to extend Trainer names."),
+                        "Saved successfully, but...", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                } else {
+                    MessageBox.Show($"Trainer File saved successfully. However:\nThe Trainer name length could not be safely determined for this ROM.\n" +
+                        $"You attempted to save a Trainer whose name exceeds {RomInfo.trainerNameMaxLen-1} characters.\nThis will most likely lead to issues in game.",
+                        "Saved successfully, but...", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            } else {
+                MessageBox.Show("Trainer saved successfully!", "Saved successfully", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void UpdateCurrentTrainerShownName() {
@@ -9295,6 +9300,7 @@ namespace DSPRE {
 
                 UpdateCurrentTrainerName(trName);
             }
+
             /* Refresh controls and re-read file */
             trainerComboBox_SelectedIndexChanged(null, null);
             UpdateCurrentTrainerShownName();
@@ -9394,19 +9400,18 @@ namespace DSPRE {
         }
 
         private (string ability1, string ability2) getPokemonAbilityNames(int pokemonID) {
-            return (abilityNames[pokemonSpeciesAbilities[pokemonID].Item1],
-                    abilityNames[pokemonSpeciesAbilities[pokemonID].Item2]);
+            return (abilityNames[pokemonSpeciesAbilities[pokemonID].abi1],
+                    abilityNames[pokemonSpeciesAbilities[pokemonID].abi2]);
         }
 
         private void setTrainerPartyPokemonAbilities(int partyPokemonPosition) {
-
-            (string ability1, string ability2) currentPartyPokemonAbilities = getPokemonAbilityNames(partyPokemonComboboxList[partyPokemonPosition].SelectedIndex);
+            (string ability1, string ability2) = getPokemonAbilityNames(partyPokemonComboboxList[partyPokemonPosition].SelectedIndex);
             partyAbilityComboBoxList[partyPokemonPosition].Items.Clear();
             partyAbilityComboBoxList[partyPokemonPosition].Items.Add(currentPartyPokemonAbilities.ability1);
             partyAbilityComboBoxList[partyPokemonPosition].Items.Add(currentPartyPokemonAbilities.ability2);
 
             //if the name " -" is returned for ability 2 then there is no ability 2
-            if (currentPartyPokemonAbilities.ability2.Equals(" -") || currentPartyPokemonAbilities.ability2.Equals(currentPartyPokemonAbilities.ability1) || gameFamily != gFamEnum.HGSS) {
+            if (ability2.Equals(" -") || ability2.Equals(ability1) || gameFamily != gFamEnum.HGSS) {
                 partyAbilityComboBoxList[partyPokemonPosition].Enabled = false;
             } else {
                 partyAbilityComboBoxList[partyPokemonPosition].Enabled = true;
