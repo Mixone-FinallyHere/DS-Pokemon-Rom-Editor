@@ -6,7 +6,7 @@ using static DSPRE.RomInfo;
 namespace DSPRE.ROMFiles {
     public abstract class RomFile {
         public abstract byte[] ToByteArray();
-        public bool SaveToFile(string path, bool showSuccessMessage = true) {
+        public bool SaveToFile(string path, bool showSuccessMessage = false) {
             
             byte[] romFileToByteArray = ToByteArray();
             if (romFileToByteArray is null) {

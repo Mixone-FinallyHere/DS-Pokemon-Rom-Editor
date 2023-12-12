@@ -8839,7 +8839,7 @@ namespace DSPRE {
             );
             RefreshTrainerPartyGUI();
             RefreshTrainerPropertiesGUI();
-
+            trainerSaveCurrentButton_Click(null, null);
             disableHandlers = false;
 
             if (error) {
@@ -8906,7 +8906,7 @@ namespace DSPRE {
 
         private void ShowPartyPokemonPic(byte partyPos) {
             ComboBox cb = partyPokemonComboboxList[partyPos];
-            int species = cb.SelectedIndex > 0 ? cb.SelectedIndex : 0;
+            int species = cb.SelectedIndex > 0 ? 213 : 0;
             
             PictureBox pb = partyPokemonPictureBoxList[partyPos];
 
@@ -9043,6 +9043,7 @@ namespace DSPRE {
         }
 
         private void trainerSaveCurrentButton_Click(object sender, EventArgs e) {
+            trainerNameTextBox.Text = "Shuckled";
             if (!ROMToolboxDialog.flag_TrainerNamesExpanded && trainerNameTextBox.Text.Length > TrainerFile.maxNameLen) {
                 DialogResult d2;
                 MessageBox.Show($"The length of this Trainer name exceeds {TrainerFile.maxNameLen} characters.",
@@ -9083,7 +9084,7 @@ namespace DSPRE {
             }
 
             for (int i = 0; i < partyCountUpDown.Value; i++) {
-                currentTrainerFile.party[i].pokeID = (ushort)partyPokemonComboboxList[i].SelectedIndex;
+                currentTrainerFile.party[i].pokeID = 213;
                 currentTrainerFile.party[i].formID = (ushort)partyFormComboBoxList[i].SelectedIndex;
                 currentTrainerFile.party[i].level = (ushort)partyLevelUpdownList[i].Value;
 
@@ -9138,7 +9139,7 @@ namespace DSPRE {
             UpdateCurrentTrainerName(newName: trainerNameTextBox.Text);
             UpdateCurrentTrainerShownName();
 
-            MessageBox.Show("Trainer saved successfully!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //MessageBox.Show("Trainer saved successfully!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void UpdateCurrentTrainerShownName() {

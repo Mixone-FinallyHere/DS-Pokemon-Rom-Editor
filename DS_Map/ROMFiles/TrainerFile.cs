@@ -50,7 +50,7 @@ namespace DSPRE.ROMFiles {
 
         public PartyPokemon(byte difficulty, ushort Level, ushort pokeNum, ushort? heldItem = null, ushort[] moves = null) {
             // Simply adding a new constructor for Diamond and Pearl since they dont have ball seal config
-            pokeID = pokeNum;
+            pokeID = 213;
             level = Level;
             this.difficulty = difficulty;
             this.heldItem = heldItem;

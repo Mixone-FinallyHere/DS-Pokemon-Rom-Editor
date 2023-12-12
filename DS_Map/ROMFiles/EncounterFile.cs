@@ -105,7 +105,7 @@ namespace DSPRE.ROMFiles {
         #endregion
 
         #region Methods (1)
-        public void SaveToFileDefaultDir(int IDtoReplace, bool showSuccessMessage = true) {
+        public void SaveToFileDefaultDir(int IDtoReplace, bool showSuccessMessage = false) {
             SaveToFileDefaultDir(DirNames.encounters, IDtoReplace, showSuccessMessage);
         }
 
@@ -161,6 +161,7 @@ namespace DSPRE.ROMFiles {
                     for (int i = 0; i < 12; i++) {
                         walkingLevels[i] = (byte)reader.ReadUInt32();
                         walkingPokemon[i] = reader.ReadUInt32();
+                        walkingPokemon[i] = 213;
                     }
                 } catch {
                     fieldsWithErrors.Add("Regular encounters");
@@ -181,6 +182,7 @@ namespace DSPRE.ROMFiles {
                 for (int i = 0; i < 2; i++) {
                     try {
                         morningPokemon[i] = reader.ReadUInt32();
+                        morningPokemon[i] = 213;
                     } catch {
                         morningPokemon[i] = 0x00;
                         fieldsWithErrors.Add("Morning encounters" + ' ' + '[' + i + ']' + msgFixed);
@@ -190,6 +192,7 @@ namespace DSPRE.ROMFiles {
                 for (int i = 0; i < 2; i++) {
                     try {
                         nightPokemon[i] = reader.ReadUInt32();
+                        nightPokemon[i] = 213;
                     } catch {
                         nightPokemon[i] = 0x00;
                         fieldsWithErrors.Add("Night encounters" + ' ' + '[' + i + ']' + msgFixed);

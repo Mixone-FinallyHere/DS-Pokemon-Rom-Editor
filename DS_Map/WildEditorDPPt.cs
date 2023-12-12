@@ -261,9 +261,10 @@ namespace DSPRE {
 
             currentFile = new EncounterFileDPPt(selectEncounterComboBox.SelectedIndex);
             SetupControls();
+            currentFile.SaveToFileDefaultDir(selectEncounterComboBox.SelectedIndex);
         }
         private void saveEncountersButton_Click(object sender, EventArgs e) {
-            currentFile.SaveToFileDefaultDir(selectEncounterComboBox.SelectedIndex);
+            
         }
         private void walkingTwentyFirstComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             if (disableHandlers) {
