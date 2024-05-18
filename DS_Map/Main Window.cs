@@ -696,6 +696,7 @@ namespace DSPRE {
                 mainTabControl.TabPages.Remove(tabPageEncountersEditor);
             } else {
                 overlayEditorToolStripMenuItem.Enabled = true;
+                starterEditorToolStripMenuItem.Enabled = true;
             }
 
             Helpers.statusLabelMessage();
@@ -7832,9 +7833,7 @@ namespace DSPRE {
 
             int numPokemonSpecies = Directory.GetFiles(RomInfo.gameDirs[DirNames.personalPokeData].unpackedDir, "*").Count();
             pokemonSpeciesAbilities = new (int abi1, int abi2)[numPokemonSpecies];
-            pokemonSpecies = new SpeciesFile[numPokemonSpecies];
-
-            RomInfo.SetMonIconsPalTableAddress();
+            pokemonSpecies = new SpeciesFile[numPokemonSpecies];           
 
             partyPokemonComboboxList.Clear();
             partyPokemonComboboxList.Add(partyPokemon1ComboBox);
@@ -8801,8 +8800,6 @@ namespace DSPRE {
                     DirNames.textArchives,
                     DirNames.monIcons
                 });
-                RomInfo.SetBattleEffectsData();
-                RomInfo.SetMonIconsPalTableAddress();
 
                 effectsComboTable = new List<(ushort vsGraph, ushort battleSSEQ)>();
 
@@ -9869,7 +9866,6 @@ namespace DSPRE {
             Update();
 
             DSUtils.TryUnpackNarcs(new List<DirNames> { DirNames.personalPokeData, DirNames.learnsets, DirNames.evolutions, DirNames.monIcons });
-            RomInfo.SetMonIconsPalTableAddress();
 
             PokemonEditor pde = new PokemonEditor(itemNames, abilityNames, moveNames);
             pde.ShowDialog();
@@ -9891,6 +9887,18 @@ namespace DSPRE {
             Update();
             OverlayEditor ovlEditor = new OverlayEditor();
             ovlEditor.ShowDialog();
+
+            Helpers.statusLabelMessage();
+            Update();
+        }
+
+        private void starterEditorToolStripMenuItem_Click(object sender, EventArgs e) {
+            Helpers.statusLabelMessage("Setting up Starter Editor...");
+            Update();
+            
+            DSUtils.TryUnpackNarcs(new List<DirNames> { DirNames.personalPokeData, DirNames.monIcons });
+            StarterEditor starterEditor = new StarterEditor();
+            starterEditor.ShowDialog();
 
             Helpers.statusLabelMessage();
             Update();

@@ -81,6 +81,8 @@ namespace DSPRE
         public static string internalNamesLocation { get; private set; }
         public static readonly byte internalNameLength = 16;
         public static string internalNamesPath { get; private set; }
+        
+        public static uint[] starterOffsets = {0, 0, 0};
 
         public static int cameraSize { get; private set; }
 
@@ -222,6 +224,9 @@ namespace DSPRE
             SetTrainerClassMessageNumber();
             SetTrainerFunnyScriptNumber();
             SetTrainerNameLenOffset();
+            SetStarterOffsets();
+            SetMonIconsPalTableAddress();
+            SetBattleEffectsData();
 
             /* System */
             ScriptCommandParametersDict = BuildCommandParametersDatabase(gameFamily);
@@ -1125,7 +1130,20 @@ namespace DSPRE
                     trainerFunnyScriptNumber = 740;
                     break;
             }
-        }        
+        }
+
+        private static void SetStarterOffsets() {
+            switch (gameFamily) {
+                case GameFamilies.DP:
+                case GameFamilies.Plat:
+                    starterOffsets = new uint[] { 0x1BC0, 0x1BC4, 0x1BC8 };
+                    break;
+
+                default: // HGSS
+                    starterOffsets = new uint[] { 0x108514, 0x108518, 0x10851C};
+                    break;
+            }
+        }
 
         private static void SetTrainerNameLenOffset()
         {

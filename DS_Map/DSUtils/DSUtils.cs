@@ -179,7 +179,6 @@ namespace DSPRE {
             // read arm9 table to grab pal ID
             int paletteId = 0;
             string iconTablePath;
-
             int iconPalTableOffsetFromFileStart;
             string ov129path = OverlayUtils.GetPath(129);
             if (File.Exists(ov129path)) {
@@ -195,7 +194,7 @@ namespace DSPRE {
                 iconPalTableOffsetFromFileStart = (int)(RomInfo.monIconPalTableAddress - ARM9.address);
                 iconTablePath = RomInfo.arm9Path;
             }
-
+            
             using (DSUtils.EasyReader idReader = new DSUtils.EasyReader(iconTablePath, iconPalTableOffsetFromFileStart + species)) {
                 paletteId = idReader.ReadByte();
             }
@@ -203,7 +202,6 @@ namespace DSPRE {
             if (paletteId != 0) {
                 paletteBase.Palette[0] = paletteBase.Palette[paletteId]; // update pal 0 to be the new pal
             }
-
             // grab tiles
             int spriteFileID = species + 7;
             string spriteFilename = spriteFileID.ToString("D" + (fiveDigits ? "5" : "4"));
@@ -220,7 +218,6 @@ namespace DSPRE {
             for (int i = 0; i < OAMenabled.Length; i++) {
                 OAMenabled[i] = i;
             }
-
             // finally compose image
             try {
                 return spriteBase.Get_Image(imageBase, paletteBase, 0, w, h, false, false, false, true, true, -1, OAMenabled);
