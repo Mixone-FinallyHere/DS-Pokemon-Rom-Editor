@@ -11,6 +11,7 @@ using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static DSPRE.DSUtils;
 
 namespace DSPRE.Editors {
     public partial class StarterEditor : Form {
@@ -51,6 +52,14 @@ namespace DSPRE.Editors {
                     starters[2] = BitConverter.ToInt32(ARM9.ReadBytes(RomInfo.starterOffsets[2], 4), 0);                    
                     break;
                 default: // DPPt
+                    if (OverlayUtils.IsCompressed(78)) {
+                        OverlayUtils.Decompress(78);
+                    }
+                    using (DSUtils.EasyReader f = new EasyReader(OverlayUtils.GetPath(78), RomInfo.starterOffsets[0])) {
+                        starters[0] = (int)f.ReadUInt32();
+                        starters[1] = (int)f.ReadUInt32();
+                        starters[2] = (int)f.ReadUInt32();
+                    }
                     break;
             }
             starterPersonalData = new List<PokemonPersonalData> { new PokemonPersonalData(starters[0]), new PokemonPersonalData(starters[1]), new PokemonPersonalData(starters[2]) };
@@ -124,6 +133,7 @@ namespace DSPRE.Editors {
         }
 
         private void button1_Click(object sender, EventArgs e) {
+            // TODO : Add confirmation message
             textFile.SaveToFileDefaultDir(190, showSuccessMessage: false);
             ARM9.WriteBytes(BitConverter.GetBytes(starters[0]), RomInfo.starterOffsets[0]);
             ARM9.WriteBytes(BitConverter.GetBytes(starters[1]), RomInfo.starterOffsets[1]);
