@@ -690,13 +690,13 @@ namespace DSPRE {
             spawnEditorToolStripButton.Enabled = true;
             spawnEditorToolStripMenuItem.Enabled = true;
             monEditorToolStripMenuItem.Enabled = true;
+            starterEditorToolStripMenuItem.Enabled = true;
 
             scriptCommandsButton.Enabled = true;
             if (!RomInfo.gameFamily.Equals(GameFamilies.HGSS)) {
                 mainTabControl.TabPages.Remove(tabPageEncountersEditor);
             } else {
-                overlayEditorToolStripMenuItem.Enabled = true;
-                starterEditorToolStripMenuItem.Enabled = true;
+                overlayEditorToolStripMenuItem.Enabled = true;                
             }
 
             Helpers.statusLabelMessage();
