@@ -73,6 +73,8 @@ namespace DSPRE
         public static int itemScriptFileNumber { get; internal set; }
         public static int trainerClassMessageNumber { get; private set; }
         public static int trainerNamesMessageNumber { get; private set; }
+        public static int moveDescriptionsTextNumbers { get; private set; }
+        public static int moveNamesTextNumbers { get; private set; }
         public static int locationNamesTextNumber { get; private set; }
         public static int trainerNameLenOffset { get; private set; }
         public static int trainerNameMaxLen => SetTrainerNameMaxLen();
@@ -160,6 +162,7 @@ namespace DSPRE
             trainerProperties,
             trainerParty,
             trainerGraphics,
+            moveData,
 
             monIcons,
 
@@ -227,6 +230,7 @@ namespace DSPRE
             SetStarterOffsets();
             SetMonIconsPalTableAddress();
             SetBattleEffectsData();
+            SetMoveTextNumbers();
 
             /* System */
             ScriptCommandParametersDict = BuildCommandParametersDatabase(gameFamily);
@@ -1115,6 +1119,20 @@ namespace DSPRE
                     break;
             }
         }
+        private static void SetMoveTextNumbers() {
+            switch (gameFamily) {
+                case GameFamilies.DP:
+                case GameFamilies.Plat:
+                    moveDescriptionsTextNumbers = 646;
+                    moveNamesTextNumbers = 647;
+                    break;
+
+                case GameFamilies.HGSS:
+                    moveDescriptionsTextNumbers = 749;
+                    moveNamesTextNumbers = 750;
+                    break;
+            }
+        }
 
         private static void SetTrainerFunnyScriptNumber() {
             switch (gameFamily) {
@@ -1276,6 +1294,8 @@ namespace DSPRE
         public static string[] GetEvolutionFilesList() => Directory.GetFiles(gameDirs[DirNames.evolutions].unpackedDir);
 
         public static int GetEvolutionFilesCount() => GetEvolutionFilesList().Length;
+        public static string[] GetBattleEffectSequenceFiles() => Directory.GetFiles(gameDirs[DirNames.moveData].unpackedDir);
+        public static int GetBattleEffectSequenceFilesCount() => GetBattleEffectSequenceFiles().Length;
 
         public int GetAreaDataCount() => Directory.GetFiles(gameDirs[DirNames.areaData].unpackedDir).Length;
 
@@ -1453,6 +1473,7 @@ namespace DSPRE
                         [DirNames.trainerProperties] = @"data\poketool\trainer\trdata.narc",
                         [DirNames.trainerParty] = @"data\poketool\trainer\trpoke.narc",
                         [DirNames.trainerGraphics] = @"data\poketool\trgra\trfgra.narc",
+                        [DirNames.moveData] = @"data\poketool\waza\pl_waza_tbl.narc",
 
                         [DirNames.monIcons] = @"data\poketool\icongra\pl_poke_icon.narc",
 
@@ -1488,6 +1509,7 @@ namespace DSPRE
                         [DirNames.trainerProperties] = @"data\a\0\5\5",
                         [DirNames.trainerParty] = @"data\a\0\5\6",
                         [DirNames.trainerGraphics] = @"data\a\0\5\8",
+                        [DirNames.moveData] = @"data\a\0\1\1",
 
                         [DirNames.monIcons] = @"data\a\0\2\0",
 

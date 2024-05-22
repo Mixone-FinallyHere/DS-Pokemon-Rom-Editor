@@ -687,9 +687,8 @@ namespace DSPRE {
             romToolboxToolStripMenuItem.Enabled = true;
             headerSearchToolStripButton.Enabled = true;
             headerSearchToolStripMenuItem.Enabled = true;
-            spawnEditorToolStripButton.Enabled = true;
             spawnEditorToolStripMenuItem.Enabled = true;
-            monEditorToolStripMenuItem.Enabled = true;
+            otherEditorsToolStripMenuItem.Enabled = true;
             starterEditorToolStripMenuItem.Enabled = true;
 
             scriptCommandsButton.Enabled = true;
@@ -7958,22 +7957,27 @@ namespace DSPRE {
                     partyGenderComboBox.Items.Add("Female");
                 }
             } else {
-                foreach (ComboBox partyGenderComboBox in partyGenderComboBoxList)
+                foreach (ComboBox partyGenderComboBox in partyGenderComboBoxList) {
                     partyGenderComboBox.Visible = false;
+                }
             }
 
             if (gameFamily == GameFamilies.DP) {
-                foreach (ComboBox partyFormComboBox in partyFormComboBoxList)
+                foreach (ComboBox partyFormComboBox in partyFormComboBoxList) {
                     partyFormComboBox.Visible = false;
+                }
 
-                foreach (NumericUpDown partyBallSealUpDown in partyBallUpdownList)
+                foreach (NumericUpDown partyBallSealUpDown in partyBallUpdownList) {
                     partyBallSealUpDown.Enabled = false;
+                }
             } else {
-                foreach (ComboBox partyFormComboBox in partyFormComboBoxList)
+                foreach (ComboBox partyFormComboBox in partyFormComboBoxList) {
                     partyFormComboBox.Visible = true;
+                }
 
-                foreach (NumericUpDown partyBallSealUpDown in partyBallUpdownList)
+                foreach (NumericUpDown partyBallSealUpDown in partyBallUpdownList) {
                     partyBallSealUpDown.Enabled = true;
+                }
             }
 
             string[] itemNames = RomInfo.GetItemNames();
@@ -8074,10 +8078,9 @@ namespace DSPRE {
                 setTrainerPartyPokemonForm(i);
                 setTrainerPokemonGender(i);
 
-                if (currentTrainerFile.party[i].genderAndAbilityFlags.HasFlag(PartyPokemon.GenderAndAbilityFlags.ABILITY_SLOT2))
-                    partyAbilityComboBoxList[i].SelectedIndex = TRAINER_PARTY_POKEMON_ABILITY_SLOT2_INDEX;
-                else
-                    partyAbilityComboBoxList[i].SelectedIndex = TRAINER_PARTY_POKEMON_ABILITY_SLOT1_INDEX;
+                partyAbilityComboBoxList[i].SelectedIndex = currentTrainerFile.party[i].genderAndAbilityFlags.HasFlag(PartyPokemon.GenderAndAbilityFlags.ABILITY_SLOT2)
+                    ? TRAINER_PARTY_POKEMON_ABILITY_SLOT2_INDEX
+                    : TRAINER_PARTY_POKEMON_ABILITY_SLOT1_INDEX;
 
                 partyFormComboBoxList[i].SelectedIndex = currentTrainerFile.party[i].formID;
 
@@ -8604,12 +8607,17 @@ namespace DSPRE {
             (string ability1, string ability2) = getPokemonAbilityNames(partyPokemonComboboxList[partyPokemonPosition].SelectedIndex);
             partyAbilityComboBoxList[partyPokemonPosition].Items.Clear();
             partyAbilityComboBoxList[partyPokemonPosition].Items.Add(ability1);
-
+            
             //if the name " -" is returned for ability 2 then there is no ability 2
-            if (ability2.Equals(" -") || ability2.Equals(ability1) || gameFamily != GameFamilies.HGSS) {
+            if (ability2.Equals(" -") || gameFamily != GameFamilies.HGSS) {
                 partyAbilityComboBoxList[partyPokemonPosition].Enabled = false;
             } else {
-                partyAbilityComboBoxList[partyPokemonPosition].Items.Add(ability2);
+                string stringAbi2 = ability2;
+                if (ability2.Equals(ability1)) {
+                    stringAbi2 += " (2nd Slot)";
+                }
+
+                partyAbilityComboBoxList[partyPokemonPosition].Items.Add(stringAbi2);
                 partyAbilityComboBoxList[partyPokemonPosition].Enabled = true;
             }
 
@@ -9857,7 +9865,7 @@ namespace DSPRE {
             Console.WriteLine("CSV file exported successfully.");
         }
 
-        private void personalDataEditorToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void pokemonDataEditorToolStripMenuItem_Click(object sender, EventArgs e) {
             string[] itemNames = RomInfo.GetItemNames();
             string[] abilityNames = RomInfo.GetAbilityNames();
             string[] moveNames = RomInfo.GetAttackNames();
@@ -9874,14 +9882,6 @@ namespace DSPRE {
             Update();
         }
 
-        private void learnsetsEditorToolStripMenuItem_Click(object sender, EventArgs e) {
-            // Dummy func, to be deleted from MainWIndow
-        }
-
-        private void evolutionsEditorToolStripMenuItem_Click(object sender, EventArgs e) {
-            // Dummy func, to be deleted from MainWIndow
-        }
-
         private void overlayEditorToolStripMenuItem_Click(object sender, EventArgs e) {
             Helpers.statusLabelMessage("Setting up Overlay Editor...");
             Update();
@@ -9892,10 +9892,29 @@ namespace DSPRE {
             Update();
         }
 
+        private void moveDataEditorToolStripMenuItem_Click(object sender, EventArgs e) {
+            Helpers.statusLabelMessage("Setting up Move Data Editor...");
+            Update();
+
+            DSUtils.TryUnpackNarcs(new List<DirNames> { DirNames.moveData });
+
+            string[] moveDescriptions = new TextArchive(RomInfo.moveDescriptionsTextNumbers).messages.Select(
+            x => x.Replace("\\n", Environment.NewLine)).ToArray();
+
+            MoveDataEditor mde = new MoveDataEditor(
+                new TextArchive(RomInfo.moveNamesTextNumbers).messages.ToArray(),
+                moveDescriptions
+            );
+            mde.ShowDialog();
+
+            Helpers.statusLabelMessage();
+            Update();
+        }
+
         private void starterEditorToolStripMenuItem_Click(object sender, EventArgs e) {
             Helpers.statusLabelMessage("Setting up Starter Editor...");
             Update();
-            
+
             DSUtils.TryUnpackNarcs(new List<DirNames> { DirNames.personalPokeData, DirNames.monIcons });
             StarterEditor starterEditor = new StarterEditor();
             starterEditor.ShowDialog();
