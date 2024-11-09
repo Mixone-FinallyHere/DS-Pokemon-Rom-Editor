@@ -920,6 +920,9 @@ namespace DSPRE
                             break;
 
                         case GameLanguages.French:
+							monIconPalTableAddress = BitConverter.ToUInt32(ARM9.ReadBytes(0x74408, 4), 0);
+							break;
+							
                         case GameLanguages.Spanish:
                             if (gameVersion == GameVersions.HeartGold)
                             {
