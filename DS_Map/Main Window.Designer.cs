@@ -858,6 +858,7 @@
             this.weatherMapEditor = new System.Windows.Forms.ToolStripButton();
             this.versionLabel = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.flyWarpEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainTabControl.SuspendLayout();
             this.headerEditorTabPage.SuspendLayout();
             this.worldmapCoordsGroupBox.SuspendLayout();
@@ -10489,14 +10490,14 @@
             // essentialToolStripMenuItem
             // 
             this.essentialToolStripMenuItem.Name = "essentialToolStripMenuItem";
-            this.essentialToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.essentialToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.essentialToolStripMenuItem.Text = "Essential";
             this.essentialToolStripMenuItem.MouseDown += new System.Windows.Forms.MouseEventHandler(this.simpleToolStripMenuItem_MouseDown);
             // 
             // simpleToolStripMenuItem
             // 
             this.simpleToolStripMenuItem.Name = "simpleToolStripMenuItem";
-            this.simpleToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.simpleToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.simpleToolStripMenuItem.Text = "Simple";
             this.simpleToolStripMenuItem.MouseDown += new System.Windows.Forms.MouseEventHandler(this.simpleToolStripMenuItem_MouseDown);
             // 
@@ -10505,14 +10506,14 @@
             this.advancedStripMenuItem.Checked = true;
             this.advancedStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.advancedStripMenuItem.Name = "advancedStripMenuItem";
-            this.advancedStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.advancedStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.advancedStripMenuItem.Text = "Advanced";
             this.advancedStripMenuItem.MouseDown += new System.Windows.Forms.MouseEventHandler(this.simpleToolStripMenuItem_MouseDown);
             // 
             // fullViewToolStripMenuItem
             // 
             this.fullViewToolStripMenuItem.Name = "fullViewToolStripMenuItem";
-            this.fullViewToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.fullViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.fullViewToolStripMenuItem.Text = "Complete";
             this.fullViewToolStripMenuItem.MouseDown += new System.Windows.Forms.MouseEventHandler(this.simpleToolStripMenuItem_MouseDown);
             // 
@@ -10522,7 +10523,8 @@
             this.personalDataEditorToolStripMenuItem,
             this.overlayEditorToolStripMenuItem,
             this.spawnEditorToolStripMenuItem,
-            this.moveDataEditorToolStripMenuItem});
+            this.moveDataEditorToolStripMenuItem,
+            this.flyWarpEditorToolStripMenuItem});
             this.otherEditorsToolStripMenuItem.Enabled = false;
             this.otherEditorsToolStripMenuItem.Name = "otherEditorsToolStripMenuItem";
             this.otherEditorsToolStripMenuItem.Size = new System.Drawing.Size(88, 20);
@@ -10942,6 +10944,13 @@
             this.versionLabel.TabIndex = 9;
             this.versionLabel.Text = "ROM:";
             this.versionLabel.Visible = false;
+            // 
+            // flyWarpEditorToolStripMenuItem
+            // 
+            this.flyWarpEditorToolStripMenuItem.Name = "flyWarpEditorToolStripMenuItem";
+            this.flyWarpEditorToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.flyWarpEditorToolStripMenuItem.Text = "Fly Warp Editor";
+            this.flyWarpEditorToolStripMenuItem.Click += new System.EventHandler(this.flyWarpEditorToolStripMenuItem_Click);
             // 
             // MainProgram
             // 
@@ -12086,6 +12095,7 @@
         private System.Windows.Forms.ToolStripMenuItem addressHelperToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportScriptDatabaseJSONToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem generateCSVToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem flyWarpEditorToolStripMenuItem;
     }
 }
 
