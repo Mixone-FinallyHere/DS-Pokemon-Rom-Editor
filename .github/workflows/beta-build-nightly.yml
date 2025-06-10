@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 env:
   SOLUTION_FILE_PATH: DS_Map.sln
@@ -20,8 +21,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v2
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -37,14 +38,12 @@ jobs:
     - name: Fetch tags
       run: git fetch --prune --unshallow --tags
 
-    - name: Move beta_canary tag to latest commit
+    - name: Update canary tag
       run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git tag -f beta_canary
-        git push -f origin beta_canary
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       git config user.name "github-actions[bot]"
+       git config user.email "github-actions[bot]@users.noreply.github.com"
+       git tag -f beta_canary
+       git push -f origin beta_canary
 
     - name: Delete previous release
       run: |
@@ -55,10 +54,10 @@ jobs:
         
     - name: Get current date
       id: date
-      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
         
     - name: Create new release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631
       with:
         tag_name: beta_canary
         name: DSPRE Beta Canary Build ${{ steps.date.outputs.date }}
