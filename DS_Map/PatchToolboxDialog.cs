@@ -79,7 +79,7 @@ namespace DSPRE
                     break;
 
                 case GameFamilies.HGSS:
-                    if (!OverlayUtils.OverlayTable.IsDefaultCompressed(1))
+                    if (!OverlayUtils.OverlayTable.IsCompressed(1))
                     {
                         DisableOverlay1patch("Already applied");
                         overlay1CB.Visible = true;
@@ -214,7 +214,6 @@ namespace DSPRE
             }
 
             string overlayFilePath = OverlayUtils.GetPath(data.overlayNumber);
-            OverlayUtils.Decompress(data.overlayNumber);
 
             byte[] overlayCode1 = DSUtils.HexStringToByteArray(data.overlayString1);
             byte[] overlayCode1Read = DSUtils.ReadFromFile(overlayFilePath, data.overlayOffset1, overlayCode1.Length);
@@ -456,7 +455,7 @@ namespace DSPRE
 
             if (RomInfo.gameFamily == GameFamilies.HGSS)
             {
-                if (OverlayUtils.OverlayTable.IsDefaultCompressed(data.overlayNumber))
+                if (OverlayUtils.OverlayTable.IsCompressed(data.overlayNumber))
                 {
                     DialogResult d1 = MessageBox.Show("It is STRONGLY recommended to configure Overlay1 as uncompressed before proceeding.\n\n" +
                         "More details in the following dialog.\n\n" + "Do you want to know more?",
@@ -490,10 +489,6 @@ namespace DSPRE
 
                     /* Write to overlayfile */
                     string overlayFilePath = OverlayUtils.GetPath(data.overlayNumber);
-                    if (OverlayUtils.IsCompressed(data.overlayNumber))
-                    {
-                        OverlayUtils.Decompress(data.overlayNumber);
-                    }
 
                     DSUtils.WriteToFile(overlayFilePath, DSUtils.HexStringToByteArray(data.overlayString1), data.overlayOffset1); //Write new overlayCode1
                     DSUtils.WriteToFile(overlayFilePath, DSUtils.HexStringToByteArray(data.overlayString2), data.overlayOffset2); //Write new overlayCode2
@@ -538,12 +533,6 @@ namespace DSPRE
             bool isCompressed = false;
             string stringDecompressOverlay = "";
 
-            if (OverlayUtils.IsCompressed(1))
-            {
-                isCompressed = true;
-                stringDecompressOverlay = "- Overlay 1 will be decompressed.\n\n";
-            }
-
             DialogResult d = MessageBox.Show("This process will apply the following changes:\n\n" +
             stringDecompressOverlay +
             "- Overlay 1 will be configured as \"uncompressed\" in the overlay table.\n\n" +
@@ -552,11 +541,7 @@ namespace DSPRE
 
             if (d == DialogResult.Yes)
             {
-                OverlayUtils.OverlayTable.SetDefaultCompressed(1, false);
-                if (isCompressed)
-                {
-                    OverlayUtils.Decompress(1);
-                }
+                OverlayUtils.OverlayTable.SetCompressed(1, false);
 
                 MessageBox.Show("Overlay1 is now configured as uncompressed.", "Operation successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return true;

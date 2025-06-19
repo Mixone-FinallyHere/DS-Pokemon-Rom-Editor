@@ -17,33 +17,6 @@ namespace DSPRE {
                 this.BaseStream.Position = pos;
             }
         }
-        public static void EditSize(int increment) {
-            using (Writer w = new Writer()) {
-                w.EditSize(increment);
-            }
-        }
-        public static bool Decompress(string path) {
-            Process decompress = DSUtils.CreateDecompressProcess(path);
-            decompress.Start();
-            decompress.WaitForExit();
-
-            return new FileInfo(path).Length > MAX_SIZE;
-        }
-
-        public static bool Compress(string path) {
-            Process compress = new Process();
-            compress.StartInfo.FileName = @"Tools\blz.exe";
-            compress.StartInfo.Arguments = @" -en9 " + '"' + path + '"';
-            compress.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            compress.StartInfo.CreateNoWindow = true;
-            compress.Start();
-            compress.WaitForExit();
-
-            return new FileInfo(path).Length <= MAX_SIZE;
-        }
-        public static bool CheckCompressionMark() {
-            return BitConverter.ToInt32(ReadBytes((uint)(RomInfo.gameFamily == GameFamilies.DP ? 0xB7C : 0xBB4), 4), 0) != 0;
-        }
 
         public static byte[] ReadBytes(uint startOffset, long numberOfBytes = 0) {
             return DSUtils.ReadFromFile(RomInfo.arm9Path, startOffset, numberOfBytes);

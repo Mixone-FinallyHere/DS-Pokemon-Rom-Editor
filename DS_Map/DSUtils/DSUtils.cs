@@ -83,20 +83,19 @@ namespace DSPRE {
 
         }
 
-        public static void RepackROM(string ndsFileName) {
+        public static void RepackROM(string ndsFileName)
+        {
+
+            string dsromPath = Path.Combine(Application.StartupPath, "Tools", "dsrom.exe");
+            string ndsFileAbs = Path.GetFullPath(ndsFileName);
+            string configFileAbs = Path.GetFullPath(RomInfo.workDir + "config.yaml");
+
             Process repack = new Process();
-            repack.StartInfo.FileName = @"Tools\ndstool.exe";
-            repack.StartInfo.Arguments = "-c " + '"' + ndsFileName + '"'
-                + " -9 " + '"' + RomInfo.arm9Path + '"'
-                + " -7 " + '"' + RomInfo.workDir + "arm7.bin" + '"'
-                + " -y9 " + '"' + RomInfo.workDir + "y9.bin" + '"'
-                + " -y7 " + '"' + RomInfo.workDir + "y7.bin" + '"'
-                + " -d " + '"' + RomInfo.workDir + "data" + '"'
-                + " -y " + '"' + RomInfo.workDir + "overlay" + '"'
-                + " -t " + '"' + RomInfo.workDir + "banner.bin" + '"'
-                + " -h " + '"' + RomInfo.workDir + "header.bin" + '"';
+            repack.StartInfo.FileName = $"{dsromPath}";
+            repack.StartInfo.Arguments = $"build --config \"{configFileAbs}\" --rom \"{ndsFileAbs}\"";
 
             Application.DoEvents();
+
             repack.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             repack.StartInfo.CreateNoWindow = true;
             repack.Start();
