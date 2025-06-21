@@ -1,5 +1,7 @@
 ﻿using DSPRE.Resources;
 using DSPRE.ROMFiles;
+using Ekona.Images;
+using Images;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,10 +9,21 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
+using static DSPRE.ROMFiles.ItemData;
+using static DSPRE.RomInfo;
+using static Images.NCOB.sNCOB;
 using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace DSPRE.Editors
 {
+    struct ItemNarcTableEntry
+    {
+        public uint itemData;
+        public uint itemIcon;
+        public uint itemPalette;
+        public uint itemAGB;
+    };
+
     public partial class ItemEditor : Form
     {
 
@@ -23,12 +36,28 @@ namespace DSPRE.Editors
         private static bool dirty = false;
         private static readonly string formName = "Item Data Editor";
 
+        private ItemNarcTableEntry[] itemNarcTable;
+        private uint itemNarcTableOffset;
+
+        private HashSet<uint> iconIdSet = new HashSet<uint>();
+        private HashSet<uint> paletteIdSet = new HashSet<uint>();
+
         public ItemEditor(string[] itemFileNames) //, string[] itemDescriptions)
-        {
+         {
+            itemNarcTableOffset = (uint)(RomInfo.gameFamily == RomInfo.GameFamilies.HGSS ? 0x100194 : RomInfo.gameFamily == RomInfo.GameFamilies.Plat ? 0xF0CC4 : 0xF85B4);
             int killCount = 0;
+            itemNarcTable = new ItemNarcTableEntry[itemFileNames.Length];
             List<string> cleanNames = itemFileNames.ToList();
             for (int i = 0; i < itemFileNames.Length; i++)
             {
+                ItemNarcTableEntry itemNarcTableEntry = new ItemNarcTableEntry();
+                itemNarcTableEntry.itemData = ARM9.ReadWordLE((uint)(itemNarcTableOffset + i*8));
+                itemNarcTableEntry.itemIcon = ARM9.ReadWordLE((uint)(itemNarcTableOffset + i * 8 + 2));
+                itemNarcTableEntry.itemPalette = ARM9.ReadWordLE((uint)(itemNarcTableOffset + i * 8 + 4));
+                itemNarcTableEntry.itemAGB = ARM9.ReadWordLE((uint)(itemNarcTableOffset + i * 8 + 6));
+                itemNarcTable[i] = itemNarcTableEntry;
+                iconIdSet.Add(itemNarcTableEntry.itemIcon);
+                paletteIdSet.Add(itemNarcTableEntry.itemPalette);
                 if (itemFileNames[i] == null || itemFileNames[i] == "???")
                 {
                     cleanNames.RemoveAt(i-killCount);
@@ -67,9 +96,145 @@ namespace DSPRE.Editors
             fieldFunctionComboBox.Items.AddRange(Enum.GetNames(typeof(FieldUseFunc)));
             battleFunctionComboBox.Items.AddRange(Enum.GetNames(typeof(BattleUseFunc)));
 
+            // ItemParameters
+            BindItemParamsEvents();
+            SetItemParamToolTips();
+            SetItemParamRanges();
+            PopulateIconPaletteDropdowns();
+
             Helpers.EnableHandlers();
 
             itemNameInputComboBox.SelectedIndex = 1;
+        }
+
+        private void PopulateIconPaletteDropdowns()
+        {
+            imageComboBox.BeginUpdate();
+            paletteComboBox.BeginUpdate();
+            imageComboBox.Items.Clear();
+            paletteComboBox.Items.Clear();
+
+            foreach (var icon in iconIdSet.OrderBy(i => i))
+                imageComboBox.Items.Add(icon.ToString("D4"));
+
+            foreach (var palette in paletteIdSet.OrderBy(p => p))
+                paletteComboBox.Items.Add(palette.ToString("D4"));
+
+            imageComboBox.EndUpdate();
+            paletteComboBox.EndUpdate();
+        }
+
+
+        private void BindItemParamsEvents()
+        {
+            foreach (var ctrl in new CheckBox[] {
+                slpHealCheckBox, psnHealCheckBox, brnHealCheckBox, frzHealCheckBox,
+                przHealCheckBox, cfsHealCheckBox, infHealCheckBox, guardSpecCheckBox,
+                reviveCheckBox, reviveAllCheckBox, levelUpCheckBox, evolveCheckBox,
+                hpRestoreCheckBox, ppRestoreCheckBox, ppUpsCheckBox, ppMaxCheckBox, ppRestoreAllCheckBox,
+                evHpCheckBox, evAtkCheckBox, evDefCheckBox, evSpeedCheckBox, evSpAtkCheckBox, evSpDefCheckBox,
+                friendshipLowCheckBox, friendshipMidCheckBox, friendshipHighCheckBox
+            }) ctrl.CheckedChanged += PartyParamsControlChanged;
+
+            foreach (var num in new NumericUpDown[] {
+                atkStagesNumeric, defStagesNumeric, spAtkStagesNumeric, spDefStagesNumeric,
+                speedStagesNumeric, accuracyStagesNumeric, critRateStagesNumeric,
+                hpRestoreParamNumeric, ppRestoreParamNumeric,
+                evHpValueNumeric, evAtkValueNumeric, evDefValueNumeric,
+                evSpeedValueNumeric, evSpAtkValueNumeric, evSpDefValueNumeric,
+                friendshipLowValueNumeric, friendshipMidValueNumeric, friendshipHighValueNumeric
+            }) num.ValueChanged += PartyParamsControlChanged;
+        }
+
+        private void SetItemParamRanges()
+        {
+            // Stat stage modifiers: range -6 to +6 in gameplay, stored as 0–15 in data (encoded with +6 offset)
+            foreach (var n in new NumericUpDown[] {
+                atkStagesNumeric, defStagesNumeric, spAtkStagesNumeric,
+                spDefStagesNumeric, speedStagesNumeric, accuracyStagesNumeric })
+            {
+                n.Minimum = -6;
+                n.Maximum = 6;
+            }
+
+            // HP and PP restore parameters: stored as byte (0–255)
+            foreach (var n in new NumericUpDown[] {
+                hpRestoreParamNumeric, ppRestoreParamNumeric })
+            {
+                n.Minimum = 0;
+                n.Maximum = 255;
+            }
+
+            // EV and friendship modifiers: stored as sbyte (-128 to +127)
+            foreach (var n in new NumericUpDown[] {
+                evHpValueNumeric, evAtkValueNumeric, evDefValueNumeric,
+                evSpeedValueNumeric, evSpAtkValueNumeric, evSpDefValueNumeric,
+                friendshipLowValueNumeric, friendshipMidValueNumeric, friendshipHighValueNumeric })
+            {
+                n.Minimum = -128;
+                n.Maximum = 127;
+            }
+
+            // Crit rate stages: 2-bit unsigned, range 0–3
+            critRateStagesNumeric.Minimum = 0;
+            critRateStagesNumeric.Maximum = 3;
+        }
+        
+
+
+        private void SetItemParamToolTips()
+        {
+            toolTip1.SetToolTip(slpHealCheckBox, "Cures sleep status");
+            toolTip1.SetToolTip(psnHealCheckBox, "Cures poison status");
+            toolTip1.SetToolTip(brnHealCheckBox, "Cures burn status");
+            toolTip1.SetToolTip(frzHealCheckBox, "Cures freeze status");
+            toolTip1.SetToolTip(przHealCheckBox, "Cures paralysis status");
+            toolTip1.SetToolTip(cfsHealCheckBox, "Cures confusion");
+            toolTip1.SetToolTip(infHealCheckBox, "Cures infatuation");
+            toolTip1.SetToolTip(guardSpecCheckBox, "Applies Mist effect to party (Guard Spec)");
+
+            toolTip1.SetToolTip(reviveCheckBox, "Revives a fainted Pokémon to 50% HP");
+            toolTip1.SetToolTip(reviveAllCheckBox, "Revives all fainted Pokémon in party");
+            toolTip1.SetToolTip(levelUpCheckBox, "Causes the Pokémon to level up");
+            toolTip1.SetToolTip(evolveCheckBox, "Causes the Pokémon to evolve");
+
+            toolTip1.SetToolTip(atkStagesNumeric, "Boost to Attack stat (in stages)");
+            toolTip1.SetToolTip(defStagesNumeric, "Boost to Defense stat");
+            toolTip1.SetToolTip(spAtkStagesNumeric, "Boost to Special Attack stat");
+            toolTip1.SetToolTip(spDefStagesNumeric, "Boost to Special Defense stat");
+            toolTip1.SetToolTip(speedStagesNumeric, "Boost to Speed stat");
+            toolTip1.SetToolTip(accuracyStagesNumeric, "Boost to Accuracy stat");
+            toolTip1.SetToolTip(critRateStagesNumeric, "Boost to Critical Hit rate");
+
+            toolTip1.SetToolTip(hpRestoreCheckBox, "Restores HP by parameter value");
+            toolTip1.SetToolTip(hpRestoreParamNumeric, "Amount of HP to restore (0 = use %)");
+            toolTip1.SetToolTip(ppRestoreCheckBox, "Restores PP by parameter value");
+            toolTip1.SetToolTip(ppRestoreParamNumeric, "Amount of PP to restore");
+            toolTip1.SetToolTip(ppUpsCheckBox, "Applies PP Up");
+            toolTip1.SetToolTip(ppMaxCheckBox, "Applies PP Max");
+            toolTip1.SetToolTip(ppRestoreAllCheckBox, "Restores PP for all moves");
+
+            toolTip1.SetToolTip(evHpCheckBox, "Adds EVs to HP");
+            toolTip1.SetToolTip(evAtkCheckBox, "Adds EVs to Attack");
+            toolTip1.SetToolTip(evDefCheckBox, "Adds EVs to Defense");
+            toolTip1.SetToolTip(evSpeedCheckBox, "Adds EVs to Speed");
+            toolTip1.SetToolTip(evSpAtkCheckBox, "Adds EVs to Special Attack");
+            toolTip1.SetToolTip(evSpDefCheckBox, "Adds EVs to Special Defense");
+
+            toolTip1.SetToolTip(evHpValueNumeric, "EV value to apply to HP");
+            toolTip1.SetToolTip(evAtkValueNumeric, "EV value to apply to Attack");
+            toolTip1.SetToolTip(evDefValueNumeric, "EV value to apply to Defense");
+            toolTip1.SetToolTip(evSpeedValueNumeric, "EV value to apply to Speed");
+            toolTip1.SetToolTip(evSpAtkValueNumeric, "EV value to apply to Special Attack");
+            toolTip1.SetToolTip(evSpDefValueNumeric, "EV value to apply to Special Defense");
+
+            toolTip1.SetToolTip(friendshipLowCheckBox, "Affects low-level friendship modification");
+            toolTip1.SetToolTip(friendshipMidCheckBox, "Affects mid-level friendship modification");
+            toolTip1.SetToolTip(friendshipHighCheckBox, "Affects high-level friendship modification");
+
+            toolTip1.SetToolTip(friendshipLowValueNumeric, "Friendship change for low base friendship");
+            toolTip1.SetToolTip(friendshipMidValueNumeric, "Friendship change for mid base friendship");
+            toolTip1.SetToolTip(friendshipHighValueNumeric, "Friendship change for high base friendship");
         }
 
         private void setDirty(bool status)
@@ -149,8 +314,172 @@ namespace DSPRE.Editors
             battleFunctionComboBox.SelectedIndex = (int)currentLoadedFile.battleUseFunc;
 
 
-            //descriptionTextBox.Text = itemDescriptions[currentLoadedId];
+            itemParamsTabControl.Enabled = partyUseCheckBox.Checked;
+            PopulateItemPartyParamsUI();
+
+            var entry = itemNarcTable[currentLoadedFile.RealID];
+
+            string iconID = entry.itemIcon.ToString("D4");
+            string paletteID = entry.itemPalette.ToString("D4");
+
+            if (imageComboBox.Items.Contains(iconID))
+            {
+                imageComboBox.SelectedItem = iconID;
+            }
+
+            if (paletteComboBox.Items.Contains(paletteID))
+            {
+                paletteComboBox.SelectedItem = paletteID;
+            }
+
+            SetUpIcon();
+
         }
+
+        private void SetUpIcon()
+        {
+            var itemIconId = itemNarcTable[currentLoadedFile.RealID].itemIcon;
+            var itemPaletteId = itemNarcTable[currentLoadedFile.RealID].itemPalette;
+
+            string paletteFilename = itemPaletteId.ToString("D4");
+            var itemPalette = new NCLR(gameDirs[DirNames.itemIcons].unpackedDir + "\\" + paletteFilename, (int)itemPaletteId, paletteFilename);
+
+            string spriteFilename = itemIconId.ToString("D4");
+            ImageBase imageBase = new NCGR(gameDirs[DirNames.itemIcons].unpackedDir + "\\" + spriteFilename, (int)itemIconId, spriteFilename);
+
+            int ncerFileId = 1; // there's only one ncer in pt (0001.ncer), probably the case in hg too, but is it the 0001?
+            string ncerFileName = ncerFileId.ToString("D4");
+            SpriteBase spriteBase = new NCER(gameDirs[DirNames.itemIcons].unpackedDir + "\\" + ncerFileName, 2, ncerFileName);
+
+            try
+            {
+                itemEditorSelectedPictureBox.Image = spriteBase.Get_Image(imageBase, itemPalette, 0, imageBase.Width, imageBase.Height, false, false, false, true, true, -1);
+                itemEditorSelectedPictureBox.Height = imageBase.Height;
+                itemEditorSelectedPictureBox.Width = imageBase.Width;
+            }
+            catch (FormatException)
+            {
+                itemEditorSelectedPictureBox.Image = Properties.Resources.IconItem;
+            }
+        }
+
+        private void PopulateItemPartyParamsUI()
+        {
+            ResetItemPartyParamsUI();
+            ItemPartyUseParam param = currentLoadedFile.PartyUseParam;
+            slpHealCheckBox.Checked = param.SlpHeal;
+            psnHealCheckBox.Checked = param.PsnHeal;
+            brnHealCheckBox.Checked = param.BrnHeal;
+            frzHealCheckBox.Checked = param.FrzHeal;
+            przHealCheckBox.Checked = param.PrzHeal;
+            cfsHealCheckBox.Checked = param.CfsHeal;
+            infHealCheckBox.Checked = param.InfHeal;
+            guardSpecCheckBox.Checked = param.GuardSpec;
+
+            reviveCheckBox.Checked = param.Revive;
+            reviveAllCheckBox.Checked = param.ReviveAll;
+            levelUpCheckBox.Checked = param.LevelUp;
+            evolveCheckBox.Checked = param.Evolve;
+
+            atkStagesNumeric.Value = param.AtkStages;
+            defStagesNumeric.Value = param.DefStages;
+            spAtkStagesNumeric.Value = param.SpAtkStages;
+            spDefStagesNumeric.Value = param.SpDefStages;
+            speedStagesNumeric.Value = param.SpeedStages;
+            accuracyStagesNumeric.Value = param.AccuracyStages;
+            critRateStagesNumeric.Value = param.CritRateStages;
+            hpRestoreCheckBox.Checked = param.HPRestore;
+            hpRestoreParamNumeric.Value = param.HPRestoreParam;
+            ppRestoreCheckBox.Checked = param.PPRestore;
+            ppRestoreParamNumeric.Value = param.PPRestoreParam;
+            ppUpsCheckBox.Checked = param.PPUps;
+            ppMaxCheckBox.Checked = param.PPMax;
+            ppRestoreAllCheckBox.Checked = param.PPRestoreAll;
+
+            evHpCheckBox.Checked = param.EVHp;
+            evAtkCheckBox.Checked = param.EVAtk;
+            evDefCheckBox.Checked = param.EVDef;
+            evSpeedCheckBox.Checked = param.EVSpeed;
+            evSpAtkCheckBox.Checked = param.EVSpAtk;
+            evSpDefCheckBox.Checked = param.EVSpDef;
+
+            evHpValueNumeric.Value = param.EVHpValue;
+            evAtkValueNumeric.Value = param.EVAtkValue;
+            evDefValueNumeric.Value = param.EVDefValue;
+            evSpeedValueNumeric.Value = param.EVSpeedValue;
+            evSpAtkValueNumeric.Value = param.EVSpAtkValue;
+            evSpDefValueNumeric.Value = param.EVSpDefValue;
+
+            friendshipLowCheckBox.Checked = param.FriendshipLow;
+            friendshipMidCheckBox.Checked = param.FriendshipMid;
+            friendshipHighCheckBox.Checked = param.FriendshipHigh;
+
+            friendshipLowValueNumeric.Value = param.FriendshipLowValue;
+            friendshipMidValueNumeric.Value = param.FriendshipMidValue;
+            friendshipHighValueNumeric.Value = param.FriendshipHighValue;
+            Update();
+        }
+
+        private void ResetItemPartyParamsUI()
+        {
+            // Uncheck all CheckBoxes
+            slpHealCheckBox.Checked = false;
+            psnHealCheckBox.Checked = false;
+            brnHealCheckBox.Checked = false;
+            frzHealCheckBox.Checked = false;
+            przHealCheckBox.Checked = false;
+            cfsHealCheckBox.Checked = false;
+            infHealCheckBox.Checked = false;
+            guardSpecCheckBox.Checked = false;
+
+            reviveCheckBox.Checked = false;
+            reviveAllCheckBox.Checked = false;
+            levelUpCheckBox.Checked = false;
+            evolveCheckBox.Checked = false;
+
+            hpRestoreCheckBox.Checked = false;
+            ppRestoreCheckBox.Checked = false;
+            ppUpsCheckBox.Checked = false;
+            ppMaxCheckBox.Checked = false;
+            ppRestoreAllCheckBox.Checked = false;
+
+            evHpCheckBox.Checked = false;
+            evAtkCheckBox.Checked = false;
+            evDefCheckBox.Checked = false;
+            evSpeedCheckBox.Checked = false;
+            evSpAtkCheckBox.Checked = false;
+            evSpDefCheckBox.Checked = false;
+
+            friendshipLowCheckBox.Checked = false;
+            friendshipMidCheckBox.Checked = false;
+            friendshipHighCheckBox.Checked = false;
+
+            // Reset all NumericUpDowns to 0
+            atkStagesNumeric.Value = 0;
+            defStagesNumeric.Value = 0;
+            spAtkStagesNumeric.Value = 0;
+            spDefStagesNumeric.Value = 0;
+            speedStagesNumeric.Value = 0;
+            accuracyStagesNumeric.Value = 0;
+            critRateStagesNumeric.Value = 0;
+
+            hpRestoreParamNumeric.Value = 0;
+            ppRestoreParamNumeric.Value = 0;
+
+            evHpValueNumeric.Value = 0;
+            evAtkValueNumeric.Value = 0;
+            evDefValueNumeric.Value = 0;
+            evSpeedValueNumeric.Value = 0;
+            evSpAtkValueNumeric.Value = 0;
+            evSpDefValueNumeric.Value = 0;
+
+            friendshipLowValueNumeric.Value = 0;
+            friendshipMidValueNumeric.Value = 0;
+            friendshipHighValueNumeric.Value = 0;
+
+            Update();
+        }
+
 
         private void saveDataButton_Click(object sender, EventArgs e)
         {
@@ -233,8 +562,9 @@ namespace DSPRE.Editors
                 return;
             }
 
-            currentLoadedFile.battlePocket = (BattlePocket)battlePocketComboBox.SelectedValue;
+            currentLoadedFile.battlePocket = (BattlePocket)Enum.Parse(typeof(BattlePocket), (string)battlePocketComboBox.SelectedItem);
             setDirty(true);
+
         }
 
         private void priceNumericUpDown_ValueChanged(object sender, EventArgs e)
@@ -266,8 +596,9 @@ namespace DSPRE.Editors
                 return;
             }
 
-            currentLoadedFile.naturalGiftType = (NaturalGiftType)naturalGiftTypeComboBox.SelectedIndex;
+            currentLoadedFile.naturalGiftType = (NaturalGiftType)Enum.Parse(typeof(NaturalGiftType), (string)naturalGiftTypeComboBox.SelectedItem);
             setDirty(true);
+
         }
 
         private void naturalGiftPowerNumericUpDown_ValueChanged(object sender, EventArgs e)
@@ -366,7 +697,130 @@ namespace DSPRE.Editors
             }
 
             currentLoadedFile.PartyUse = (byte)(partyUseCheckBox.Checked ? 1: 0);
+            itemParamsTabControl.Enabled = partyUseCheckBox.Checked;
             setDirty(true);
+        }
+
+        private void PartyParamsControlChanged(object sender, EventArgs e)
+        {
+            if (Helpers.HandlersDisabled)
+            {
+                return;
+            }
+            if (currentLoadedFile == null) return;
+
+            ItemPartyUseParam param = currentLoadedFile.PartyUseParam;
+
+            // Status heals
+            param.SlpHeal = slpHealCheckBox.Checked;
+            param.PsnHeal = psnHealCheckBox.Checked;
+            param.BrnHeal = brnHealCheckBox.Checked;
+            param.FrzHeal = frzHealCheckBox.Checked;
+            param.PrzHeal = przHealCheckBox.Checked;
+            param.CfsHeal = cfsHealCheckBox.Checked;
+            param.InfHeal = infHealCheckBox.Checked;
+            param.GuardSpec = guardSpecCheckBox.Checked;
+
+            // Revive, evolve, level
+            param.Revive = reviveCheckBox.Checked;
+            param.ReviveAll = reviveAllCheckBox.Checked;
+            param.LevelUp = levelUpCheckBox.Checked;
+            param.Evolve = evolveCheckBox.Checked;
+
+            // Stat stages
+            param.AtkStages = (sbyte)atkStagesNumeric.Value;
+            param.DefStages = (sbyte)defStagesNumeric.Value;
+            param.SpAtkStages = (sbyte)spAtkStagesNumeric.Value;
+            param.SpDefStages = (sbyte)spDefStagesNumeric.Value;
+            param.SpeedStages = (sbyte)speedStagesNumeric.Value;
+            param.AccuracyStages = (sbyte)accuracyStagesNumeric.Value;
+            param.CritRateStages = (sbyte)critRateStagesNumeric.Value;
+
+            // Restore
+            param.HPRestore = hpRestoreCheckBox.Checked;
+            param.HPRestoreParam = (byte)hpRestoreParamNumeric.Value;
+            param.PPRestore = ppRestoreCheckBox.Checked;
+            param.PPRestoreParam = (byte)ppRestoreParamNumeric.Value;
+            param.PPUps = ppUpsCheckBox.Checked;
+            param.PPMax = ppMaxCheckBox.Checked;
+            param.PPRestoreAll = ppRestoreAllCheckBox.Checked;
+
+            // EVs
+            param.EVHp = evHpCheckBox.Checked;
+            param.EVAtk = evAtkCheckBox.Checked;
+            param.EVDef = evDefCheckBox.Checked;
+            param.EVSpeed = evSpeedCheckBox.Checked;
+            param.EVSpAtk = evSpAtkCheckBox.Checked;
+            param.EVSpDef = evSpDefCheckBox.Checked;
+
+            param.EVHpValue = (sbyte)evHpValueNumeric.Value;
+            param.EVAtkValue = (sbyte)evAtkValueNumeric.Value;
+            param.EVDefValue = (sbyte)evDefValueNumeric.Value;
+            param.EVSpeedValue = (sbyte)evSpeedValueNumeric.Value;
+            param.EVSpAtkValue = (sbyte)evSpAtkValueNumeric.Value;
+            param.EVSpDefValue = (sbyte)evSpDefValueNumeric.Value;
+
+            // Friendship
+            param.FriendshipLow = friendshipLowCheckBox.Checked;
+            param.FriendshipMid = friendshipMidCheckBox.Checked;
+            param.FriendshipHigh = friendshipHighCheckBox.Checked;
+
+            param.FriendshipLowValue = (sbyte)friendshipLowValueNumeric.Value;
+            param.FriendshipMidValue = (sbyte)friendshipMidValueNumeric.Value;
+            param.FriendshipHighValue = (sbyte)friendshipHighValueNumeric.Value;
+
+            setDirty(true);
+        }
+
+
+        private void imageComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (Helpers.HandlersDisabled || imageComboBox.SelectedItem == null) return;
+
+            uint newIconID = uint.Parse(imageComboBox.SelectedItem.ToString());
+            itemNarcTable[currentLoadedFile.RealID].itemIcon = newIconID;
+
+            SetUpIcon();
+            setDirty(true);
+        }
+
+        private void paletteComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (Helpers.HandlersDisabled || paletteComboBox.SelectedItem == null) return;
+
+            uint newPaletteID = uint.Parse(paletteComboBox.SelectedItem.ToString());
+            itemNarcTable[currentLoadedFile.RealID].itemPalette = newPaletteID;
+
+            SetUpIcon();
+            setDirty(true);
+        }
+
+        private void saveIconButton_Click(object sender, EventArgs e)
+        {
+            if(Helpers.HandlersDisabled)
+            {
+                return;
+            }
+
+            for (int i = 0; i < itemNarcTable.Length; i++)
+            {
+                ItemNarcTableEntry itemNarcTableEntry = new ItemNarcTableEntry();
+                itemNarcTableEntry.itemData = ARM9.ReadWordLE((uint)(itemNarcTableOffset + i * 8));
+                itemNarcTableEntry.itemIcon = ARM9.ReadWordLE((uint)(itemNarcTableOffset + i * 8 + 2));
+                if (itemNarcTable[i].itemIcon != itemNarcTableEntry.itemIcon)
+                {
+                    byte[] bytes = BitConverter.GetBytes((ushort)itemNarcTableEntry.itemIcon);
+                    ARM9.WriteBytes(bytes, itemNarcTableOffset + (uint)(currentLoadedFile.RealID * 8 + 2));
+                }   
+                itemNarcTableEntry.itemPalette = ARM9.ReadWordLE((uint)(itemNarcTableOffset + i * 8 + 4));
+                if (itemNarcTable[i].itemPalette != itemNarcTableEntry.itemPalette)
+                {
+                    byte[] bytes = BitConverter.GetBytes((ushort)itemNarcTableEntry.itemPalette);
+                    ARM9.WriteBytes(bytes, itemNarcTableOffset + (uint)(currentLoadedFile.RealID * 8 + 4));
+                }
+                itemNarcTableEntry.itemAGB = ARM9.ReadWordLE((uint)(itemNarcTableOffset + i * 8 + 6));
+            }
+            setDirty(false);
         }
     }
 }

@@ -10134,6 +10134,7 @@ namespace DSPRE {
             Update();
 
             DSUtils.TryUnpackNarcs(new List<DirNames> { DirNames.itemData });
+            DSUtils.TryUnpackNarcs(new List<DirNames> { DirNames.itemIcons });
 
             ItemEditor itemEditor = new ItemEditor(
                 RomInfo.GetItemNames()

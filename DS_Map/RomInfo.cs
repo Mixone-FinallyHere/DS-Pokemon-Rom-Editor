@@ -13,7 +13,7 @@ using Path = System.IO.Path;
 namespace DSPRE
 {
     /// <summary>
-    /// Class to store ROM data from GEN IV Pokémon games
+    /// Class to store ROM data from GEN IV PokÃ©mon games
     /// </summary>
 
     public class RomInfo
@@ -174,7 +174,8 @@ namespace DSPRE
             learnsets,
             evolutions,
 
-            itemData
+            itemData,
+            itemIcons
         };
 
         public static Dictionary<DirNames, (string packedDir, string unpackedDir)> gameDirs { get; private set; }
@@ -208,7 +209,7 @@ namespace DSPRE
             }
             catch (KeyNotFoundException)
             {
-                MessageBox.Show("The ROM you attempted to load is not supported.\nYou can only load Gen IV Pokémon ROMS, for now.", "Unsupported ROM",
+                MessageBox.Show("The ROM you attempted to load is not supported.\nYou can only load Gen IV PokÃ©mon ROMS, for now.", "Unsupported ROM",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -1457,6 +1458,7 @@ namespace DSPRE
                         [DirNames.otherPokemonBattleSprites] = $@"{dataFolderName}\poketool\pokegra\otherpoke.narc",
 
                         [DirNames.itemData] = $@"{dataFolderName}\itemtool\item_data.narc",
+                        [DirNames.itemIcons] = $@"{dataFolderName}\itemtool\itemdata\item_icon.narc"
                     };
 
                     //Personal Data archive is different for Pearl
@@ -1511,6 +1513,7 @@ namespace DSPRE
                         [DirNames.evolutions] = $@"{dataFolderName}\poketool\personal\evo.narc",
 
                         [DirNames.itemData] = $@"{dataFolderName}\itemtool\pl_item_data.narc",
+                        [DirNames.itemIcons] = $@"{dataFolderName}\itemtool\itemdata\item_icon.narc"
                     };
                     break;
 
@@ -1551,6 +1554,8 @@ namespace DSPRE
                         [DirNames.learnsets] = $@"{dataFolderName}\a\0\3\3",
                         [DirNames.evolutions] = $@"{dataFolderName}\a\0\3\4",
                         [DirNames.itemData] = $@"{dataFolderName}\a\0\1\7",
+                        [DirNames.itemIcons] = $@"{dataFolderName}\a\0\1\8",
+
                         [DirNames.safariZone] = $@"{dataFolderName}\a\2\3\0",
                         [DirNames.headbutt] = $@"{dataFolderName}\a\2\5\2", //both versions use the same folder with different data
                     };
