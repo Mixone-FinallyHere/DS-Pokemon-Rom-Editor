@@ -613,11 +613,13 @@ namespace DSPRE {
 
         private bool detectAndHandleWSL(string fileName) {
             string fullPath = Path.GetFullPath(fileName);
-
             if (!fullPath.ToLower().Contains("wsl.")) 
             {
                 return true; // No WSL detected, proceed normally
             }
+
+            // This handles opening from unpacked folder
+            // We show the message here since copying the folder to a windows drive is extremely slow
             if (Directory.Exists(fullPath))
             {
                 MessageBox.Show("WSL was detected in the path. " +
@@ -646,11 +648,6 @@ namespace DSPRE {
             bool toolsMissing = false;
             List<string> missingToolsList = new List<string>();
 
-            if (!File.Exists(@"Tools\ndstool.exe"))
-            {
-                toolsMissing = true;
-                missingToolsList.Add("ndstool.exe");
-            }
             if (!File.Exists(@"Tools\dsrom.exe"))
             {
                 toolsMissing = true;
@@ -727,6 +724,7 @@ namespace DSPRE {
                 return;
             }
 
+            // We read the game code from the header.yaml file, if it exists
             SetupROMLanguageFolder(Path.Combine(fileName, "header.yaml"));
 
             /* Set ROM gameVersion and language */
