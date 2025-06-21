@@ -28,8 +28,11 @@ namespace NarcAPI {
         }
 
         public static Narc Open(String filePath) {
-            Narc narc = new Narc(Path.GetFileNameWithoutExtension(filePath));
-            BinaryReader br = new BinaryReader(File.OpenRead(filePath));
+
+            string fullPath = Path.GetFullPath(filePath);
+
+            Narc narc = new Narc(Path.GetFileNameWithoutExtension(fullPath));
+            BinaryReader br = new BinaryReader(File.OpenRead(fullPath));
 
             if (br.ReadUInt32() != NARC_FILE_MAGIC_NUM) {
                 return null;
@@ -42,8 +45,11 @@ namespace NarcAPI {
         }
 
         public static Narc FromFolder(String dirPath) {
-            Narc narc = new Narc(Path.GetDirectoryName(dirPath));
-            String[] fileNames = Directory.GetFiles(dirPath, "*.*", SearchOption.AllDirectories);
+
+            string fullPath = Path.GetFullPath(dirPath);
+
+            Narc narc = new Narc(Path.GetDirectoryName(fullPath));
+            String[] fileNames = Directory.GetFiles(fullPath, "*.*", SearchOption.AllDirectories);
             uint numberOfElements = (uint)fileNames.Length;
             narc.Elements = new MemoryStream[numberOfElements];
 
@@ -62,7 +68,14 @@ namespace NarcAPI {
         public void Save(String filePath) {
             uint fileSizeOffset, fileImageSizeOffset, curOffset;
 
-            BinaryWriter bw = new BinaryWriter(File.Create(filePath));
+            string fullPath = Path.GetFullPath(filePath);
+
+            if (string.IsNullOrWhiteSpace(fullPath)) {
+                MessageBox.Show("File path + \"" + filePath + "\" is invalid.", "Can't create file", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            BinaryWriter bw = new BinaryWriter(File.Create(fullPath));
             // Write NARC Section
             bw.Write(NARC_FILE_MAGIC_NUM);
             bw.Write(0x0100FFFE);
@@ -116,44 +129,47 @@ namespace NarcAPI {
         }
 
         public void ExtractToFolder(String dirPath, string extension = null) {
-            if ( string.IsNullOrWhiteSpace(dirPath) ) {
-                MessageBox.Show("Dir path + \"" + dirPath + "\" is invalid.", "Can't create directory", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            string fullDirPath = Path.GetFullPath(dirPath);
+
+            if ( string.IsNullOrWhiteSpace(fullDirPath) ) {
+                MessageBox.Show("Dir path + \"" + fullDirPath + "\" is invalid.", "Can't create directory", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            if (Directory.Exists(dirPath)) {
-                if (Directory.GetFiles(dirPath).Length > 0) {
+            if (Directory.Exists(fullDirPath)) {
+                if (Directory.GetFiles(fullDirPath).Length > 0) {
                     try {
-                        if (dirPath.IndexOf(RomInfo.folderSuffix, StringComparison.CurrentCultureIgnoreCase) >= 0) {
-                            Directory.Delete(dirPath, true);
-                            Console.WriteLine("Deleted DSPRE-related folder \"" + dirPath + "\" without user confirmation.");
+                        if (fullDirPath.IndexOf(RomInfo.folderSuffix, StringComparison.CurrentCultureIgnoreCase) >= 0) {
+                            Directory.Delete(fullDirPath, true);
+                            Console.WriteLine("Deleted DSPRE-related folder \"" + fullDirPath + "\" without user confirmation.");
                         } else {
-                            DialogResult d = MessageBox.Show("Directory \"" + dirPath + "\" already exists and is not empty.\n" +
+                            DialogResult d = MessageBox.Show("Directory \"" + fullDirPath + "\" already exists and is not empty.\n" +
                                 "Do you want to delete its contents?", "Directory not empty", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                             if (d.Equals(DialogResult.Yes)) {
-                                Directory.Delete(dirPath, true);
-                                Console.WriteLine("Deleted non-DSPRE-related folder \"" + dirPath + "\" after user confirmation.");
+                                Directory.Delete(fullDirPath, true);
+                                Console.WriteLine("Deleted non-DSPRE-related folder \"" + fullDirPath + "\" after user confirmation.");
                             }
                         }
                     } catch (IOException) {
-                        MessageBox.Show("NARC has not been extracted.\nCan't delete directory: \n" + dirPath + "\nThis might be a temporary issue.\nMake sure no other process is using it and try again.", "Delete Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("NARC has not been extracted.\nCan't delete directory: \n" + fullDirPath + "\nThis might be a temporary issue.\nMake sure no other process is using it and try again.", "Delete Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
             }
 
-            if (!Directory.Exists(dirPath)) {
+            if (!Directory.Exists(fullDirPath)) {
                 try {
-                    Directory.CreateDirectory(dirPath);
-                    Console.WriteLine("Created NARC folder \"" + dirPath + "\".");
+                    Directory.CreateDirectory(fullDirPath);
+                    Console.WriteLine("Created NARC folder \"" + fullDirPath + "\".");
                 } catch (IOException) {
-                    MessageBox.Show("NARC has not been extracted.\nCan't create directory: \n" + dirPath + "\nThis might be a temporary issue.\nMake sure no other process is using it and try again.", "Creation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("NARC has not been extracted.\nCan't create directory: \n" + fullDirPath + "\nThis might be a temporary issue.\nMake sure no other process is using it and try again.", "Creation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
             }
 
             Parallel.For(0, Elements.Length, i => {
-                string path = Path.Combine(dirPath, i.ToString("D4") + (string.IsNullOrWhiteSpace(extension) ? "" : extension) );
+                string path = Path.Combine(fullDirPath, i.ToString("D4") + (string.IsNullOrWhiteSpace(extension) ? "" : extension) );
                 using (BinaryWriter wr = new BinaryWriter(File.Create(path))) {
                     long len = Elements[i].Length;
                     byte[] buffer = new byte[len];

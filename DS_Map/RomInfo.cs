@@ -190,6 +190,7 @@ namespace DSPRE
             }
 
             string path = System.IO.Path.GetDirectoryName(romName) + "\\" + Path.GetFileNameWithoutExtension(romName) + folderSuffix + "\\";
+            path = Path.GetFullPath(path);
 
             workDir = path;
             arm9Path = Path.Combine(workDir, @"arm9/arm9.bin");
@@ -1568,7 +1569,8 @@ namespace DSPRE
             gameDirs = new Dictionary<DirNames, (string packedDir, string unpackedDir)>();
             foreach (KeyValuePair<DirNames, string> kvp in packedDirsDict)
             {
-                gameDirs.Add(kvp.Key, (workDir + kvp.Value, workDir + @"unpacked" + '\\' + kvp.Key.ToString()));
+                string unpackedPath = Path.Combine(workDir, @"unpacked", kvp.Key.ToString());
+                gameDirs.Add(kvp.Key, (workDir + kvp.Value, unpackedPath));
             }
         }
 

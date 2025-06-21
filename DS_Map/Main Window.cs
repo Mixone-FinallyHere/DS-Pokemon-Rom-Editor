@@ -58,7 +58,6 @@ namespace DSPRE {
 
         #region Variables
         public bool iconON = false;
-        public bool wslDetected = false; // Not technically necessary rn, but it might be useful in the future
 
         /* Editors Setup */
         public bool matrixEditorIsReady { get; private set; } = false;
@@ -491,39 +490,8 @@ namespace DSPRE {
                 return;
             }
 
-            if (!detectAndHandleWSL(openRom.FileName)) {
-                return; // User chose not to create a new work directory
-            }
-
-            // Handle WSL
-            if (wslDetected)
-            {
-                string executablePath = Path.GetDirectoryName(Application.ExecutablePath);
-                string buildFolderPath = Path.Combine(executablePath, "build");
-                // Create a new work directory in the same folder as DSPRE
-                if (!Directory.Exists(buildFolderPath)) {
-                    Directory.CreateDirectory(buildFolderPath);
-                }
-
-                // Copy the ROM to the build folder
-                string newRomPath = Path.Combine(buildFolderPath, Path.GetFileName(openRom.FileName));
-
-                // Check if file already exists and ask to overwrite
-                if (File.Exists(newRomPath)) {
-                    DialogResult overwriteResult = MessageBox.Show("The ROM file already exists in the build folder. Do you want to overwrite it?", "File Exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                    if (overwriteResult != DialogResult.Yes) {
-                        return; // User chose not to overwrite
-                    }
-                }
-
-                try {
-                    File.Copy(openRom.FileName, newRomPath, true);
-                    openRom.FileName = newRomPath; // Update the file name to the new path
-                } catch (IOException ex) {
-                    MessageBox.Show("Failed to copy ROM to build folder: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-            }
+            // Detect WSL and show a message if it is detected
+            DetectAndHandleWSL(openRom.FileName);
 
             SetupROMLanguage(openRom.FileName);
 
@@ -611,37 +579,22 @@ namespace DSPRE {
             return true;
         }
 
-        private bool detectAndHandleWSL(string fileName) {
+        private bool DetectAndHandleWSL(string fileName) {
+
             string fullPath = Path.GetFullPath(fileName);
             if (!fullPath.ToLower().Contains("wsl.")) 
             {
-                return true; // No WSL detected, proceed normally
+                return false; // No WSL detected, proceed normally
             }
 
-            // This handles opening from unpacked folder
-            // We show the message here since copying the folder to a windows drive is extremely slow
-            if (Directory.Exists(fullPath))
-            {
-                MessageBox.Show("WSL was detected in the path. " +
-                    "The associated unpacked folder of a ROM should not be stored on the WSL file system! " +
-                    "Please move the folder to the same drive that DSPRE is located on.", "Invalid Path", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
+            MessageBox.Show("WSL was detected in the path. " +
+                "You may experience some slow-downs, especially on WSL2.\n" +
+                "If the slow-down is too excessive consider moving your files to the Windows filesystem.", 
+                "WSL Detected", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            DialogResult result = MessageBox.Show("WSL was detected in the path. " +
-                "Do you want to create a build directory in the same folder as DSPRE to unpack to?", "WSL Detected", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            wslDetected = true;
-
-            if (result == DialogResult.Yes)
-            {
-                return true; // User wants to create a new work directory
-            }
-            else
-            {
-                MessageBox.Show("Unpacking will not be possible without a valid work directory.", "Unpacking aborted", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }               
+            return true;
         }
+
         private bool DetectRequiredTools()
         {
             
@@ -710,9 +663,8 @@ namespace DSPRE {
                 return;
             }
 
-            if (!detectAndHandleWSL(romFolder.FileName)) {
-                return; // User chose not to create a new work directory
-            }
+            // Detect WSL and show a message if it is detected
+            DetectAndHandleWSL(romFolder.FileName);
 
             string fileName = romFolder.FileName;
 
