@@ -86,6 +86,8 @@ namespace DSPRE {
         RomInfo romInfo;
         public Dictionary<ushort /*evFile*/, ushort /*header*/> eventToHeader = new Dictionary<ushort, ushort>();
 
+        ScriptDatabaseJSON scriptDatabaseJSON = new ScriptDatabaseJSON();
+
         #endregion
 
         #region Subroutines
@@ -495,7 +497,7 @@ namespace DSPRE {
             Dictionary<ushort, string> comparisonOPsDict) {
             Helpers.statusLabelMessage("Setting up Commands Database. Please wait...");
             Update();
-            CommandsDatabase form = new CommandsDatabase(namesDict, paramsDict, actionsDict, comparisonOPsDict);
+            CommandsDatabase form = new CommandsDatabase(scriptDatabaseJSON);
             form.Show();
             Helpers.statusLabelMessage();
         }

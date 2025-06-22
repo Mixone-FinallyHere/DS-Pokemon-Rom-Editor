@@ -1,0 +1,10 @@
+[
+    {
+        "Name": "HG-Engine",
+        "JsonPath": "scrcmd_hge.json"
+    },
+    {
+        "Name": "Lost in Time",
+        "JsonPath": "scrcmd_lit.json"
+    }
+]

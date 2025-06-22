@@ -24,14 +24,15 @@ namespace DSPRE.Resources {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.scriptcmdDataGridView = new System.Windows.Forms.DataGridView();
             this.CommandID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CommandName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ParamsCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Params = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.scriptcmdSearchTextBox = new System.Windows.Forms.TextBox();
             this.startSearchButtonScripts = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -52,11 +53,18 @@ namespace DSPRE.Resources {
             this.compOPDataGridView = new System.Windows.Forms.DataGridView();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.exportScrcmdButton = new System.Windows.Forms.Button();
+            this.manageScrcmdsButton = new System.Windows.Forms.Button();
+            this.customScrcmdSelector = new DSPRE.InputComboBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.useGameDefaultScrcmdButton = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.scriptcmdDataGridView)).BeginInit();
             this.criteriaGroupBoxScripts.SuspendLayout();
             this.criteriaGroupBoxActions.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.actionDataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.compOPDataGridView)).BeginInit();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // scriptcmdDataGridView
@@ -68,19 +76,20 @@ namespace DSPRE.Resources {
             this.CommandID,
             this.CommandName,
             this.ParamsCount,
-            this.Params});
-            this.scriptcmdDataGridView.Location = new System.Drawing.Point(14, 63);
+            this.Params,
+            this.Description});
+            this.scriptcmdDataGridView.Location = new System.Drawing.Point(13, 66);
             this.scriptcmdDataGridView.Name = "scriptcmdDataGridView";
             this.scriptcmdDataGridView.ReadOnly = true;
             this.scriptcmdDataGridView.RowHeadersVisible = false;
-            this.scriptcmdDataGridView.Size = new System.Drawing.Size(506, 622);
+            this.scriptcmdDataGridView.Size = new System.Drawing.Size(707, 621);
             this.scriptcmdDataGridView.TabIndex = 0;
             // 
             // CommandID
             // 
             this.CommandID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewCellStyle4.Format = "X4";
-            this.CommandID.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle1.Format = "X4";
+            this.CommandID.DefaultCellStyle = dataGridViewCellStyle1;
             this.CommandID.FillWeight = 15F;
             this.CommandID.HeaderText = "Command ID";
             this.CommandID.MaxInputLength = 10;
@@ -117,10 +126,17 @@ namespace DSPRE.Resources {
             this.Params.Name = "Params";
             this.Params.ReadOnly = true;
             // 
+            // Description
+            // 
+            this.Description.HeaderText = "Description";
+            this.Description.Name = "Description";
+            this.Description.ReadOnly = true;
+            this.Description.Width = 85;
+            // 
             // scriptcmdSearchTextBox
             // 
             this.scriptcmdSearchTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.scriptcmdSearchTextBox.Location = new System.Drawing.Point(14, 26);
+            this.scriptcmdSearchTextBox.Location = new System.Drawing.Point(13, 28);
             this.scriptcmdSearchTextBox.Name = "scriptcmdSearchTextBox";
             this.scriptcmdSearchTextBox.Size = new System.Drawing.Size(141, 22);
             this.scriptcmdSearchTextBox.TabIndex = 1;
@@ -130,7 +146,7 @@ namespace DSPRE.Resources {
             // 
             this.startSearchButtonScripts.Image = global::DSPRE.Properties.Resources.wideLensImage;
             this.startSearchButtonScripts.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.startSearchButtonScripts.Location = new System.Drawing.Point(433, 15);
+            this.startSearchButtonScripts.Location = new System.Drawing.Point(432, 17);
             this.startSearchButtonScripts.Name = "startSearchButtonScripts";
             this.startSearchButtonScripts.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.startSearchButtonScripts.Size = new System.Drawing.Size(87, 43);
@@ -143,7 +159,7 @@ namespace DSPRE.Resources {
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 10);
+            this.label1.Location = new System.Drawing.Point(11, 12);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(112, 13);
             this.label1.TabIndex = 18;
@@ -154,7 +170,7 @@ namespace DSPRE.Resources {
             this.criteriaGroupBoxScripts.Controls.Add(this.matchCBScripts);
             this.criteriaGroupBoxScripts.Controls.Add(this.containsCBScripts);
             this.criteriaGroupBoxScripts.Controls.Add(this.startsWithCBScripts);
-            this.criteriaGroupBoxScripts.Location = new System.Drawing.Point(161, 10);
+            this.criteriaGroupBoxScripts.Location = new System.Drawing.Point(160, 12);
             this.criteriaGroupBoxScripts.Name = "criteriaGroupBoxScripts";
             this.criteriaGroupBoxScripts.Size = new System.Drawing.Size(266, 46);
             this.criteriaGroupBoxScripts.TabIndex = 19;
@@ -201,7 +217,7 @@ namespace DSPRE.Resources {
             this.criteriaGroupBoxActions.Controls.Add(this.matchCBActions);
             this.criteriaGroupBoxActions.Controls.Add(this.containsCBActions);
             this.criteriaGroupBoxActions.Controls.Add(this.startsWithCBActions);
-            this.criteriaGroupBoxActions.Location = new System.Drawing.Point(703, 9);
+            this.criteriaGroupBoxActions.Location = new System.Drawing.Point(888, 12);
             this.criteriaGroupBoxActions.Name = "criteriaGroupBoxActions";
             this.criteriaGroupBoxActions.Size = new System.Drawing.Size(266, 46);
             this.criteriaGroupBoxActions.TabIndex = 24;
@@ -246,7 +262,7 @@ namespace DSPRE.Resources {
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(554, 9);
+            this.label2.Location = new System.Drawing.Point(739, 12);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(95, 13);
             this.label2.TabIndex = 23;
@@ -256,7 +272,7 @@ namespace DSPRE.Resources {
             // 
             this.startSearchButtonActions.Image = global::DSPRE.Properties.Resources.wideLensImage;
             this.startSearchButtonActions.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.startSearchButtonActions.Location = new System.Drawing.Point(975, 14);
+            this.startSearchButtonActions.Location = new System.Drawing.Point(1160, 17);
             this.startSearchButtonActions.Name = "startSearchButtonActions";
             this.startSearchButtonActions.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.startSearchButtonActions.Size = new System.Drawing.Size(87, 43);
@@ -269,7 +285,7 @@ namespace DSPRE.Resources {
             // actioncmdSearchTextBox
             // 
             this.actioncmdSearchTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.actioncmdSearchTextBox.Location = new System.Drawing.Point(556, 25);
+            this.actioncmdSearchTextBox.Location = new System.Drawing.Point(741, 28);
             this.actioncmdSearchTextBox.Name = "actioncmdSearchTextBox";
             this.actioncmdSearchTextBox.Size = new System.Drawing.Size(141, 22);
             this.actioncmdSearchTextBox.TabIndex = 21;
@@ -283,7 +299,7 @@ namespace DSPRE.Resources {
             this.actionDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn1,
             this.dataGridViewTextBoxColumn2});
-            this.actionDataGridView.Location = new System.Drawing.Point(556, 62);
+            this.actionDataGridView.Location = new System.Drawing.Point(741, 65);
             this.actionDataGridView.Name = "actionDataGridView";
             this.actionDataGridView.ReadOnly = true;
             this.actionDataGridView.RowHeadersVisible = false;
@@ -293,8 +309,8 @@ namespace DSPRE.Resources {
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewCellStyle5.Format = "X4";
-            this.dataGridViewTextBoxColumn1.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle2.Format = "X4";
+            this.dataGridViewTextBoxColumn1.DefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridViewTextBoxColumn1.FillWeight = 30F;
             this.dataGridViewTextBoxColumn1.HeaderText = "Command ID";
             this.dataGridViewTextBoxColumn1.MaxInputLength = 10;
@@ -319,7 +335,7 @@ namespace DSPRE.Resources {
             this.compOPDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn3,
             this.dataGridViewTextBoxColumn4});
-            this.compOPDataGridView.Location = new System.Drawing.Point(817, 62);
+            this.compOPDataGridView.Location = new System.Drawing.Point(1002, 65);
             this.compOPDataGridView.Name = "compOPDataGridView";
             this.compOPDataGridView.ReadOnly = true;
             this.compOPDataGridView.RowHeadersVisible = false;
@@ -329,8 +345,8 @@ namespace DSPRE.Resources {
             // dataGridViewTextBoxColumn3
             // 
             this.dataGridViewTextBoxColumn3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewCellStyle6.Format = "X4";
-            this.dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle3.Format = "X4";
+            this.dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewTextBoxColumn3.FillWeight = 30F;
             this.dataGridViewTextBoxColumn3.HeaderText = "Operator ID";
             this.dataGridViewTextBoxColumn3.MaxInputLength = 10;
@@ -347,10 +363,87 @@ namespace DSPRE.Resources {
             this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
             this.dataGridViewTextBoxColumn4.ReadOnly = true;
             // 
+            // exportScrcmdButton
+            // 
+            this.exportScrcmdButton.Image = global::DSPRE.Properties.Resources.scriptDBIconExport;
+            this.exportScrcmdButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.exportScrcmdButton.Location = new System.Drawing.Point(6, 19);
+            this.exportScrcmdButton.Name = "exportScrcmdButton";
+            this.exportScrcmdButton.Size = new System.Drawing.Size(126, 40);
+            this.exportScrcmdButton.TabIndex = 26;
+            this.exportScrcmdButton.Text = "Export Scrcmd";
+            this.exportScrcmdButton.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
+            this.exportScrcmdButton.UseVisualStyleBackColor = true;
+            this.exportScrcmdButton.Click += new System.EventHandler(this.exportScrcmdButton_Click);
+            // 
+            // manageScrcmdsButton
+            // 
+            this.manageScrcmdsButton.Image = global::DSPRE.Properties.Resources.scriptDBIcon;
+            this.manageScrcmdsButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.manageScrcmdsButton.Location = new System.Drawing.Point(138, 19);
+            this.manageScrcmdsButton.Name = "manageScrcmdsButton";
+            this.manageScrcmdsButton.Size = new System.Drawing.Size(126, 40);
+            this.manageScrcmdsButton.TabIndex = 28;
+            this.manageScrcmdsButton.Text = "Manage Custom Scrcmd";
+            this.manageScrcmdsButton.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
+            this.manageScrcmdsButton.UseVisualStyleBackColor = true;
+            this.manageScrcmdsButton.Click += new System.EventHandler(this.manageScrcmdsButton_Click);
+            // 
+            // customScrcmdSelector
+            // 
+            this.customScrcmdSelector.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.customScrcmdSelector.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.customScrcmdSelector.FormattingEnabled = true;
+            this.customScrcmdSelector.Location = new System.Drawing.Point(6, 76);
+            this.customScrcmdSelector.Name = "customScrcmdSelector";
+            this.customScrcmdSelector.Size = new System.Drawing.Size(258, 21);
+            this.customScrcmdSelector.TabIndex = 29;
+            this.customScrcmdSelector.SelectedIndexChanged += new System.EventHandler(this.customScrcmdSelector_SelectedIndexChanged);
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.useGameDefaultScrcmdButton);
+            this.groupBox1.Controls.Add(this.button2);
+            this.groupBox1.Controls.Add(this.manageScrcmdsButton);
+            this.groupBox1.Controls.Add(this.exportScrcmdButton);
+            this.groupBox1.Controls.Add(this.customScrcmdSelector);
+            this.groupBox1.Location = new System.Drawing.Point(12, 693);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(405, 115);
+            this.groupBox1.TabIndex = 30;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Custom Scrcmd";
+            // 
+            // useGameDefaultScrcmdButton
+            // 
+            this.useGameDefaultScrcmdButton.Image = global::DSPRE.Properties.Resources.scriptDBIcon;
+            this.useGameDefaultScrcmdButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.useGameDefaultScrcmdButton.Location = new System.Drawing.Point(270, 65);
+            this.useGameDefaultScrcmdButton.Name = "useGameDefaultScrcmdButton";
+            this.useGameDefaultScrcmdButton.Size = new System.Drawing.Size(126, 40);
+            this.useGameDefaultScrcmdButton.TabIndex = 31;
+            this.useGameDefaultScrcmdButton.Text = "Use Game Default Scrcmd";
+            this.useGameDefaultScrcmdButton.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
+            this.useGameDefaultScrcmdButton.UseVisualStyleBackColor = true;
+            this.useGameDefaultScrcmdButton.Click += new System.EventHandler(this.useGameDefaultScrcmdButton_Click);
+            // 
+            // button2
+            // 
+            this.button2.Image = global::DSPRE.Properties.Resources.scriptDBIconImport;
+            this.button2.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.button2.Location = new System.Drawing.Point(270, 19);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(126, 40);
+            this.button2.TabIndex = 30;
+            this.button2.Text = "Save Current Custom Scrcmd";
+            this.button2.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
+            this.button2.UseVisualStyleBackColor = true;
+            // 
             // CommandsDatabase
             // 
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(1075, 697);
+            this.ClientSize = new System.Drawing.Size(1262, 820);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.compOPDataGridView);
             this.Controls.Add(this.criteriaGroupBoxActions);
             this.Controls.Add(this.label2);
@@ -375,6 +468,7 @@ namespace DSPRE.Resources {
             this.criteriaGroupBoxActions.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.actionDataGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.compOPDataGridView)).EndInit();
+            this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -401,11 +495,18 @@ namespace DSPRE.Resources {
         private System.Windows.Forms.DataGridView compOPDataGridView;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn CommandID;
         private System.Windows.Forms.DataGridViewTextBoxColumn CommandName;
         private System.Windows.Forms.DataGridViewTextBoxColumn ParamsCount;
         private System.Windows.Forms.DataGridViewTextBoxColumn Params;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Description;
+        private System.Windows.Forms.Button exportScrcmdButton;
+        private System.Windows.Forms.Button manageScrcmdsButton;
+        private InputComboBox customScrcmdSelector;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button useGameDefaultScrcmdButton;
     }
 }

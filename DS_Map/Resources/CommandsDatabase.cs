@@ -1,31 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Windows.Forms;
+using static ScintillaNET.Style;
+using static Tao.Platform.Windows.Winmm;
 
 namespace DSPRE.Resources {
     public partial class CommandsDatabase : Form {
         private DataGridViewRow currentrow;
-        private Dictionary<ushort, string> namesDict;
-        private Dictionary<ushort, byte[]> paramsDict;
-        private Dictionary<ushort, string> actionsDict;
-        private Dictionary<ushort, string> comparisonOPsDict;
 
         private List<RadioButton> scriptRadioButtons;
         private List<RadioButton> actionRadioButtons;
+        ScriptDatabaseJSON scriptDatabaseJSON;
 
-        public CommandsDatabase(Dictionary<ushort, string> namesDict, Dictionary<ushort, byte[]> paramsDict, Dictionary<ushort, string> actionsDict,
-            Dictionary<ushort, string> comparisonOPsDict) {
-            this.namesDict = namesDict;
-            this.paramsDict = paramsDict;
+        public CommandsDatabase(ScriptDatabaseJSON db) {
 
-            this.actionsDict = actionsDict;
-            this.comparisonOPsDict = comparisonOPsDict;
+            var customScrcmds = CustomScrcmdManager.LoadSettings();
+            scriptDatabaseJSON = db;
 
             InitializeComponent();
-            SetupFromScriptDictionaries(scriptcmdDataGridView, paramsDict.Keys.Max(), namesDict, paramsDict);
-            SetupFromScriptDictionaries(actionDataGridView, actionsDict.Keys.Max(), actionsDict);
-            SetupFromScriptDictionaries(compOPDataGridView, comparisonOPsDict.Keys.Max(), comparisonOPsDict);
+            InitializeTables();
+
+            if (customScrcmds.Count > 0)
+            {
+                customScrcmdSelector.Enabled = true;
+               
+
+                switch (RomInfo.gameFamily)
+                {
+                    case RomInfo.GameFamilies.HGSS:
+                        useGameDefaultScrcmdButton.Image = DSPRE.Properties.Resources.scriptDBIconHGSS;
+                        break;
+                    case RomInfo.GameFamilies.DP:
+                        useGameDefaultScrcmdButton.Image = DSPRE.Properties.Resources.scriptDBIconDP;
+
+                        break;
+                    case RomInfo.GameFamilies.Plat:
+                        useGameDefaultScrcmdButton.Image = DSPRE.Properties.Resources.scriptDBIconPt;
+                        break;
+
+                    default:
+                        useGameDefaultScrcmdButton.Image = DSPRE.Properties.Resources.scriptDBIcon;
+                        break;
+
+                }
+                //DSPRE.Properties.Resources.scriptDBIconDP
+                foreach (var cusScrcmd in customScrcmds)
+                {
+                    customScrcmdSelector.Items.Add(cusScrcmd.Name);
+                }
+            }
+            else
+            {
+                customScrcmdSelector.Enabled = false;
+                useGameDefaultScrcmdButton.Enabled = false;
+            }
 
             scriptRadioButtons = new List<RadioButton>() {
                 containsCBScripts,
@@ -39,45 +70,57 @@ namespace DSPRE.Resources {
             };
         }
 
-        private void SetupFromScriptDictionaries(DataGridView table, int entriesCount, Dictionary<ushort, string> sourceNamesDict, Dictionary<ushort, byte[]> sourceParamsDict = null) {
-            table.Rows.Clear();
-            for (int i = 0; i < entriesCount; i++) {
-                table.Rows.Add();
+        private void InitializeTables()
+        {
+
+            string selectedScrcmd = scriptDatabaseJSON.SelectedScrcmd;
+            var db = scriptDatabaseJSON.GetDatabaseFromJSON(selectedScrcmd);
+
+            if (selectedScrcmd == null) {
+                useGameDefaultScrcmdButton.Enabled = false;
+            } else
+            {
+                useGameDefaultScrcmdButton.Enabled = true;
             }
 
-            DataGridViewRowCollection list = table.Rows;
-            for (ushort i = 0; i < list.Count; i++) { //loop through 
-                DataGridViewRow r = list[i];
-                ushort currentID = i;
+            SetupScriptCommandsTable(scriptcmdDataGridView, db.Scrcmd);
+            SetupFromScriptDictionaries(actionDataGridView, db.Movements);
+            SetupFromScriptDictionaries(compOPDataGridView, db.ComparisonOperators);
+        }
 
-                string buffer = "";
-                sourceNamesDict.TryGetValue(i, out buffer);
-                string commandName = buffer;
+        private void SetupFromScriptDictionaries(DataGridView table, Dictionary<string, string> sourceNamesDict) {
+            table.Rows.Clear();
 
-                r.Cells[0].Value = currentID.ToString("X4");
-                r.Cells[1].Value = commandName;
+            int index = 0;
+            foreach (var kvp in sourceNamesDict)
+            {
+                table.Rows.Add();
+                DataGridViewRow r = table.Rows[index];
+                r.Cells[0].Value = kvp.Key;
+                r.Cells[1].Value = kvp.Value;
 
-                if (sourceParamsDict != null) {
-                    var paramDictValues = sourceParamsDict.Values;
-                    try {
-                        if (paramDictValues.ElementAt(i)[0] == 0) {
-                            r.Cells[2].Value = 0;
-                        } else {
-                            r.Cells[2].Value = paramDictValues.ElementAt(i).Length;//.ToString();
-                        }
-                    } catch { }
+                index++;
+ 
+            }
+        }
 
-                    string paramSize = "";
-                    try {
-                        foreach (byte size in paramDictValues.ElementAt(i)) {
-                            if (size != 0) {
-                                paramSize += size + "B;  ";
-                            }
-                        }
-                    } catch { }
+        private void SetupScriptCommandsTable(DataGridView table, Dictionary<string, Command> scrmcd)
+        {
+            table.Rows.Clear();
 
-                    table.Rows[i].Cells[3].Value = paramSize.TrimEnd();
-                }
+            int index = 0;
+            foreach (var kvp in scrmcd)
+            {
+                table.Rows.Add();
+                DataGridViewRow r = table.Rows[index];
+
+                r.Cells[0].Value = kvp.Key;
+                r.Cells[1].Value = kvp.Value.Name;
+                r.Cells[2].Value = kvp.Value.Parameters.Count;
+                r.Cells[3].Value = string.Join("", kvp.Value.Parameters.Select(p => $"{p}B;"));
+                r.Cells[4].Value = kvp.Value.Description;
+                index++;
+
             }
         }
 
@@ -132,6 +175,38 @@ namespace DSPRE.Resources {
             if (e.KeyCode == Keys.Enter) {
                 StartSearch(actionDataGridView, actioncmdSearchTextBox, actionRadioButtons);
             }
+        }
+
+        private void exportScrcmdButton_Click(object sender, EventArgs e)
+        {
+            // Export json of current selected scrcmd.
+        }
+
+        private void manageScrcmdsButton_Click(object sender, EventArgs e)
+        {
+            using (CustomScrcmdManager editor = new CustomScrcmdManager())
+                editor.ShowDialog();
+        }
+
+        private void useGameDefaultScrcmdButton_Click(object sender, EventArgs e)
+        {
+            customScrcmdSelector.SelectedIndex = -1;
+        }
+
+        private void customScrcmdSelector_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var customScrcmds = CustomScrcmdManager.LoadSettings();
+            int selectedIndex = customScrcmdSelector.SelectedIndex;
+            if (selectedIndex >= 0)
+            {
+                scriptDatabaseJSON.SelectedScrcmd = customScrcmds.ElementAt(selectedIndex).JsonPath;
+            } else
+            {
+                scriptDatabaseJSON.SelectedScrcmd = null;
+            }
+            
+
+            InitializeTables();
         }
     }
 }
