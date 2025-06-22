@@ -1,5 +1,6 @@
 ﻿using DSPRE;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -41,6 +42,9 @@ namespace NarcAPI {
             narc.ReadOffsets(br);
             narc.ReadElements(br);
             br.Close();
+
+            Debug.WriteLine($"Loaded NARC with {narc.Elements.Length} elements from file: {fullPath}");
+
             return narc;
         }
 
@@ -49,7 +53,11 @@ namespace NarcAPI {
             string fullPath = Path.GetFullPath(dirPath);
 
             Narc narc = new Narc(Path.GetDirectoryName(fullPath));
-            String[] fileNames = Directory.GetFiles(fullPath, "*.*", SearchOption.AllDirectories);
+            String[] fileNames = Directory.GetFiles(fullPath);
+
+            // Sort filenames lexicographically to ensure consistent order
+            Array.Sort(fileNames, StringComparer.OrdinalIgnoreCase);
+
             uint numberOfElements = (uint)fileNames.Length;
             narc.Elements = new MemoryStream[numberOfElements];
 
@@ -62,6 +70,9 @@ namespace NarcAPI {
                 narc.Elements[i] = ms;
                 fs.Close();
             });
+
+            Debug.WriteLine($"Loaded NARC with {numberOfElements} elements from folder: {fullPath}");
+
             return narc;
         }
 
@@ -108,8 +119,13 @@ namespace NarcAPI {
             bw.Write((UInt32)0x0);      
             curOffset = 0;
             byte[] buffer;
-            for (int i = 0; i < Elements.Length; i++) {
-                while (curOffset % 4 != 0) { // Force offsets to be a multiple of 4
+
+            for (int i = 0; i < Elements.Length; i++)
+            { 
+
+                // Force offsets to be a multiple of 4
+                while (curOffset % 4 != 0) 
+                { 
                     bw.Write((Byte)0xFF); curOffset++; 
                 }     
                 // Data writin'
@@ -119,13 +135,23 @@ namespace NarcAPI {
                 bw.Write(buffer, 0, (int)Elements[i].Length);
                 curOffset += (uint)Elements[i].Length;
             }
+
+            // Force final file size to be a multiple of 4
+            while (curOffset % 4 != 0)
+            {
+                bw.Write((Byte)0xFF); curOffset++;
+            }
+
             // Writes sizes
-            int fileSize = (int)bw.BaseStream.Position;
-            bw.Seek((int)fileSizeOffset, SeekOrigin.Begin);         // File size
+            int fileSize = (int)bw.BaseStream.Position;  // File size
+            bw.Seek((int)fileSizeOffset, SeekOrigin.Begin);        
             bw.Write((UInt32)fileSize);
-            bw.Seek((int)fileImageSizeOffset, SeekOrigin.Begin);         // seeks back to FIMG size
-            bw.Write((UInt32)curOffset + FILE_IMAGE_HEADER_SIZE);   // FIMG size == Last end offset + File image header size
+            bw.Seek((int)fileImageSizeOffset, SeekOrigin.Begin);  // seeks back to FIMG size       
+            UInt32 fimgSize = (UInt32)curOffset + FILE_IMAGE_HEADER_SIZE; // FIMG size == Last end offset + File image header size
+            bw.Write(fimgSize);
             bw.Close();
+
+            Debug.WriteLine($"Saved NARC with {Elements.Length} elements and filesize {fileSize} Bytes to file: {fullPath}");
         }
 
         public void ExtractToFolder(String dirPath, string extension = null) {

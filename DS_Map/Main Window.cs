@@ -58,6 +58,7 @@ namespace DSPRE {
 
         #region Variables
         public bool iconON = false;
+        public bool wslDetected = false;
 
         /* Editors Setup */
         public bool matrixEditorIsReady { get; private set; } = false;
@@ -491,7 +492,7 @@ namespace DSPRE {
             }
 
             // Detect WSL and show a message if it is detected
-            DetectAndHandleWSL(openRom.FileName);
+            wslDetected = DetectAndHandleWSL(openRom.FileName);
 
             SetupROMLanguage(openRom.FileName);
 
@@ -664,7 +665,7 @@ namespace DSPRE {
             }
 
             // Detect WSL and show a message if it is detected
-            DetectAndHandleWSL(romFolder.FileName);
+            wslDetected = DetectAndHandleWSL(romFolder.FileName);
 
             string fileName = romFolder.FileName;
 
@@ -778,12 +779,65 @@ namespace DSPRE {
             Update();
             var dateBegin = DateTime.Now;
 
+            string appFolderPath = Path.GetDirectoryName(Application.ExecutablePath);
+            string tempFolderPath = Path.GetFullPath(Path.Combine(appFolderPath, "temp"));
+
+            if (wslDetected && !Directory.Exists(tempFolderPath))
+            {
+                Directory.CreateDirectory(tempFolderPath); // Create temp folder if it doesn't exist
+            }
+
+
             // Repack NARCs
             foreach (KeyValuePair<DirNames, (string packedDir, string unpackedDir)> kvp in RomInfo.gameDirs) {
+
                 DirectoryInfo di = new DirectoryInfo(kvp.Value.unpackedDir);
-                if (di.Exists) {
+
+                if (!di.Exists)
+                {
+                    continue;
+                }
+
+                if (!wslDetected) 
+                {                    
                     Narc.FromFolder(kvp.Value.unpackedDir).Save(kvp.Value.packedDir); // Make new NARC from folder
                 }
+                else 
+                {
+                    // If WSL is detected, we built the narcs to the windows filesystem then copy them to the WSL filesystem
+
+                    // Get application folder path
+                    
+                    string fileName = Path.GetFileName(kvp.Value.packedDir);
+                    string tempNarcPath = Path.Combine(tempFolderPath , fileName);
+                    Narc.FromFolder(kvp.Value.unpackedDir).Save(tempNarcPath);
+
+                    // Copy the NARC to the WSL filesystem
+                    try 
+                    {
+                        File.Copy(tempNarcPath, kvp.Value.packedDir, true);
+                    }
+                    catch (IOException ex) 
+                    {
+                        MessageBox.Show("Failed to copy NARC \"" + di.Name +"\" to WSL filesystem: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        continue;
+                    }
+                    finally 
+                    {
+                        // Clean up the temporary NARC file
+                        if (File.Exists(tempNarcPath))
+                        {
+                            File.Delete(tempNarcPath);
+                        }
+                    }
+
+                }
+
+            }
+
+            if (wslDetected && Directory.Exists(tempFolderPath))
+            {
+                Directory.Delete(tempFolderPath); // Delete the temporary folder used for WSL
             }
 
             Helpers.statusLabelMessage("Repacking ROM...");
