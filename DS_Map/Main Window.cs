@@ -602,7 +602,18 @@ namespace DSPRE {
 
             string romDir = DSUtils.WorkDirPathFromFile(openRom.FileName);
 
-            int userchoice = UnpackRomCheckUserChoice(romDir);
+            SetupROMLanguageBin(openRom.FileName);
+            /* Set ROM gameVersion and language */
+            romInfo = new RomInfo(gameCode, openRom.FileName, useSuffix: true, legacyMode: DSUtils.legacyMode);
+            Helpers.romInfo = new RomInfo(gameCode, openRom.FileName, useSuffix: true, legacyMode: DSUtils.legacyMode);
+
+            if (string.IsNullOrWhiteSpace(RomInfo.romID) || string.IsNullOrWhiteSpace(RomInfo.fileName)) {
+                return;
+            }
+
+            CheckROMLanguage();
+
+            int userchoice = UnpackRomCheckUserChoice();
             switch (userchoice) {
                 case -1:
                     if (!UnpackRom(openRom.FileName, romDir)) {
@@ -947,6 +958,10 @@ namespace DSPRE {
             {
                 OverlayUtils.OverlayTable.LoadOverlayTable();
             }
+            if (!DSUtils.legacyMode)
+            {
+                OverlayUtils.OverlayTable.LoadOverlayTable();
+            }
 
             /* Setup essential editors */
             SetupHeaderEditor();
@@ -988,6 +1003,8 @@ namespace DSPRE {
             {
                 this.Text += " (Legacy Mode)";
             }
+
+        }
 
         }
 
