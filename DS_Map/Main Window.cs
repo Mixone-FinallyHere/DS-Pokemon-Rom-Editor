@@ -1,4 +1,5 @@
 ﻿using DSPRE.Editors;
+using DSPRE.Editors.BtxEditor;
 using DSPRE.Resources;
 using DSPRE.ROMFiles;
 using Ekona.Images;
@@ -14,30 +15,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
-using NarcAPI;
 using Tao.OpenGl;
-using LibNDSFormats.NSBMD;
-using LibNDSFormats.NSBTX;
-using DSPRE.Resources;
-using DSPRE.ROMFiles;
-using static DSPRE.RomInfo;
-using Images;
-using Ekona.Images;
-using Microsoft.WindowsAPICodePack.Dialogs;
-using ScintillaNET;
-using ScintillaNET.Utils;
-using System.Globalization;
-using static DSPRE.ROMFiles.Event;
-using NSMBe4.NSBMD;
+using YamlDotNet.Core;
+using YamlDotNet.RepresentationModel;
 using static DSPRE.ROMFiles.SpeciesFile;
-using System.Reflection;
-using System.ComponentModel;
-using DSPRE.Editors;
-using DSPRE.Editors.BtxEditor;
+using static DSPRE.RomInfo;
 
 namespace DSPRE {
 
@@ -82,7 +70,7 @@ namespace DSPRE {
 
         /* ROM Information */
         public static string gameCode;
-        public static byte europeByte;
+        public static byte romVersion;
         RomInfo romInfo;
         public Dictionary<ushort /*evFile*/, ushort /*header*/> eventToHeader = new Dictionary<ushort, ushort>();
 
@@ -144,6 +132,35 @@ namespace DSPRE {
         }
 
         private void PaintGameIcon(object sender, PaintEventArgs e) {
+            if (iconON) {
+
+                if (!DSUtils.legacyMode)
+                {
+                    FileStream banner;
+
+                    try
+                    {
+                        banner = File.OpenRead(RomInfo.workDir + @"banner/bitmap.png");
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        MessageBox.Show("Couldn't load " + '"' + "banner/bitmap.png" + '"' + '.', "Open Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    e.Graphics.DrawImage(Image.FromStream(banner), 0, 0, gameIcon.Width, gameIcon.Height);
+
+                    banner.Close();
+                }
+                else
+                {
+                    // Legacy mode icon painting
+                    PaintGameIconLegacy(sender, e);
+                }
+            }
+        }
+
+        private void PaintGameIconLegacy(object sender, PaintEventArgs e) {
             if (iconON) {
                 FileStream banner;
 
@@ -309,35 +326,6 @@ namespace DSPRE {
             } else {
                 return 2; //No data found
             }
-        }
-        private bool UnpackRom(string ndsFileName) {
-            Helpers.statusLabelMessage("Unpacking ROM contents to " + RomInfo.workDir + " ...");
-            Update();
-
-            Directory.CreateDirectory(RomInfo.workDir);
-            Process unpack = new Process();
-            unpack.StartInfo.FileName = @"Tools\ndstool.exe";
-            unpack.StartInfo.Arguments = "-x " + '"' + ndsFileName + '"'
-                + " -9 " + '"' + RomInfo.arm9Path + '"'
-                + " -7 " + '"' + RomInfo.workDir + "arm7.bin" + '"'
-                + " -y9 " + '"' + RomInfo.workDir + "y9.bin" + '"'
-                + " -y7 " + '"' + RomInfo.workDir + "y7.bin" + '"'
-                + " -d " + '"' + RomInfo.workDir + "data" + '"'
-                + " -y " + '"' + RomInfo.workDir + "overlay" + '"'
-                + " -t " + '"' + RomInfo.workDir + "banner.bin" + '"'
-                + " -h " + '"' + RomInfo.workDir + "header.bin" + '"';
-            Application.DoEvents();
-            unpack.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            unpack.StartInfo.CreateNoWindow = true;
-            try {
-                unpack.Start();
-                unpack.WaitForExit();
-            } catch (System.ComponentModel.Win32Exception) {
-                MessageBox.Show("Failed to call ndstool.exe" + Environment.NewLine + "Make sure DSPRE's Tools folder is intact.",
-                    "Couldn't unpack ROM", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            return true;
         }
         #endregion
 
@@ -572,44 +560,12 @@ namespace DSPRE {
                 return;
             }
 
-            if (!detectAndHandleWSL(openRom.FileName)) {
-                return; // User chose not to create a new work directory
-            }
+            detectAndHandleWSL(openRom.FileName);
 
-            // Handle WSL
-            if (wslDetected)
-            {
-                string executablePath = Path.GetDirectoryName(Application.ExecutablePath);
-                string buildFolderPath = Path.Combine(executablePath, "build");
-                // Create a new work directory in the same folder as DSPRE
-                if (!Directory.Exists(buildFolderPath)) {
-                    Directory.CreateDirectory(buildFolderPath);
-                }
-
-                // Copy the ROM to the build folder
-                string newRomPath = Path.Combine(buildFolderPath, Path.GetFileName(openRom.FileName));
-
-                // Check if file already exists and ask to overwrite
-                if (File.Exists(newRomPath)) {
-                    DialogResult overwriteResult = MessageBox.Show("The ROM file already exists in the build folder. Do you want to overwrite it?", "File Exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                    if (overwriteResult != DialogResult.Yes) {
-                        return; // User chose not to overwrite
-                    }
-                }
-
-                try {
-                    File.Copy(openRom.FileName, newRomPath, true);
-                    openRom.FileName = newRomPath; // Update the file name to the new path
-                } catch (IOException ex) {
-                    MessageBox.Show("Failed to copy ROM to build folder: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-            }
-
-            SetupROMLanguage(openRom.FileName);
+            SetupROMLanguageBin(openRom.FileName);
             /* Set ROM gameVersion and language */
-            romInfo = new RomInfo(gameCode, openRom.FileName, useSuffix: true);
-            Helpers.romInfo = new RomInfo(gameCode, openRom.FileName, useSuffix: true);
+            romInfo = new RomInfo(gameCode, openRom.FileName, useSuffix: true, legacyMode: DSUtils.legacyMode);
+            Helpers.romInfo = new RomInfo(gameCode, openRom.FileName, useSuffix: true, legacyMode: DSUtils.legacyMode);
 
             if (string.IsNullOrWhiteSpace(RomInfo.romID) || string.IsNullOrWhiteSpace(RomInfo.fileName)) {
                 return;
@@ -641,7 +597,9 @@ namespace DSPRE {
                     }
 
                     try {
-                        if (!UnpackRom(openRom.FileName)) {
+                        Helpers.statusLabelMessage("Unpacking ROM contents to " + RomInfo.workDir + " ...");
+                        Update();
+                        if (!DSUtils.UnpackROM(openRom.FileName)) {
                             Helpers.statusLabelError("ERROR");
                             languageLabel.Text = "";
                             versionLabel.Text = "Error";
@@ -661,11 +619,6 @@ namespace DSPRE {
             gameIcon.Refresh();  // Paint game icon
             Helpers.statusLabelMessage("Attempting to unpack NARCs from folder...");
             Update();
-            //for (int i = 0; i < 128; i++) {
-            //    if (OverlayUtils.IsCompressed(i)) {
-            //        OverlayUtils.Decompress(i);
-            //    }
-            //}
             ReadROMInitData();
         }
 
@@ -694,32 +647,17 @@ namespace DSPRE {
 
         private bool detectAndHandleWSL(string fileName) {
             string fullPath = Path.GetFullPath(fileName);
-
-            if (!fullPath.ToLower().Contains("wsl.")) 
+            if (!fullPath.ToLower().Contains("wsl."))
             {
-                return true; // No WSL detected, proceed normally
-            }
-            if (Directory.Exists(fullPath))
-            {
-                MessageBox.Show("WSL was detected in the path. " +
-                    "The associated unpacked folder of a ROM should not be stored on the WSL file system! " +
-                    "Please move the folder to the same drive that DSPRE is located on.", "Invalid Path", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
+                return false; // No WSL detected, proceed normally
             }
 
-            DialogResult result = MessageBox.Show("WSL was detected in the path. " +
-                "Do you want to create a build directory in the same folder as DSPRE to unpack to?", "WSL Detected", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            wslDetected = true;
+            MessageBox.Show("WSL was detected in the path. " +
+                "You may experience some slow-downs, especially on WSL2.\n" +
+                "If the slow-down is too excessive consider moving your files to the Windows filesystem.",
+                "WSL Detected", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            if (result == DialogResult.Yes)
-            {
-                return true; // User wants to create a new work directory
-            }
-            else
-            {
-                MessageBox.Show("Unpacking will not be possible without a valid work directory.", "Unpacking aborted", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }               
+            return true;
         }
         private bool DetectRequiredTools()
         {
@@ -741,6 +679,11 @@ namespace DSPRE {
             {
                 toolsMissing = true;
                 missingToolsList.Add("apicula.exe");
+            }
+            if (!File.Exists(@"Tools\dsrom.exe"))
+            {
+                toolsMissing = true;
+                missingToolsList.Add("dsrom.exe");
             }
 
             if (toolsMissing)
@@ -775,7 +718,7 @@ namespace DSPRE {
             languageLabel.Text = "Lang: " + RomInfo.gameLanguage;
 
             if (RomInfo.gameLanguage == GameLanguages.English) {
-                if (europeByte == 0x0A) {
+                if (romVersion == 0x0A) {
                     languageLabel.Text += " [Europe]";
                 } else {
                     languageLabel.Text += " [America]";
@@ -805,24 +748,51 @@ namespace DSPRE {
                 return;
             }
 
-            if (!detectAndHandleWSL(romFolderPath))
+            detectAndHandleWSL(romFolderPath);
+
+            if (DSUtils.GetFolderType(romFolderPath) == -1)
             {
-                return; // User chose not to create a new work directory
+                MessageBox.Show("The selected folder does not contain a valid ROM folder structure.", "Invalid Folder", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return; // Invalid folder, abort loading
+            }
+            // Check if the folder is a legacy ROM folder structure
+            else if (DSUtils.GetFolderType(romFolderPath) == 1)
+            {
+                var result = MessageBox.Show("The selected folder is a legacy ROM folder structure created on an old version of DSPRE.\n" +
+                    "It's recommended that you convert the folder to the new structure. This has the following advantages:\n" +
+                    "- Smaller patch size due to more accurate packing\n" +
+                    "- Overall improved hardware compatability\n" +
+                    "- Better support for different drives and WSL\n" +
+                    "- Automatic decompression and recompression of overlays\n\n" +
+                    "Do you want to convert the folder to the new structure?",
+                    "Legacy Folder", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (result == DialogResult.Yes)
+                {
+                    if(!ConvertROMFolder(romFolderPath))
+                    {
+                        return; // Conversion failed, abort loading
+                    }
+                    SetupROMLanguageYaml(romFolderPath);
+                }
+                else
+                {
+                    MessageBox.Show("The legacy ROM folder structure will still work, " +
+                        "but it is recommended that you convert it to the new structure for better compatibility.\n" +
+                        "This message will be shown again.",
+                        "Legacy Folder", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    DSUtils.legacyMode = true; // Set legacy mode to true for the rest of the program
+                    SetupROMLanguageBin(Path.Combine(romFolderPath, "header.bin"));
+                }
+            }
+            else
+            {
+                SetupROMLanguageYaml(romFolderPath);
             }
 
-          
-
-            try
-            {
-                SetupROMLanguage(Directory.GetFiles(romFolderPath).First(x => x.Contains("header.bin")));
-            }
-            catch (InvalidOperationException)
-            {
-                MessageBox.Show("This folder does not seem to contain any data from a NDS Pokémon ROM.", "No ROM Data", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
             /* Set ROM gameVersion and language */
-            romInfo = new RomInfo(gameCode, romFolderPath, useSuffix: false);
+            romInfo = new RomInfo(gameCode, romFolderPath, useSuffix: false, legacyMode: DSUtils.legacyMode);
 
             if (string.IsNullOrWhiteSpace(RomInfo.romID) || string.IsNullOrWhiteSpace(RomInfo.fileName))
             {
@@ -837,20 +807,54 @@ namespace DSPRE {
             ReadROMInitData();
         }
 
-        private void SetupROMLanguage(string headerPath) {
+        private void SetupROMLanguageBin(string headerPath) {
             using (DSUtils.EasyReader br = new DSUtils.EasyReader(headerPath, 0xC)) {
                 gameCode = Encoding.UTF8.GetString(br.ReadBytes(4));
                 br.BaseStream.Position = 0x1E;
-                europeByte = br.ReadByte();
+                romVersion = br.ReadByte();
+            }
+        }
+
+        private bool ConvertROMFolder(string romFolderPath) {
+
+            string headerPath = Path.Combine(romFolderPath, "header.bin");
+            SetupROMLanguageBin(headerPath);
+            RomInfo oldInfo = new RomInfo(gameCode, romFolderPath, useSuffix: false, legacyMode: true);
+
+            // Convert the legacy ROM folder structure to the new one
+            if (DSUtils.ConvertLegacyROMFolder(romFolderPath)) 
+            {
+                MessageBox.Show("The ROM folder has been successfully converted to the new structure.", "Conversion Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return true;
+            } else 
+            {
+                MessageBox.Show("An error occurred while converting the ROM folder. Please try again.", "Conversion Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
+
+        private void SetupROMLanguageYaml(string romFolderPath) {
+            string headerPath = Path.Combine(romFolderPath, "header.yaml");
+            try {
+                using (StreamReader reader = new StreamReader(headerPath)) {
+                    YamlStream yaml = new YamlStream();
+                    yaml.Load(reader);
+                    YamlMappingNode rootNode = (YamlMappingNode)yaml.Documents[0].RootNode;
+                    gameCode = rootNode.Children[new YamlScalarNode("gamecode")].ToString();
+                    romVersion = byte.Parse(rootNode.Children[new YamlScalarNode("rom_version")].ToString());
+                }
+            } catch (Exception ex) {
+                MessageBox.Show("Error reading header.yaml: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void ReadROMInitData() {
-            if (ARM9.CheckCompressionMark()) {
+            if (DSUtils.legacyMode && ARM9.CheckCompressionMark()) {
                 if (!RomInfo.gameFamily.Equals(GameFamilies.HGSS)) {
                     MessageBox.Show("Unexpected compressed ARM9. It is advised that you double check the ARM9.");
                 }
-                if (!ARM9.Decompress(RomInfo.arm9Path)) {
+                // Only decompress in legacy mode
+                if (DSUtils.legacyMode && !ARM9.Decompress(RomInfo.arm9Path)) {
                     MessageBox.Show("ARM9 decompression failed. The program can't proceed.\nAborting.",
                                 "Error with ARM9 decompression", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
@@ -915,8 +919,7 @@ namespace DSPRE {
                 }
             }
 
-
-            if (ARM9.CheckCompressionMark()) {
+            if (DSUtils.legacyMode && ARM9.CheckCompressionMark()) {
                 Helpers.statusLabelMessage("Awaiting user response...");
                 DialogResult d = MessageBox.Show("The ARM9 file of this ROM is currently uncompressed, but marked as compressed.\n" +
                     "This will prevent your ROM from working on native hardware.\n\n" +
@@ -930,37 +933,31 @@ namespace DSPRE {
 
             Helpers.statusLabelMessage("Repacking ROM...");
 
-            if (OverlayUtils.OverlayTable.IsDefaultCompressed(1)) {
+            if (LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(1)) {
                 if (PatchToolboxDialog.overlay1MustBeRestoredFromBackup) {
-                    OverlayUtils.RestoreFromCompressedBackup(1, eventEditorIsReady);
+                    LegacyOverlayUtils.RestoreFromCompressedBackup(1, eventEditorIsReady);
                 } else {
-                    if (!OverlayUtils.IsCompressed(1)) {
-                        OverlayUtils.Compress(1);
+                    if (!LegacyOverlayUtils.IsCompressed(1)) {
+                        LegacyOverlayUtils.Compress(1);
                     }
                 }
             }
 
-            if (OverlayUtils.OverlayTable.IsDefaultCompressed(RomInfo.initialMoneyOverlayNumber)) {
-                if (!OverlayUtils.IsCompressed(RomInfo.initialMoneyOverlayNumber)) {
-                    OverlayUtils.Compress(RomInfo.initialMoneyOverlayNumber);
+            if (LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(RomInfo.initialMoneyOverlayNumber)) {
+                if (!LegacyOverlayUtils.IsCompressed(RomInfo.initialMoneyOverlayNumber)) {
+                    LegacyOverlayUtils.Compress(RomInfo.initialMoneyOverlayNumber);
                 }
             }
 
 
             Update();
 
-            //for (int i = 0; i < 128; i++) {
-            //    if (!OverlayUtils.IsCompressed(i)) {
-            //        OverlayUtils.Compress(i);
-            //    }
-            //}
-
-            DSUtils.RepackROM(saveRom.FileName);
+            DSUtils.RepackROMLegacy(saveRom.FileName);
 
             if (RomInfo.gameFamily != GameFamilies.DP && RomInfo.gameFamily != GameFamilies.Plat) {
                 if (eventEditorIsReady) {
-                    if (OverlayUtils.IsCompressed(1)) {
-                        OverlayUtils.Decompress(1);
+                    if (LegacyOverlayUtils.IsCompressed(1)) {
+                        LegacyOverlayUtils.Decompress(1);
                     }
                 }
             }
@@ -5606,9 +5603,9 @@ namespace DSPRE {
                         break;
                     default:
                         // HGSS Overlay 1 must be decompressed in order to read the overworld table
-                        if (OverlayUtils.OverlayTable.IsDefaultCompressed(1)) {
-                            if (OverlayUtils.IsCompressed(1)) {
-                                if (OverlayUtils.Decompress(1) < 0) {
+                        if (LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(1)) {
+                            if (LegacyOverlayUtils.IsCompressed(1)) {
+                                if (LegacyOverlayUtils.Decompress(1) < 0) {
                                     MessageBox.Show("Overlay 1 couldn't be decompressed.\nOverworld sprites in the Event Editor will be " +
                                 "displayed incorrectly or not displayed at all.", "Unexpected EOF", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 }
@@ -7849,7 +7846,7 @@ namespace DSPRE {
             RomInfo.PrepareCameraData();
             cameraEditorDataGridView.Rows.Clear();
 
-            if (OverlayUtils.OverlayTable.IsDefaultCompressed(RomInfo.cameraTblOverlayNumber)) {
+            if (LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(RomInfo.cameraTblOverlayNumber)) {
                 DialogResult d1 = MessageBox.Show("It is STRONGLY recommended to configure Overlay1 as uncompressed before proceeding.\n\n" +
                         "More details in the following dialog.\n\n" + "Do you want to know more?",
                         "Confirm to proceed", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -7862,15 +7859,15 @@ namespace DSPRE {
                             "If you change your mind, you can apply it later by accessing the Patch Toolbox.",
                             "Caution", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    if (OverlayUtils.IsCompressed(RomInfo.cameraTblOverlayNumber)) {
-                        OverlayUtils.Decompress(RomInfo.cameraTblOverlayNumber);
+                    if (LegacyOverlayUtils.IsCompressed(RomInfo.cameraTblOverlayNumber)) {
+                        LegacyOverlayUtils.Decompress(RomInfo.cameraTblOverlayNumber);
                     }
                 }
             }
 
 
             uint[] RAMaddresses = new uint[RomInfo.cameraTblOffsetsToRAMaddress.Length];
-            string camOverlayPath = OverlayUtils.GetPath(RomInfo.cameraTblOverlayNumber);
+            string camOverlayPath = LegacyOverlayUtils.GetPath(RomInfo.cameraTblOverlayNumber);
             using (DSUtils.EasyReader br = new DSUtils.EasyReader(camOverlayPath)) {
                 for (int i = 0; i < RomInfo.cameraTblOffsetsToRAMaddress.Length; i++) {
                     br.BaseStream.Position = RomInfo.cameraTblOffsetsToRAMaddress[i];
@@ -7887,7 +7884,7 @@ namespace DSPRE {
                 }
             }
 
-            overlayCameraTblOffset = RAMaddresses[0] - OverlayUtils.OverlayTable.GetRAMAddress(RomInfo.cameraTblOverlayNumber);
+            overlayCameraTblOffset = RAMaddresses[0] - LegacyOverlayUtils.OverlayTable.GetRAMAddress(RomInfo.cameraTblOverlayNumber);
             using (DSUtils.EasyReader br = new DSUtils.EasyReader(camOverlayPath, overlayCameraTblOffset)) {
                 if (RomInfo.gameFamily == GameFamilies.HGSS) {
                     currentCameraTable = new GameCamera[17];
@@ -7917,7 +7914,7 @@ namespace DSPRE {
             }
         }
         private void saveCameraTableButton_Click(object sender, EventArgs e) {
-            SaveCameraTable(OverlayUtils.GetPath(RomInfo.cameraTblOverlayNumber), overlayCameraTblOffset);
+            SaveCameraTable(LegacyOverlayUtils.GetPath(RomInfo.cameraTblOverlayNumber), overlayCameraTblOffset);
         }
         private void cameraEditorDataGridView_CellValidated(object sender, DataGridViewCellEventArgs e) {
             currentCameraTable[e.RowIndex][e.ColumnIndex] = cameraEditorDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;

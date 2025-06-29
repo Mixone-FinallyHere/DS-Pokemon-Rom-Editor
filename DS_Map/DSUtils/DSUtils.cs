@@ -23,6 +23,9 @@ namespace DSPRE {
         public const string backupSuffix = ".backup";
 
         public static readonly string NDSRomFilter = "NDS File (*.nds)|*.nds";
+
+        public static bool legacyMode = false; // true if using legacy ndstool, false if using dsrom
+
         public class EasyReader : BinaryReader {
             public EasyReader(string path, long pos = 0) : base(File.OpenRead(path)) {
                 this.BaseStream.Position = pos;
@@ -83,7 +86,7 @@ namespace DSPRE {
 
         }
 
-        public static void RepackROM(string ndsFileName) {
+        public static void RepackROMLegacy(string ndsFileName) {
             Process repack = new Process();
             repack.StartInfo.FileName = @"Tools\ndstool.exe";
             repack.StartInfo.Arguments = "-c " + '"' + ndsFileName + '"'
@@ -101,6 +104,181 @@ namespace DSPRE {
             repack.StartInfo.CreateNoWindow = true;
             repack.Start();
             repack.WaitForExit();
+        }
+
+        public static void RepackROM(string ndsFileName)
+        {
+
+            string dsromPath = Path.Combine(Application.StartupPath, "Tools", "dsrom.exe");
+            string ndsFileAbs = Path.GetFullPath(ndsFileName);
+            string configFileAbs = Path.GetFullPath(RomInfo.workDir + "config.yaml");
+
+            Process repack = new Process();
+            repack.StartInfo.FileName = $"{dsromPath}";
+            repack.StartInfo.Arguments = $"build --config \"{configFileAbs}\" --rom \"{ndsFileAbs}\"";
+
+            Application.DoEvents();
+
+            repack.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            repack.StartInfo.CreateNoWindow = true;
+            repack.Start();
+            repack.WaitForExit();
+        }
+
+        // Unpack ROM using ndstool
+        public static bool UnpackROMLegacy(string ndsFileName)
+        {
+            Directory.CreateDirectory(RomInfo.workDir);
+            Process unpack = new Process();
+            unpack.StartInfo.FileName = @"Tools\ndstool.exe";
+            unpack.StartInfo.Arguments = "-x " + '"' + ndsFileName + '"'
+                + " -9 " + '"' + RomInfo.arm9Path + '"'
+                + " -7 " + '"' + RomInfo.workDir + "arm7.bin" + '"'
+                + " -y9 " + '"' + RomInfo.workDir + "y9.bin" + '"'
+                + " -y7 " + '"' + RomInfo.workDir + "y7.bin" + '"'
+                + " -d " + '"' + RomInfo.workDir + "data" + '"'
+                + " -y " + '"' + RomInfo.workDir + "overlay" + '"'
+                + " -t " + '"' + RomInfo.workDir + "banner.bin" + '"'
+                + " -h " + '"' + RomInfo.workDir + "header.bin" + '"';
+            Application.DoEvents();
+            unpack.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            unpack.StartInfo.CreateNoWindow = true;
+            try
+            {
+                unpack.Start();
+                unpack.WaitForExit();
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                MessageBox.Show("Failed to call ndstool.exe" + Environment.NewLine + "Make sure DSPRE's Tools folder is intact.",
+                    "Couldn't unpack ROM", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
+        }
+
+        public static bool UnpackROM(string ndsFileName)
+        {
+            string dsromPath = Path.Combine(Application.StartupPath, "Tools", "dsrom.exe");
+            string ndsFileAbs = Path.GetFullPath(ndsFileName);
+            string workDirAbs = Path.GetFullPath(RomInfo.workDir);
+
+            workDirAbs = workDirAbs.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+            Process unpack = new Process();
+            unpack.StartInfo.FileName = $"{dsromPath}";
+            unpack.StartInfo.Arguments = $"extract -r \"{ndsFileAbs}\" -o \"{workDirAbs}\"";
+            unpack.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            unpack.StartInfo.CreateNoWindow = true;
+            unpack.StartInfo.UseShellExecute = false;
+
+            Console.WriteLine("Unpacking ROM with command: " + unpack.StartInfo.FileName + " " + unpack.StartInfo.Arguments);
+            Application.DoEvents();
+
+            try
+            {
+                unpack.Start();
+                unpack.WaitForExit();
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                MessageBox.Show("Failed to call dsrom.exe" + Environment.NewLine + "Make sure DSPRE's Tools folder is intact.",
+                    "Couldn't unpack ROM", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
+        }
+
+        public static int GetFolderType(string folderPath)
+        {
+            if (!Directory.Exists(folderPath))
+                return -1;
+
+            // Check if the folder contains a config.yaml file
+            string configPath = Path.Combine(folderPath, "config.yaml");
+            string headerPath = Path.Combine(folderPath, "header.bin");
+            if (File.Exists(configPath)) 
+            {
+                return 0; // This is a dsrom folder
+            }
+            else if (File.Exists(headerPath))
+            {
+                return 1; // This is a ndstool folder
+            }
+            
+            return -1; // Not a valid dsrom or ndstool folder
+
+        }
+
+        public static bool ConvertLegacyROMFolder(string folderPath)
+        {
+            if (!Directory.Exists(folderPath))
+                return false;
+
+            // Pack all NARCs
+            foreach (KeyValuePair<DirNames, (string packedDir, string unpackedDir)> kvp in RomInfo.gameDirs)
+            {
+                DirectoryInfo di = new DirectoryInfo(kvp.Value.unpackedDir);
+                if (di.Exists)
+                {
+                    Narc.FromFolder(kvp.Value.unpackedDir).Save(kvp.Value.packedDir); // Make new NARC from folder
+                }
+            }
+            
+            var hashcode = DateTime.Now.GetHashCode();
+            string parentDir = Directory.GetParent(folderPath).FullName;
+            string tempRomPath = Path.Combine(parentDir, "temp_" + hashcode + ".nds");
+
+            // Pack the ROM using ndstool
+            RepackROMLegacy(tempRomPath);
+            if (!File.Exists(tempRomPath))
+            {
+                MessageBox.Show("Failed to create new ROM file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            // Unpack the new ROM
+            if (!UnpackROM(tempRomPath))
+            {
+                return false;
+            }
+
+            // Delete the temporary ROM file
+            try
+            {
+                File.Delete(tempRomPath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to delete temporary ROM file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            // Rename old folder to backup
+            string backupFolderPath = Path.Combine(parentDir, "backup_" + hashcode);
+            try
+            {
+                Directory.Move(folderPath, backupFolderPath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to rename old folder: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            // Move the new unpacked folder to the original folder path
+            string newUnpackedFolderPath = Path.Combine(parentDir, Path.GetDirectoryName(folderPath));
+            try
+            {
+                Directory.Move(newUnpackedFolderPath, folderPath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to move new unpacked folder: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            return true;
         }
 
         public static byte[] StringToByteArray(String hex) {
@@ -179,10 +357,10 @@ namespace DSPRE {
             string iconTablePath;
 
             int iconPalTableOffsetFromFileStart;
-            string ov129path = OverlayUtils.GetPath(129);
+            string ov129path = LegacyOverlayUtils.GetPath(129);
             if (File.Exists(ov129path)) {
                 // if overlay 129 exists, read it from there
-                iconPalTableOffsetFromFileStart = (int)(RomInfo.monIconPalTableAddress - OverlayUtils.OverlayTable.GetRAMAddress(129));
+                iconPalTableOffsetFromFileStart = (int)(RomInfo.monIconPalTableAddress - LegacyOverlayUtils.OverlayTable.GetRAMAddress(129));
                 iconTablePath = ov129path;
             } else if ((int)(RomInfo.monIconPalTableAddress - RomInfo.synthOverlayLoadAddress) >= 0) {
                 // if there is a synthetic overlay, read it from there
