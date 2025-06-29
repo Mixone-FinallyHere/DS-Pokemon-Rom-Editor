@@ -462,7 +462,7 @@ namespace DSPRE
 
             if (RomInfo.gameFamily == GameFamilies.HGSS)
             {
-                if (LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(data.overlayNumber))
+                if (DSUtils.legacyMode && LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(data.overlayNumber))
                 {
                     DialogResult d1 = MessageBox.Show("It is STRONGLY recommended to configure Overlay1 as uncompressed before proceeding.\n\n" +
                         "More details in the following dialog.\n\n" + "Do you want to know more?",

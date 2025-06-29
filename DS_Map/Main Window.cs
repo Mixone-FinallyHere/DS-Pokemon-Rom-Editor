@@ -302,29 +302,69 @@ namespace DSPRE {
             Helpers.statusLabelMessage();
         }
 
-        private int UnpackRomCheckUserChoice() {
-            // Check if extracted data for the ROM exists, and ask user if they want to load it.
-            // Returns true if user aborted the process
-            if (Directory.Exists(RomInfo.workDir)) {
-                DialogResult d = MessageBox.Show("Extracted data of this ROM has been found.\n" +
-                    "Do you want to load it and unpack it?", "Data detected", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+        /// <summary>
+        /// Check if extracted data for the ROM exists, and ask user if they want to load it.
+        /// </summary>
+        /// <returns>
+        /// -1 - Do nothing, no data found
+        ///  0 - User wants to abort loading
+        ///  1 - User wants to load existing data
+        ///  2 - User wants to re-extract data
+        /// </returns>
+        private int UnpackRomCheckUserChoice(string romDir) {
 
-                if (d == DialogResult.Cancel) {
-                    return -1; //user wants to abort loading
-                } else if (d == DialogResult.Yes) {
-                    return 0; //user wants to load data
-                } else {
+            switch (DSUtils.GetFolderType(romDir))
+            {
+                case -1:
+                    return -1; // Do nothing case
+                case 0:
+                    DialogResult d = MessageBox.Show("Extracted data of this ROM has been found.\n" +
+                    "Do you want to load it and unpack it?", "Data detected", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                    if (d == DialogResult.Cancel)
+                    {
+                        return 0; //user wants to abort loading
+                    }
+                    else if (d == DialogResult.Yes)
+                    {
+                        return 1; //user wants to load data
+                    }
+
                     DialogResult nd = MessageBox.Show("All data of this ROM will be re-extracted. Proceed?\n",
                         "Existing data will be deleted", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-                    if (nd == DialogResult.No) {
-                        return -1; //user wants to abort loading
-                    } else {
-                        return 1; //user wants to re-extract data
+                    if (nd == DialogResult.Yes)
+                    {
+                        return 2; //user wants to re-extract data
                     }
-                }
-            } else {
-                return 2; //No data found
+
+                    return 0; //user wants to abort loading
+                case 1:
+                    DialogResult d2 = MessageBox.Show("Extracted data of this ROM has been found, but it is of legacy type.\n" +
+                        "Do you want to load it?", "Legacy data detected", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+                    if (d2 == DialogResult.Cancel)
+                    {
+                        return 0; //user wants to abort loading
+                    }
+                    else if (d2 == DialogResult.Yes)
+                    {
+                        MessageBox.Show("Data from legacy folder will be loaded, you will be asked whether to convert it.",
+                            "Legacy data will be loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return 1; //user wants to load data
+                    }
+
+                    DialogResult nd2 = MessageBox.Show("All data of this ROM will be re-extracted. Proceed?\n",
+                        "Existing data will be deleted", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                    if (nd2 == DialogResult.Yes)
+                    {
+                        return 2; //user wants to re-extract data
+                    }
+
+                    return 0; //user wants to abort loading
+                default:
+                    return -1; // Do nothing case
+
             }
         }
         #endregion
@@ -562,64 +602,121 @@ namespace DSPRE {
 
             detectAndHandleWSL(openRom.FileName);
 
-            SetupROMLanguageBin(openRom.FileName);
-            /* Set ROM gameVersion and language */
-            romInfo = new RomInfo(gameCode, openRom.FileName, useSuffix: true, legacyMode: DSUtils.legacyMode);
-            Helpers.romInfo = new RomInfo(gameCode, openRom.FileName, useSuffix: true, legacyMode: DSUtils.legacyMode);
+            //SetupROMLanguageBin(openRom.FileName);
+            ///* Set ROM gameVersion and language */
+            //romInfo = new RomInfo(gameCode, openRom.FileName, useSuffix: true, legacyMode: DSUtils.legacyMode);
+            //Helpers.romInfo = new RomInfo(gameCode, openRom.FileName, useSuffix: true, legacyMode: DSUtils.legacyMode);
 
-            if (string.IsNullOrWhiteSpace(RomInfo.romID) || string.IsNullOrWhiteSpace(RomInfo.fileName)) {
-                return;
-            }
+            //if (string.IsNullOrWhiteSpace(RomInfo.romID) || string.IsNullOrWhiteSpace(RomInfo.fileName)) {
+            //    return;
+            //}
 
-            CheckROMLanguage();
+            //CheckROMLanguage();
 
-            int userchoice = UnpackRomCheckUserChoice();
+            string romDir = DSUtils.WorkDirPathFromFile(openRom.FileName);
+
+            int userchoice = UnpackRomCheckUserChoice(romDir);
             switch (userchoice) {
                 case -1:
+                    if (!UnpackRom(openRom.FileName, romDir)) {
+                        Helpers.statusLabelError("Unpacking of ROM \"" + openRom.FileName + "\" has failed");
+                        Update();
+                        return; // Unpacking failed, abort loading
+                    }
+                    break;                    
+                case 0:
                     Helpers.statusLabelMessage("Loading aborted");
                     Update();
                     return;
-                case 0:
-                    break;
                 case 1:
+                    Application.DoEvents();
+                    break;
                 case 2:
                     Application.DoEvents();
-                    if (userchoice == 1) {
-                        Helpers.statusLabelMessage("Deleting old data...");
-                        try {
-                            Directory.Delete(RomInfo.workDir, true);
-                        } catch (IOException) {
-                            MessageBox.Show("Concurrent access detected: \n" + RomInfo.workDir +
-                                "\nMake sure no other process is using the extracted ROM folder while DSPRE is running.", "Concurrent Access", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                        Update();
-                    }
+                    Helpers.statusLabelMessage("Deleting old data...");
+                    Update();
 
-                    try {
-                        Helpers.statusLabelMessage("Unpacking ROM contents to " + RomInfo.workDir + " ...");
-                        Update();
-                        if (!DSUtils.UnpackROM(openRom.FileName)) {
-                            Helpers.statusLabelError("ERROR");
-                            languageLabel.Text = "";
-                            versionLabel.Text = "Error";
-                            return;
-                        }
-                        ARM9.EditSize(-12);
-                    } catch (IOException) {
-                        MessageBox.Show("Can't access temp directory: \n" + RomInfo.workDir + "\nThis might be a temporary issue.\nMake sure no other process is using it and try again.", "Open Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        Helpers.statusLabelError("ERROR: Concurrent access to " + RomInfo.workDir);
-                        Update();
+                    try
+                    {
+                        Directory.Delete(romDir, true);
+                    }
+                    catch (IOException)
+                    {
+                        MessageBox.Show("Concurrent access detected: \n" + romDir +
+                            "\nMake sure no other process is using the extracted ROM folder while DSPRE is running.", "Concurrent Access", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
+
+                    if (!UnpackRom(openRom.FileName, romDir))
+                    {
+                        Helpers.statusLabelError("Unpacking of ROM \"" + openRom.FileName + "\" has failed");
+                        Update();
+                        return; // Unpacking failed, abort loading
+                    }
+
                     break;
             }
-
-            iconON = true;
-            gameIcon.Refresh();  // Paint game icon
-            Helpers.statusLabelMessage("Attempting to unpack NARCs from folder...");
             Update();
-            ReadROMInitData();
+            OpenRomFromFolder(romDir);
+
+            //iconON = true;
+            //gameIcon.Refresh();  // Paint game icon
+            //Helpers.statusLabelMessage("Attempting to unpack NARCs from folder...");
+            //Update();
+            //ReadROMInitData();
+        }
+
+        private bool UnpackRom(string fileName, string romDir)
+        {
+            try
+            {
+                Helpers.statusLabelMessage("Unpacking ROM contents to " + romDir + " ...");
+                Update();
+                if (!DSUtils.UnpackROM(fileName, romDir))
+                {
+                    Helpers.statusLabelError("ERROR");
+                    languageLabel.Text = "";
+                    versionLabel.Text = "Error";
+                    return false;
+                }
+
+                if(DSUtils.IsROMPackedByNdstool(fileName)) {
+                    DialogResult d = MessageBox.Show("This ROM was likely packed by ndstool.\n" +
+                        "As a consequence, the file order and ARM9 compression may not be correct.\n" +
+                        "DSPRE can try to fix this, do you want to proceed?",
+                        "ROM Packed by ndstool", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                    
+
+                    if (d != DialogResult.Yes)
+                    {
+                        DialogResult confirm = MessageBox.Show("This may permanently mess up your path order.\n" +
+                           "Are you sure you want to proceed?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                        if (confirm != DialogResult.Yes)
+                        {
+                            return true; // User chose not to fix the path order
+                        }
+
+                    }
+
+                    if (!DSUtils.ResetPathOrder(romDir) || !DSUtils.MarkARM9Recompression(romDir))
+                    {
+                        return false;
+                    }
+                }
+
+            }
+            catch (IOException)
+            {
+                MessageBox.Show("Can't access temp directory: \n" + RomInfo.workDir + "\nThis might be a temporary issue.\nMake sure no other process is using it and try again.", "Open Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Helpers.statusLabelError("ERROR: Concurrent access to " + RomInfo.workDir);
+                Update();
+                return false;
+            }
+
+            return true;
+
         }
 
         private bool ValidateFilePath(string fileName) {
@@ -817,6 +914,8 @@ namespace DSPRE {
 
         private bool ConvertROMFolder(string romFolderPath) {
 
+            Helpers.statusLabelMessage("Converting ROM folder...");
+
             string headerPath = Path.Combine(romFolderPath, "header.bin");
             SetupROMLanguageBin(headerPath);
             RomInfo oldInfo = new RomInfo(gameCode, romFolderPath, useSuffix: false, legacyMode: true);
@@ -824,10 +923,13 @@ namespace DSPRE {
             // Convert the legacy ROM folder structure to the new one
             if (DSUtils.ConvertLegacyROMFolder(romFolderPath)) 
             {
-                MessageBox.Show("The ROM folder has been successfully converted to the new structure.", "Conversion Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Helpers.statusLabelMessage();
+                MessageBox.Show("The ROM folder has been successfully converted to the new structure.\n" +
+                    "A backup as been created in the same folder.", "Conversion Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return true;
             } else 
             {
+                Helpers.statusLabelError("ROM folder conversion failed", true);
                 MessageBox.Show("An error occurred while converting the ROM folder. Please try again.", "Conversion Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
@@ -859,6 +961,10 @@ namespace DSPRE {
                                 "Error with ARM9 decompression", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
+            }
+            if (!DSUtils.legacyMode)
+            {
+                OverlayUtils.OverlayTable.LoadOverlayTable();
             }
 
             /* Setup essential editors */
@@ -896,6 +1002,12 @@ namespace DSPRE {
 
             Helpers.statusLabelMessage();
             this.Text += "  -  " + RomInfo.fileName;
+
+            if (DSUtils.legacyMode)
+            {
+                this.Text += " (Legacy Mode)";
+            }
+
         }
 
         private void saveRom_Click(object sender, EventArgs e) {
@@ -933,7 +1045,7 @@ namespace DSPRE {
 
             Helpers.statusLabelMessage("Repacking ROM...");
 
-            if (LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(1)) {
+            if (DSUtils.legacyMode && LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(1)) {
                 if (PatchToolboxDialog.overlay1MustBeRestoredFromBackup) {
                     LegacyOverlayUtils.RestoreFromCompressedBackup(1, eventEditorIsReady);
                 } else {
@@ -943,7 +1055,7 @@ namespace DSPRE {
                 }
             }
 
-            if (LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(RomInfo.initialMoneyOverlayNumber)) {
+            if (DSUtils.legacyMode && LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(RomInfo.initialMoneyOverlayNumber)) {
                 if (!LegacyOverlayUtils.IsCompressed(RomInfo.initialMoneyOverlayNumber)) {
                     LegacyOverlayUtils.Compress(RomInfo.initialMoneyOverlayNumber);
                 }
@@ -952,11 +1064,23 @@ namespace DSPRE {
 
             Update();
 
-            DSUtils.RepackROMLegacy(saveRom.FileName);
+            if (DSUtils.legacyMode)
+            {
+                DSUtils.RepackROMLegacy(saveRom.FileName);
+            }
+            else 
+            {
+                DSUtils.RepackROM(saveRom.FileName);
+            }
 
-            if (RomInfo.gameFamily != GameFamilies.DP && RomInfo.gameFamily != GameFamilies.Plat) {
-                if (eventEditorIsReady) {
-                    if (LegacyOverlayUtils.IsCompressed(1)) {
+
+
+            if (RomInfo.gameFamily != GameFamilies.DP && RomInfo.gameFamily != GameFamilies.Plat)
+            {
+                if (eventEditorIsReady)
+                {
+                    if (LegacyOverlayUtils.IsCompressed(1))
+                    {
                         LegacyOverlayUtils.Decompress(1);
                     }
                 }
@@ -3703,7 +3827,7 @@ namespace DSPRE {
         }
         private void mapOpenGlControl_Click(object sender, EventArgs e) {
             if (radio2D.Checked && bldPlaceWithMouseCheckbox.Checked) {
-                PointF coordinates = mapRenderPanel.PointToClient(Cursor.Position);
+                PointF coordinates = mapRenderPanel.PointToClient(System.Windows.Forms.Cursor.Position);
                 PointF mouseTilePos = new PointF(coordinates.X / mapEditorSquareSize, coordinates.Y / mapEditorSquareSize);
 
                 if (buildingsListBox.SelectedIndex > -1) {
@@ -5206,7 +5330,7 @@ namespace DSPRE {
             }
         }
         private void eventPictureBox_MouseMove(object sender, MouseEventArgs e) {
-            Point coordinates = eventPictureBox.PointToClient(Cursor.Position);
+            Point coordinates = eventPictureBox.PointToClient(System.Windows.Forms.Cursor.Position);
             Point mouseTilePos = new Point(coordinates.X / (tileSize + 1), coordinates.Y / (tileSize + 1));
             Helpers.statusLabelMessage("Local: " + mouseTilePos.X + ", " + mouseTilePos.Y + "   |   " + "Global: " + (eventMatrixXUpDown.Value * MapFile.mapSize + mouseTilePos.X).ToString() + ", " + (eventMatrixYUpDown.Value * MapFile.mapSize + mouseTilePos.Y).ToString());
         }
@@ -5603,7 +5727,7 @@ namespace DSPRE {
                         break;
                     default:
                         // HGSS Overlay 1 must be decompressed in order to read the overworld table
-                        if (LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(1)) {
+                        if (DSUtils.legacyMode && LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(1)) {
                             if (LegacyOverlayUtils.IsCompressed(1)) {
                                 if (LegacyOverlayUtils.Decompress(1) < 0) {
                                     MessageBox.Show("Overlay 1 couldn't be decompressed.\nOverworld sprites in the Event Editor will be " +
@@ -5731,7 +5855,7 @@ namespace DSPRE {
         }
         private void eventMatrixPictureBox_Click(object sender, EventArgs e) {
             const int squareSize = 16;
-            Point coordinates = eventMatrixPictureBox.PointToClient(Cursor.Position);
+            Point coordinates = eventMatrixPictureBox.PointToClient(System.Windows.Forms.Cursor.Position);
             Point mouseTilePos = new Point(coordinates.X / squareSize, coordinates.Y / squareSize);
 
             MarkActiveCell(mouseTilePos.X, mouseTilePos.Y);
@@ -5974,7 +6098,7 @@ namespace DSPRE {
             DisplayEventMap(readGraphicsFromHeader: false);
         }
         private void eventPictureBox_Click(object sender, EventArgs e) {
-            Point coordinates = eventPictureBox.PointToClient(Cursor.Position);
+            Point coordinates = eventPictureBox.PointToClient(System.Windows.Forms.Cursor.Position);
             Point mouseTilePos = new Point(coordinates.X / (tileSize + 1), coordinates.Y / (tileSize + 1));
             MouseEventArgs mea = (MouseEventArgs)e;
 
@@ -7846,7 +7970,7 @@ namespace DSPRE {
             RomInfo.PrepareCameraData();
             cameraEditorDataGridView.Rows.Clear();
 
-            if (LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(RomInfo.cameraTblOverlayNumber)) {
+            if (DSUtils.legacyMode && LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(RomInfo.cameraTblOverlayNumber)) {
                 DialogResult d1 = MessageBox.Show("It is STRONGLY recommended to configure Overlay1 as uncompressed before proceeding.\n\n" +
                         "More details in the following dialog.\n\n" + "Do you want to know more?",
                         "Confirm to proceed", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -10166,8 +10290,19 @@ namespace DSPRE {
         private void overlayEditorToolStripMenuItem_Click(object sender, EventArgs e) {
             Helpers.statusLabelMessage("Setting up Overlay Editor...");
             Update();
-            OverlayEditor ovlEditor = new OverlayEditor();
-            ovlEditor.ShowDialog();
+            if (DSUtils.legacyMode)
+            {
+                OverlayEditor ovlEditor = new OverlayEditor();
+                ovlEditor.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("Overlay Editor is not available in the new structure.\n\n" +
+                    "Technical explanation: DSPRE now uses a tool called \"dsrom\" to unpack and build the ROM. " +
+                    "Unlike ndstool, dsrom automatically uncompresses all overlays when extracting and recompresses them when building the ROM.\n" +
+                    "This means you don't have to worry about overlay compression at all. Your overlays are already in an uncompressed state!", 
+                    "Overlay Editor Unavailable", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
 
             Helpers.statusLabelMessage();
             Update();
