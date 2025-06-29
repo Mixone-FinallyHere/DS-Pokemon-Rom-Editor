@@ -600,19 +600,6 @@ namespace DSPRE {
                 return;
             }
 
-            detectAndHandleWSL(openRom.FileName);
-
-            //SetupROMLanguageBin(openRom.FileName);
-            ///* Set ROM gameVersion and language */
-            //romInfo = new RomInfo(gameCode, openRom.FileName, useSuffix: true, legacyMode: DSUtils.legacyMode);
-            //Helpers.romInfo = new RomInfo(gameCode, openRom.FileName, useSuffix: true, legacyMode: DSUtils.legacyMode);
-
-            //if (string.IsNullOrWhiteSpace(RomInfo.romID) || string.IsNullOrWhiteSpace(RomInfo.fileName)) {
-            //    return;
-            //}
-
-            //CheckROMLanguage();
-
             string romDir = DSUtils.WorkDirPathFromFile(openRom.FileName);
 
             int userchoice = UnpackRomCheckUserChoice(romDir);
@@ -658,12 +645,6 @@ namespace DSPRE {
             }
             Update();
             OpenRomFromFolder(romDir);
-
-            //iconON = true;
-            //gameIcon.Refresh();  // Paint game icon
-            //Helpers.statusLabelMessage("Attempting to unpack NARCs from folder...");
-            //Update();
-            //ReadROMInitData();
         }
 
         private bool UnpackRom(string fileName, string romDir)
