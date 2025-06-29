@@ -108,6 +108,7 @@
     <Compile Include="DSUtils\ModelUtils.cs" />
     <Compile Include="DSUtils\NSBUtils.cs" />
     <Compile Include="DSUtils\LegacyOverlayUtils.cs" />
+    <Compile Include="DSUtils\OverlayUtils.cs" />
     <Compile Include="DVCalculator\DVCalc.cs">
       <SubType>Form</SubType>
     </Compile>

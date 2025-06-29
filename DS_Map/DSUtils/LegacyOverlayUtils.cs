@@ -18,42 +18,41 @@ namespace DSPRE {
             **/
             public static bool IsDefaultCompressed(int ovNumber)
             {
-                using (DSUtils.EasyReader f = new EasyReader(RomInfo.overlayTablePath, ovNumber * ENTRY_LEN + 31))
+                if (DSUtils.legacyMode)
                 {
-                    return (f.ReadByte() & 1) == 1;
+                    using (DSUtils.EasyReader f = new EasyReader(RomInfo.overlayTablePath, ovNumber * ENTRY_LEN + 31))
+                    {
+                        return (f.ReadByte() & 1) == 1;
+                    }
                 }
-
+                return OverlayUtils.OverlayTable.GetRecompress(ovNumber);
             }
+
             public static void SetDefaultCompressed(int ovNumber, bool compressStatus) {
                 DSUtils.WriteToFile(RomInfo.overlayTablePath, new byte[] { compressStatus ? (byte)1 : (byte)0 }, (uint)(ovNumber * ENTRY_LEN + 31)); //overlayNumber * size of entry + offset
             }
 
             public static uint GetRAMAddress(int ovNumber) {
-                using (DSUtils.EasyReader f = new EasyReader(RomInfo.overlayTablePath, ovNumber * ENTRY_LEN + 4)) {
-                    return f.ReadUInt32();
+                if (DSUtils.legacyMode)
+                {
+                    using (DSUtils.EasyReader f = new EasyReader(RomInfo.overlayTablePath, ovNumber * ENTRY_LEN + 4))
+                    {
+                        return f.ReadUInt32();
+                    }
                 }
+                return OverlayUtils.OverlayTable.GetRAMAddress(ovNumber);
+
             }
             public static uint GetUncompressedSize(int ovNumber) {
-                using (DSUtils.EasyReader f = new EasyReader(RomInfo.overlayTablePath, ovNumber * ENTRY_LEN + 8)) {
-                    return f.ReadUInt32();
-                }
-            }
-
-            // Read YAML overlay table
-            public static void ReadYamlOverlayTable() {
-                if (!File.Exists(RomInfo.overlayTablePath)) {
-                    MessageBox.Show($"Overlay table file {RomInfo.overlayTablePath} not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                using (StreamReader reader = new StreamReader(RomInfo.overlayTablePath))
+                if (DSUtils.legacyMode)
                 {
-                    var deserializer = new DeserializerBuilder()
-                        .WithNamingConvention(UnderscoredNamingConvention.Instance)
-                        .Build();
-
+                    using (DSUtils.EasyReader f = new EasyReader(RomInfo.overlayTablePath, ovNumber * ENTRY_LEN + 8))
+                    {
+                        return f.ReadUInt32();
+                    }
                 }
+                return OverlayUtils.OverlayTable.GetCodeSize(ovNumber) + OverlayUtils.OverlayTable.GetBSSSize(ovNumber);
             }
-
 
             /**
             * Gets number of overlays

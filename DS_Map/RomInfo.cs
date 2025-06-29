@@ -20,7 +20,7 @@ namespace DSPRE
     public class RomInfo
     {
         public static string folderSuffix = "_DSPRE_contents";
-        public static string dataFolderName = @"data";
+        public static string dataFolderName = @"files";
 
         public static string romID { get; private set; }
         public static string fileName { get; private set; }
@@ -190,7 +190,7 @@ namespace DSPRE
                 folderSuffix = "";
             }
 
-            string path = System.IO.Path.GetDirectoryName(romName) + "\\" + Path.GetFileNameWithoutExtension(romName) + folderSuffix + "\\";
+            string path = Path.GetDirectoryName(romName) + "\\" + Path.GetFileNameWithoutExtension(romName) + folderSuffix + "\\";
             path = Path.GetFullPath(path);
 
             SetRomDirs(path, legacyMode);
@@ -210,7 +210,7 @@ namespace DSPRE
             fileName = romName;
 
             LoadGameFamily();
-            LoadGameLanguage();
+            LoadGameLanguage();           
 
             SetNarcDirs();
             SetHeaderTableOffset();
@@ -632,7 +632,7 @@ namespace DSPRE
                     break;
 
                 case GameFamilies.HGSS:
-                    if (LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(1))
+                    if (DSUtils.legacyMode && LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(1))
                     {
                         if (LegacyOverlayUtils.IsCompressed(1))
                         {
@@ -1422,6 +1422,7 @@ namespace DSPRE
             if (!legacyMode)
             {
                 workDir = path;
+                dataFolderName = "files";
                 arm9Path = Path.Combine(workDir, @"arm9/arm9.bin");
                 arm7Path = Path.Combine(workDir, @"arm7/arm7.bin");
                 dataPath = Path.Combine(workDir, dataFolderName);
@@ -1437,6 +1438,7 @@ namespace DSPRE
             else
             {
                 workDir = path;
+                dataFolderName = "data";
                 arm9Path = Path.Combine(workDir, @"arm9.bin");
                 arm7Path = Path.Combine(workDir, @"arm7.bin");
                 overlayTablePath = Path.Combine(workDir, @"y9.bin");

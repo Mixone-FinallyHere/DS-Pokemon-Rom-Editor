@@ -12,11 +12,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamlDotNet.RepresentationModel;
 using static DSPRE.RomInfo;
 
 namespace DSPRE {
-    public static class DSUtils {
-
+    public static class DSUtils
+    {
         public const int ERR_OVERLAY_NOTFOUND = -1;
         public const int ERR_OVERLAY_ALREADY_UNCOMPRESSED = -2;
 
@@ -106,6 +107,12 @@ namespace DSPRE {
             repack.WaitForExit();
         }
 
+        public static string WorkDirPathFromFile(string filePath)
+        {
+            filePath = Path.GetFullPath(filePath);
+            return Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath) + "_DSPRE_contents");
+        }
+
         public static void RepackROM(string ndsFileName)
         {
 
@@ -157,11 +164,21 @@ namespace DSPRE {
             return true;
         }
 
-        public static bool UnpackROM(string ndsFileName)
+        public static bool UnpackROM(string ndsFileName, string customFolderPath = "")
         {
             string dsromPath = Path.Combine(Application.StartupPath, "Tools", "dsrom.exe");
             string ndsFileAbs = Path.GetFullPath(ndsFileName);
-            string workDirAbs = Path.GetFullPath(RomInfo.workDir);
+            string workDirAbs = "";
+
+            if (!customFolderPath.Equals(string.Empty))
+            {
+                // If a custom folder path is provided, use it instead of the default work directory
+                workDirAbs = Path.GetFullPath(customFolderPath);
+            }
+            else
+            {
+                workDirAbs = Path.GetFullPath(RomInfo.workDir);
+            }
 
             workDirAbs = workDirAbs.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
@@ -186,6 +203,9 @@ namespace DSPRE {
                     "Couldn't unpack ROM", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
+
+            Console.WriteLine("dsrom.exe returned: " + unpack.ExitCode);
+
             return true;
         }
 
@@ -210,6 +230,75 @@ namespace DSPRE {
 
         }
 
+        public static bool IsROMPackedByNdstool(string filePath)
+        {
+            if (!File.Exists(filePath))
+                return false;
+
+            // Check if file is packed by ndstool via file size
+            FileInfo fileInfo = new FileInfo(filePath);
+
+            // Correctly packed ROMs have file sizes that are powers of two
+            // Due to ndstool's trimming, the file size will likely not be a power of two
+            // We therefore check if the file size is a power of two and assume that if it is not, it is packed by ndstool
+            return !((fileInfo.Length & (fileInfo.Length - 1)) == 0);
+        }
+
+        public static bool ResetPathOrder(string folderPath)
+        {
+            if (!Directory.Exists(folderPath))
+                return false;
+            // Reset the path order by writing a single slash to the path_order.txt file
+            string pathOrderFile = Path.Combine(folderPath, "path_order.txt");
+            try
+            {
+                File.WriteAllText(pathOrderFile, "/");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to reset path order: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool MarkARM9Recompression(string folderPath)
+        {
+            try
+            {
+                string arm9YamlPath = Path.Combine(folderPath, "arm9/arm9.yaml");
+                StreamReader reader = new StreamReader(arm9YamlPath);
+                YamlStream yamlStream = new YamlStream();
+                yamlStream.Load(reader);
+                reader.Close();
+
+                YamlMappingNode rootNode = (YamlMappingNode)yamlStream.Documents[0].RootNode;
+
+                if (rootNode.Children.ContainsKey("compressed"))
+                {
+                    rootNode.Children["compressed"] = new YamlScalarNode("true");
+                    // Save the changes back to the YAML file
+                    using (StreamWriter writer = new StreamWriter(arm9YamlPath))
+                    {
+                        yamlStream.Save(writer, false);
+                        writer.Close();
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to mark ARM9 for recompression: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            return true;
+        }
+
         public static bool ConvertLegacyROMFolder(string folderPath)
         {
             if (!Directory.Exists(folderPath))
@@ -224,10 +313,18 @@ namespace DSPRE {
                     Narc.FromFolder(kvp.Value.unpackedDir).Save(kvp.Value.packedDir); // Make new NARC from folder
                 }
             }
+
+            // If there is a compression mismatch conversion will fail so this is required
+            if (ARM9.CheckCompressionMark())
+            {
+                ARM9.WriteBytes(new byte[4] { 0, 0, 0, 0 }, (uint)(RomInfo.gameFamily == GameFamilies.DP ? 0xB7C : 0xBB4));
+            }
             
-            var hashcode = DateTime.Now.GetHashCode();
+            uint hashcode = (uint)DateTime.Now.GetHashCode();
             string parentDir = Directory.GetParent(folderPath).FullName;
             string tempRomPath = Path.Combine(parentDir, "temp_" + hashcode + ".nds");
+            string backupFolderPath = Path.Combine(parentDir, "backup_" + hashcode);
+            string newUnpackedFolderPath = Path.Combine(parentDir, "temp_" + hashcode);
 
             // Pack the ROM using ndstool
             RepackROMLegacy(tempRomPath);
@@ -238,7 +335,7 @@ namespace DSPRE {
             }
 
             // Unpack the new ROM
-            if (!UnpackROM(tempRomPath))
+            if (!UnpackROM(tempRomPath, newUnpackedFolderPath))
             {
                 return false;
             }
@@ -254,8 +351,12 @@ namespace DSPRE {
                 return false;
             }
 
+            if (!Directory.Exists(newUnpackedFolderPath))
+            {
+                return false;
+            }
+
             // Rename old folder to backup
-            string backupFolderPath = Path.Combine(parentDir, "backup_" + hashcode);
             try
             {
                 Directory.Move(folderPath, backupFolderPath);
@@ -267,7 +368,6 @@ namespace DSPRE {
             }
 
             // Move the new unpacked folder to the original folder path
-            string newUnpackedFolderPath = Path.Combine(parentDir, Path.GetDirectoryName(folderPath));
             try
             {
                 Directory.Move(newUnpackedFolderPath, folderPath);
@@ -275,6 +375,18 @@ namespace DSPRE {
             catch (Exception ex)
             {
                 MessageBox.Show("Failed to move new unpacked folder: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            // Reset the path order
+            if (!ResetPathOrder(folderPath))
+            {
+                return false;
+            }
+
+            // Mark ARM9 for recompression
+            if (!MarkARM9Recompression(folderPath)) 
+            {
                 return false;
             }
 
