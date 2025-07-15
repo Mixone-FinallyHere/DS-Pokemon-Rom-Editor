@@ -147,6 +147,8 @@ namespace DSPRE {
                 + " -y " + '"' + RomInfo.workDir + "overlay" + '"'
                 + " -t " + '"' + RomInfo.workDir + "banner.bin" + '"'
                 + " -h " + '"' + RomInfo.workDir + "header.bin" + '"';
+
+            AppLogger.Debug("Unpacking ROM with command: " + unpack.StartInfo.FileName + " " + unpack.StartInfo.Arguments);
             Application.DoEvents();
             unpack.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             unpack.StartInfo.CreateNoWindow = true;
@@ -157,10 +159,14 @@ namespace DSPRE {
             }
             catch (System.ComponentModel.Win32Exception)
             {
+                AppLogger.Error("Failed to call ndstool.exe");
                 MessageBox.Show("Failed to call ndstool.exe" + Environment.NewLine + "Make sure DSPRE's Tools folder is intact.",
                     "Couldn't unpack ROM", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
+
+            AppLogger.Debug("ndstool.exe returned: " + unpack.ExitCode);
+
             return true;
         }
 
@@ -189,7 +195,7 @@ namespace DSPRE {
             unpack.StartInfo.CreateNoWindow = true;
             unpack.StartInfo.UseShellExecute = false;
 
-            Console.WriteLine("Unpacking ROM with command: " + unpack.StartInfo.FileName + " " + unpack.StartInfo.Arguments);
+            AppLogger.Debug("Unpacking ROM with command: " + unpack.StartInfo.FileName + " " + unpack.StartInfo.Arguments);
             Application.DoEvents();
 
             try
@@ -199,12 +205,13 @@ namespace DSPRE {
             }
             catch (System.ComponentModel.Win32Exception)
             {
+                AppLogger.Error("Failed to call dsrom.exe");
                 MessageBox.Show("Failed to call dsrom.exe" + Environment.NewLine + "Make sure DSPRE's Tools folder is intact.",
                     "Couldn't unpack ROM", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
 
-            Console.WriteLine("dsrom.exe returned: " + unpack.ExitCode);
+            AppLogger.Debug("dsrom.exe returned: " + unpack.ExitCode);
 
             return true;
         }
@@ -256,6 +263,7 @@ namespace DSPRE {
             }
             catch (Exception ex)
             {
+                AppLogger.Error("Failed to reset path order: " + ex.Message);
                 MessageBox.Show("Failed to reset path order: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
@@ -292,6 +300,7 @@ namespace DSPRE {
             }
             catch (Exception ex)
             {
+                AppLogger.Error("Failed to mark ARM9 for recompression: " + ex.Message);
                 MessageBox.Show("Failed to mark ARM9 for recompression: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }

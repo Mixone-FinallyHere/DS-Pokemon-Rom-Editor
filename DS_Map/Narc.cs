@@ -41,7 +41,7 @@ namespace NarcAPI {
             narc.ReadElements(br);
             br.Close();
 
-            Console.WriteLine($"Loaded NARC with {narc.Elements.Length} elements from file: {filePath}");
+            AppLogger.Debug($"Loaded NARC \"{narc.Name}\" with {narc.Elements.Length} elements from file: {filePath}");
 
             return narc;
         }
@@ -67,7 +67,7 @@ namespace NarcAPI {
                 fs.Close();
             });
 
-            Console.WriteLine($"Loaded NARC with {numberOfElements} elements from folder: {dirPath}");
+            AppLogger.Debug($"Loaded NARC \"{narc.Name}\" with {numberOfElements} elements from folder: {dirPath}");
 
             return narc;
         }
@@ -135,7 +135,7 @@ namespace NarcAPI {
             bw.Seek((int)fileImageSizeOffset, SeekOrigin.Begin);         // seeks back to FIMG size
             bw.Write((UInt32)curOffset + FILE_IMAGE_HEADER_SIZE);   // FIMG size == Last end offset + File image header size
 
-            Console.WriteLine($"Saved NARC with {Elements.Length} elements and filesize {fileSize} Bytes to file: {filePath}");
+            AppLogger.Debug($"Saved NARC \"{Name}\" with {Elements.Length} elements and filesize {fileSize} Bytes to file: {filePath}");
 
             bw.Close();
         }
@@ -154,13 +154,13 @@ namespace NarcAPI {
                     try {
                         if (dirPath.IndexOf(RomInfo.folderSuffix, StringComparison.CurrentCultureIgnoreCase) >= 0) {
                             Directory.Delete(dirPath, true);
-                            Console.WriteLine("Deleted DSPRE-related folder \"" + dirPath + "\" without user confirmation.");
+                            AppLogger.Debug("Deleted DSPRE-related folder \"" + dirPath + "\" without user confirmation.");
                         } else {
                             DialogResult d = MessageBox.Show("Directory \"" + dirPath + "\" already exists and is not empty.\n" +
                                 "Do you want to delete its contents?", "Directory not empty", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                             if (d.Equals(DialogResult.Yes)) {
                                 Directory.Delete(dirPath, true);
-                                Console.WriteLine("Deleted non-DSPRE-related folder \"" + dirPath + "\" after user confirmation.");
+                                AppLogger.Debug("Deleted non-DSPRE-related folder \"" + dirPath + "\" after user confirmation.");
                             }
                         }
                     } catch (IOException) {
@@ -173,7 +173,7 @@ namespace NarcAPI {
             if (!Directory.Exists(dirPath)) {
                 try {
                     Directory.CreateDirectory(dirPath);
-                    Console.WriteLine("Created NARC folder \"" + dirPath + "\".");
+                    AppLogger.Debug("Created NARC folder \"" + dirPath + "\".");
                 } catch (IOException) {
                     MessageBox.Show("NARC has not been extracted.\nCan't create directory: \n" + dirPath + "\nThis might be a temporary issue.\nMake sure no other process is using it and try again.", "Creation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
@@ -191,7 +191,7 @@ namespace NarcAPI {
                 }
             });
 
-            Console.WriteLine($"Extracted NARC with {Elements.Length} elements to folder: {dirPath}");
+            AppLogger.Debug($"Extracted NARC \"{Name}\" with {Elements.Length} elements to folder: {dirPath}");
         }
 
         public void Free() { // Libera todos los recursos de memoria asociados (cierra los streams)
