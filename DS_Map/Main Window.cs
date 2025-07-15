@@ -22,7 +22,6 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using Tao.OpenGl;
-using YamlDotNet.Core;
 using YamlDotNet.RepresentationModel;
 using static DSPRE.ROMFiles.SpeciesFile;
 using static DSPRE.RomInfo;
@@ -613,7 +612,7 @@ namespace DSPRE {
 
             CheckROMLanguage();
 
-            int userchoice = UnpackRomCheckUserChoice();
+            int userchoice = UnpackRomCheckUserChoice(romDir);
             switch (userchoice) {
                 case -1:
                     if (!UnpackRom(openRom.FileName, romDir)) {
@@ -1003,8 +1002,6 @@ namespace DSPRE {
             {
                 this.Text += " (Legacy Mode)";
             }
-
-        }
 
         }
 
