@@ -1,13 +1,14 @@
+using DSPRE.MessageEnc;
+using DSPRE.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Resources;
+using System.Linq;
 using System.Reflection;
+using System.Resources;
+using System.Text;
 using System.Windows.Forms;
-using DSPRE.Resources;
 using static DSPRE.RomInfo;
-using DSPRE.MessageEnc;
 
 namespace DSPRE.ROMFiles
 {
@@ -25,13 +26,31 @@ namespace DSPRE.ROMFiles
 
         #region Constructors (1)
 
-        public TextArchive(FileStream messageStream, List<string> msg, bool discardLines = false)
+        public TextArchive(int ID, List<string> msg = null, bool discardLines = false)
         {
-            messages = msg ?? EncryptText.ReadMessageArchive(messageStream, discardLines);
-        }
+            if (msg != null)
+            {
+                messages = msg;
+                return;
+            }
 
-        public TextArchive(int ID, List<string> msg = null, bool discardLines = false) : this(new FileStream($"{gameDirs[DirNames.textArchives].unpackedDir}\\{ID:D4}", FileMode.Open), msg, discardLines)
-        {
+            string baseDir = gameDirs[DirNames.textArchives].unpackedDir;
+            string expandedPath = Path.Combine(baseDir, "expanded", $"{ID:D4}.txt");
+
+            if (!File.Exists(expandedPath))
+            {
+                throw new FileNotFoundException($"Expanded text file not found: {expandedPath}");
+            }
+
+            // Read lines and keep only every other line (e.g., even indices: 0, 2, 4, ...)
+            messages = File.ReadLines(expandedPath)
+                          .Where((line, index) => index % 2 == 0)
+                          .ToList();
+
+            foreach (string line in messages)
+            {
+                Console.WriteLine(line);
+            }
         }
 
         #endregion Constructors (1)

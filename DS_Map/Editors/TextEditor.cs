@@ -15,27 +15,137 @@ using static DSPRE.RomInfo;
 using static MKDS_Course_Editor.NSBTP.NSBTP.NSBTP_File;
 using static Tao.Platform.Windows.Winmm;
 using Path = System.IO.Path;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace DSPRE.Editors
 {
     public partial class TextEditor : UserControl
     {
-        MainProgram _parent;
-        public bool textEditorIsReady { get; set; } = false;
+
         public TextEditor()
         {
             InitializeComponent();
             this.textSearchResultsListBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.textSearchResultsListBox_GoToEntryResult);
-
+               
         }
 
         #region Text Editor
 
         #region Variables
         public TextArchive currentTextArchive;
-        #endregion
-        
 
+        MainProgram _parent;
+        public bool textEditorIsReady { get; set; } = false;
+
+        private Dictionary<string, Color> highlightPatterns = new Dictionary<string, Color>
+        {
+            {"{STRVAR[^}]*}", Color.Blue},  
+            {"{YESNO[^}]*}", Color.Green},  
+            {"{PAUSE[^}]*}", Color.Green},  
+            {"{WAIT[^}]*}", Color.Green},  
+            {"{CURSOR[^}]*}", Color.Green},
+            {"{ALN[^}]*}", Color.Green},
+            {"{UNK[^}]*}", Color.Red},
+            {"{COLOR[^}]*}", Color.Gray},
+            {"{SIZE[^}]*}", Color.Green}
+        };
+        #endregion
+
+        #region syntax highlighting
+        private string ApplyHighlightMarkers(string text)
+        {
+            string markedText = text;
+            foreach (var pattern in highlightPatterns)
+            {
+                markedText = System.Text.RegularExpressions.Regex.Replace(markedText, pattern.Key, match =>
+                    $"[COLOR={pattern.Value.Name.ToLower()}]{match.Value}[/COLOR]");
+            }
+            return markedText;
+        }
+
+        private void textEditorDataGridView_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex != 0) return; // Only paint the first column (text)
+
+            // Paint background and borders, exclude default content
+            e.Paint(e.CellBounds, DataGridViewPaintParts.Background | DataGridViewPaintParts.Border | DataGridViewPaintParts.Focus | DataGridViewPaintParts.SelectionBackground);
+
+            // Clear the cell area
+            using (SolidBrush clearBrush = new SolidBrush(e.CellStyle.BackColor))
+            {
+                e.Graphics.FillRectangle(clearBrush, e.CellBounds);
+            }
+
+            string cellText = e.FormattedValue?.ToString() ?? "";
+            Rectangle rect = e.CellBounds;
+            int x = rect.X + 2;
+            int y = rect.Y + 2;
+
+            using (Brush brush = new SolidBrush(e.CellStyle.ForeColor))
+            using (StringFormat sf = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Near })
+            {
+                int pos = 0;
+                while (pos < cellText.Length)
+                {
+                    int colorStart = cellText.IndexOf("[COLOR=", pos, StringComparison.Ordinal);
+                    if (colorStart < 0)
+                    {
+                        // No more color tags, draw remaining text
+                        e.Graphics.DrawString(cellText.Substring(pos), e.CellStyle.Font, brush, x, y, sf);
+                        break;
+                    }
+
+                    // Draw text before color tag
+                    if (colorStart > pos)
+                    {
+                        e.Graphics.DrawString(cellText.Substring(pos, colorStart - pos), e.CellStyle.Font, brush, x, y, sf);
+                        x += (int)e.Graphics.MeasureString(cellText.Substring(pos, colorStart - pos), e.CellStyle.Font).Width;
+                    }
+
+                    // Parse color tag
+                    int colorEnd = cellText.IndexOf("]", colorStart);
+                    if (colorEnd < 0) break;
+                    string colorName = cellText.Substring(colorStart + 7, colorEnd - colorStart - 7).ToLower();
+                    Color color = Color.FromName(colorName) == Color.Empty ? e.CellStyle.ForeColor : Color.FromName(colorName);
+
+                    // Find end of colored text
+                    int textEnd = cellText.IndexOf("[/COLOR]", colorEnd);
+                    if (textEnd < 0) break;
+                    string coloredText = cellText.Substring(colorEnd + 1, textEnd - colorEnd - 1);
+
+                    // Draw colored text
+                    using (Brush colorBrush = new SolidBrush(color))
+                    {
+                        e.Graphics.DrawString(coloredText, e.CellStyle.Font, colorBrush, x, y, sf);
+                        x += (int)e.Graphics.MeasureString(coloredText, e.CellStyle.Font).Width;
+                    }
+
+                    pos = textEnd + 8; // Skip [/COLOR]
+                }
+            }
+
+            e.Handled = true; // Prevent default painting
+        }
+
+        private void textEditorDataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (Helpers.HandlersDisabled || e.RowIndex < 0 || e.ColumnIndex < 0) return;
+
+            try
+            {
+                string originalText = textEditorDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString() ?? "";
+                string cleanedText = System.Text.RegularExpressions.Regex.Replace(originalText, @"\[COLOR=[a-z]+\](.*?)\[/COLOR\]", "$1");
+                currentTextArchive.messages[e.RowIndex] = cleanedText;
+                textEditorDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = ApplyHighlightMarkers(cleanedText); // Reapply markers
+            }
+            catch (NullReferenceException)
+            {
+                currentTextArchive.messages[e.RowIndex] = "";
+                textEditorDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = ApplyHighlightMarkers("");
+            }
+        }
+
+        #endregion
         private void addTextArchiveButton_Click(object sender, EventArgs e)
         {
             /* Add copy of message 0 to text archives folder */
@@ -416,8 +526,8 @@ namespace DSPRE.Editors
         private void UpdateTextEditorFileView(bool readAgain)
         {
             Helpers.DisableHandlers();
-
             textEditorDataGridView.Rows.Clear();
+
             if (currentTextArchive is null || readAgain)
             {
                 currentTextArchive = new TextArchive(selectTextFileComboBox.SelectedIndex);
@@ -425,7 +535,7 @@ namespace DSPRE.Editors
 
             foreach (string msg in currentTextArchive.messages)
             {
-                textEditorDataGridView.Rows.Add(msg);
+                textEditorDataGridView.Rows.Add(ApplyHighlightMarkers(msg)); // Apply markers before adding
             }
 
             if (hexRadiobutton.Checked)
@@ -437,10 +547,15 @@ namespace DSPRE.Editors
                 PrintTextEditorLinesDecimal();
             }
 
-            Helpers.EnableHandlers();
+            // Ensure single event subscription
+            textEditorDataGridView.CellPainting -= textEditorDataGridView_CellPainting;
+            textEditorDataGridView.CellPainting += textEditorDataGridView_CellPainting;
+            textEditorDataGridView.Invalidate(); // Force repaint
 
+            Helpers.EnableHandlers();
             textEditorDataGridView_CurrentCellChanged(textEditorDataGridView, null);
         }
+
         private void PrintTextEditorLinesHex()
         {
             int final = Math.Min(textEditorDataGridView.Rows.Count, currentTextArchive.messages.Count);
@@ -457,24 +572,6 @@ namespace DSPRE.Editors
             for (int i = 0; i < final; i++)
             {
                 textEditorDataGridView.Rows[i].HeaderCell.Value = i.ToString();
-            }
-        }
-        private void textEditorDataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-        {
-            if (Helpers.HandlersDisabled)
-            {
-                return;
-            }
-            if (e.RowIndex > -1 && e.ColumnIndex > -1)
-            {
-                try
-                {
-                    currentTextArchive.messages[e.RowIndex] = textEditorDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
-                }
-                catch (NullReferenceException)
-                {
-                    currentTextArchive.messages[e.RowIndex] = "";
-                }
             }
         }
         private void textEditorDataGridView_CurrentCellChanged(object sender, EventArgs e)
