@@ -3,14 +3,18 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Shapes;
 using static DSPRE.RomInfo;
+using static MKDS_Course_Editor.NSBTP.NSBTP.NSBTP_File;
 using static Tao.Platform.Windows.Winmm;
+using Path = System.IO.Path;
 
 namespace DSPRE.Editors
 {
@@ -577,6 +581,8 @@ namespace DSPRE.Editors
             int textCount = parent.romInfo.GetTextArchivesCount();
             for (int i = 0; i < textCount; i++)
             {
+                Helpers.statusLabelMessage($"Parsing text file {i} of {textCount}");
+                ExpandTextFile(i);
                 selectTextFileComboBox.Items.Add("Text Archive " + i);
             }
 
@@ -587,5 +593,53 @@ namespace DSPRE.Editors
             selectTextFileComboBox.SelectedIndex = 0;
             Helpers.statusLabelMessage();
         }
+
+        public void ExpandTextFile(int ID)
+        {
+            string baseDir = RomInfo.gameDirs[DirNames.textArchives].unpackedDir;
+            string expandedDir = Path.Combine(baseDir, "expanded");
+            string path = Path.Combine(baseDir, ID.ToString("D4"));
+            string expandedPath = Path.Combine(expandedDir, ID.ToString("D4") + ".txt");
+            string toolPath = Path.Combine(Application.StartupPath, "Tools", "msgenc.exe");
+            string charmapPath = Path.Combine("Tools", "charmap.txt");
+
+            if (!Directory.Exists(expandedDir))
+            {
+                try
+                {
+                    Directory.CreateDirectory(expandedDir);
+                    Console.WriteLine("Created expanded folder \"" + expandedDir + "\".");
+                }
+                catch (IOException)
+                {
+                    MessageBox.Show("Text File has not been extracted.\nCan't create directory: \n" + expandedDir + "\nThis might be a temporary issue.\nMake sure no other process is using it and try again.", "Creation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            if (File.Exists(expandedPath) && File.GetLastWriteTimeUtc(expandedPath) >= File.GetLastWriteTimeUtc(path))
+            {
+                Console.WriteLine($"Skipped expanding {ID:D4} — already up to date.");
+                return;
+            }
+
+            Process expand = new Process();
+            expand.StartInfo.FileName = toolPath;
+            expand.StartInfo.Arguments = $"-d -c \"{charmapPath}\" \"{path}\" \"{expandedPath}\"";
+            expand.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            expand.StartInfo.CreateNoWindow = false;
+
+            try
+            {
+                expand.Start();
+                expand.WaitForExit();
+                Console.WriteLine($"Expanded {ID:D4}");
+            }
+            catch (Win32Exception ex)
+            {
+                MessageBox.Show($"Failed to start msgenc.exe: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
     }
 }
