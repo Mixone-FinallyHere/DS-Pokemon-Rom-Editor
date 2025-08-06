@@ -58,36 +58,12 @@ namespace DSPRE {
 
             currentFile = new EncounterFileHGSS(selectEncounterComboBox.SelectedIndex);
 
-            /* Once the GUI overhaul is complete - i.e.: once everything is a TableLayoutPanel, 
-             * this can be simplified a lot. */
-            foreach (TabPage page in mainTabControl.TabPages) {
-                foreach (Control g in page.Controls) {
-                    if (g != null && g is GroupBox) {
-                        foreach (Control c in g.Controls) {
-                            if (c != null) {
-                                if (c is InputComboBox) {
-                                    (c as InputComboBox).DataSource = new BindingSource(names, string.Empty);
-                                } else if (c is TableLayoutPanel) {
-                                    TableLayoutPanel tbl = (c as TableLayoutPanel);
-
-                                    foreach (Control tblC in tbl.Controls) {
-                                        if (c != null) {
-                                            if (tblC is InputComboBox) {
-                                                (tblC as InputComboBox).DataSource = new BindingSource(names, string.Empty);
-                                            }
-                                        }
-                                    }
-
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            AddPokemonNamesBinding(names);
+            SetupControls();
 
             Helpers.EnableHandlers();
 
-            SetupControls();
+            
         }
 
         public string GetDSPREVersion() {
@@ -177,7 +153,7 @@ namespace DSPRE {
             /* Setup swarm encounters controls */
             grassSwarmComboBox.SelectedIndex = currentFile.swarmPokemon[0];
             surfSwarmComboBox.SelectedIndex = currentFile.swarmPokemon[1];
-            goodRodSwarmComboBox.SelectedIndex = currentFile.swarmPokemon[2];
+            nightFishingComboBox.SelectedIndex = currentFile.swarmPokemon[2];
             superRodSwarmComboBox.SelectedIndex = currentFile.swarmPokemon[3];
 
             /* Water encounters controls setup */
@@ -266,6 +242,96 @@ namespace DSPRE {
 
             Helpers.EnableHandlers();
         }
+
+        private void AddPokemonNamesBinding(string[] names)
+        {
+            /*Grass encounters*/
+            morningTwentyFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            morningTwentySecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            morningTenFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            morningTenSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            morningTenThirdComboBox.DataSource = new BindingSource(names, string.Empty);
+            morningTenFourthComboBox.DataSource = new BindingSource(names, string.Empty);
+            morningFiveFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            morningFiveSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            morningFourFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            morningFourSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            morningOneFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            morningOneSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+
+            dayTwentyFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            dayTwentySecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            dayTenFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            dayTenSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            dayTenThirdComboBox.DataSource = new BindingSource(names, string.Empty);
+            dayTenFourthComboBox.DataSource = new BindingSource(names, string.Empty);
+            dayFiveFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            dayFiveSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            dayFourFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            dayFourSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            dayOneFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            dayOneSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+
+            nightTwentyFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            nightTwentySecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            nightTenFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            nightTenSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            nightTenThirdComboBox.DataSource = new BindingSource(names, string.Empty);
+            nightTenFourthComboBox.DataSource = new BindingSource(names, string.Empty);
+            nightFiveFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            nightFiveSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            nightFourFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            nightFourSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            nightOneFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            nightOneSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+
+            /*Radio sound encounters*/
+            hoennFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            hoennSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            sinnohFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            sinnohSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+
+            /*Rock smash encounters*/
+            rockSmashNinetyComboBox.DataSource = new BindingSource(names, string.Empty);
+            rockSmashTenComboBox.DataSource = new BindingSource(names, string.Empty);
+
+            /*Water encounters*/
+            surfSixtyComboBox.DataSource = new BindingSource(names, string.Empty);
+            surfThirtyComboBox.DataSource = new BindingSource(names, string.Empty);
+            surfFiveComboBox.DataSource = new BindingSource(names, string.Empty);
+            surfFourComboBox.DataSource = new BindingSource(names, string.Empty);
+            surfOneComboBox.DataSource = new BindingSource(names, string.Empty);
+
+            oldRodSixtyComboBox.DataSource = new BindingSource(names, string.Empty);
+            oldRodThirtyComboBox.DataSource = new BindingSource(names, string.Empty);
+            oldRodFiveComboBox.DataSource = new BindingSource(names, string.Empty);
+            oldRodFourComboBox.DataSource = new BindingSource(names, string.Empty);
+            oldRodOneComboBox.DataSource = new BindingSource(names, string.Empty);
+
+            goodRodFirstFortyComboBox.DataSource = new BindingSource(names, string.Empty);
+            goodRodSecondFortyComboBox.DataSource = new BindingSource(names, string.Empty);
+            goodRodFifteenComboBox.DataSource = new BindingSource(names, string.Empty);
+            goodRodFourComboBox.DataSource = new BindingSource(names, string.Empty);
+            goodRodOneComboBox.DataSource = new BindingSource(names, string.Empty);
+
+            superRodFirstFortyComboBox.DataSource = new BindingSource(names, string.Empty);
+            superRodSecondFortyComboBox.DataSource = new BindingSource(names, string.Empty);
+            superRodFifteenComboBox.DataSource = new BindingSource(names, string.Empty);
+            superRodFourComboBox.DataSource = new BindingSource(names, string.Empty);
+            superRodOneComboBox.DataSource = new BindingSource(names, string.Empty);
+
+            /*Swarm encounters*/
+            grassSwarmComboBox.DataSource = new BindingSource(names, string.Empty);
+            surfSwarmComboBox.DataSource = new BindingSource(names, string.Empty);
+            superRodSwarmComboBox.DataSource = new BindingSource(names, string.Empty);
+
+            nightFishingComboBox.DataSource = new BindingSource(names, string.Empty);
+        }
+
+        private void AddTooltips() 
+        { 
+        }
+
         private void exportEncounterFileButton_Click(object sender, EventArgs e) {
             currentFile.SaveToFileExplorePath("Encounter File " + selectEncounterComboBox.SelectedIndex);
         }
@@ -712,7 +778,7 @@ namespace DSPRE {
         	if (Helpers.HandlersDisabled) { 
                 return; 
             }
-            currentFile.swarmPokemon[2] = (ushort)goodRodSwarmComboBox.SelectedIndex;
+            currentFile.swarmPokemon[2] = (ushort)nightFishingComboBox.SelectedIndex;
         }
         private void superRodSwarmComboBox_SelectedIndexChanged(object sender, EventArgs e) {
         	if (Helpers.HandlersDisabled) { 

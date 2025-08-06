@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WildEditorHGSS));
             this.removeEncounterFileButton = new System.Windows.Forms.Button();
             this.addEncounterFileButton = new System.Windows.Forms.Button();
@@ -62,12 +63,7 @@
             this.label9 = new System.Windows.Forms.Label();
             this.hoennFirstComboBox = new DSPRE.InputComboBox();
             this.swarmsGroupBox = new System.Windows.Forms.GroupBox();
-            this.superRodSwarmComboBox = new DSPRE.InputComboBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.surfSwarmComboBox = new DSPRE.InputComboBox();
-            this.label6 = new System.Windows.Forms.Label();
             this.grassSwarmComboBox = new DSPRE.InputComboBox();
-            this.label8 = new System.Windows.Forms.Label();
             this.walkingGroupBox = new System.Windows.Forms.GroupBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -136,6 +132,11 @@
             this.label90 = new System.Windows.Forms.Label();
             this.morningTwentyFirstComboBox = new DSPRE.InputComboBox();
             this.waterTabPage = new System.Windows.Forms.TabPage();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.nightFishingGroupBox = new System.Windows.Forms.GroupBox();
+            this.nightFishingComboBox = new DSPRE.InputComboBox();
             this.surfPicture = new System.Windows.Forms.PictureBox();
             this.pictureBox7 = new System.Windows.Forms.PictureBox();
             this.pictureBox6 = new System.Windows.Forms.PictureBox();
@@ -241,13 +242,9 @@
             this.label66 = new System.Windows.Forms.Label();
             this.surfSixtyComboBox = new DSPRE.InputComboBox();
             this.repairAllButton = new System.Windows.Forms.Button();
-            this.nightFishingGroupBox = new System.Windows.Forms.GroupBox();
-            this.goodRodSwarmComboBox = new DSPRE.InputComboBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.inputComboBox1 = new DSPRE.InputComboBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.inputComboBox2 = new DSPRE.InputComboBox();
-            this.label18 = new System.Windows.Forms.Label();
+            this.surfSwarmComboBox = new DSPRE.InputComboBox();
+            this.superRodSwarmComboBox = new DSPRE.InputComboBox();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.mainTabControl.SuspendLayout();
             this.grassGroundTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
@@ -276,6 +273,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.twentySecondLevelUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.twentyFirstLevelUpDown)).BeginInit();
             this.waterTabPage.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.nightFishingGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.surfPicture)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox7)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).BeginInit();
@@ -328,8 +327,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.surfThirtyMinLevelUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.surfSixtyMaxLevelUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.surfSixtyMinLevelUpDown)).BeginInit();
-            this.nightFishingGroupBox.SuspendLayout();
-            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // removeEncounterFileButton
@@ -433,7 +430,6 @@
             this.grassGroundTabPage.Controls.Add(this.pictureBox2);
             this.grassGroundTabPage.Controls.Add(this.rockSmashGroupBox);
             this.grassGroundTabPage.Controls.Add(this.radioMusicComboBox);
-            this.grassGroundTabPage.Controls.Add(this.swarmsGroupBox);
             this.grassGroundTabPage.Controls.Add(this.walkingGroupBox);
             this.grassGroundTabPage.Location = new System.Drawing.Point(4, 22);
             this.grassGroundTabPage.Name = "grassGroundTabPage";
@@ -486,7 +482,7 @@
             this.rockSmashGroupBox.Controls.Add(this.rockSmashTenComboBox);
             this.rockSmashGroupBox.Location = new System.Drawing.Point(554, 227);
             this.rockSmashGroupBox.Name = "rockSmashGroupBox";
-            this.rockSmashGroupBox.Size = new System.Drawing.Size(232, 212);
+            this.rockSmashGroupBox.Size = new System.Drawing.Size(232, 236);
             this.rockSmashGroupBox.TabIndex = 165;
             this.rockSmashGroupBox.TabStop = false;
             this.rockSmashGroupBox.Text = "Rock Smash";
@@ -685,81 +681,24 @@
             // 
             // swarmsGroupBox
             // 
-            this.swarmsGroupBox.Controls.Add(this.superRodSwarmComboBox);
-            this.swarmsGroupBox.Controls.Add(this.label5);
-            this.swarmsGroupBox.Controls.Add(this.surfSwarmComboBox);
-            this.swarmsGroupBox.Controls.Add(this.label6);
             this.swarmsGroupBox.Controls.Add(this.grassSwarmComboBox);
-            this.swarmsGroupBox.Controls.Add(this.label8);
-            this.swarmsGroupBox.Location = new System.Drawing.Point(12, 445);
+            this.swarmsGroupBox.Location = new System.Drawing.Point(30, 390);
             this.swarmsGroupBox.Name = "swarmsGroupBox";
-            this.swarmsGroupBox.Size = new System.Drawing.Size(536, 51);
+            this.swarmsGroupBox.Size = new System.Drawing.Size(136, 51);
             this.swarmsGroupBox.TabIndex = 163;
             this.swarmsGroupBox.TabStop = false;
             this.swarmsGroupBox.Text = "Swarm";
-            // 
-            // superRodSwarmComboBox
-            // 
-            this.superRodSwarmComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            this.superRodSwarmComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-            this.superRodSwarmComboBox.FormattingEnabled = true;
-            this.superRodSwarmComboBox.Location = new System.Drawing.Point(388, 19);
-            this.superRodSwarmComboBox.Name = "superRodSwarmComboBox";
-            this.superRodSwarmComboBox.Size = new System.Drawing.Size(121, 21);
-            this.superRodSwarmComboBox.TabIndex = 50;
-            this.superRodSwarmComboBox.SelectedIndexChanged += new System.EventHandler(this.superRodSwarmComboBox_SelectedIndexChanged);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label5.Location = new System.Drawing.Point(175, 22);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(26, 13);
-            this.label5.TabIndex = 47;
-            this.label5.Text = "Surf";
-            // 
-            // surfSwarmComboBox
-            // 
-            this.surfSwarmComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            this.surfSwarmComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-            this.surfSwarmComboBox.FormattingEnabled = true;
-            this.surfSwarmComboBox.Location = new System.Drawing.Point(207, 19);
-            this.surfSwarmComboBox.Name = "surfSwarmComboBox";
-            this.surfSwarmComboBox.Size = new System.Drawing.Size(121, 21);
-            this.surfSwarmComboBox.TabIndex = 46;
-            this.surfSwarmComboBox.SelectedIndexChanged += new System.EventHandler(this.surfSwarmComboBox_SelectedIndexChanged);
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label6.Location = new System.Drawing.Point(8, 22);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(34, 13);
-            this.label6.TabIndex = 45;
-            this.label6.Text = "Grass";
             // 
             // grassSwarmComboBox
             // 
             this.grassSwarmComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.grassSwarmComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.grassSwarmComboBox.FormattingEnabled = true;
-            this.grassSwarmComboBox.Location = new System.Drawing.Point(48, 19);
+            this.grassSwarmComboBox.Location = new System.Drawing.Point(7, 19);
             this.grassSwarmComboBox.Name = "grassSwarmComboBox";
             this.grassSwarmComboBox.Size = new System.Drawing.Size(121, 21);
             this.grassSwarmComboBox.TabIndex = 44;
             this.grassSwarmComboBox.SelectedIndexChanged += new System.EventHandler(this.grassSwarmComboBox_SelectedIndexChanged);
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label8.Location = new System.Drawing.Point(334, 22);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(48, 13);
-            this.label8.TabIndex = 51;
-            this.label8.Text = "Any Rod";
             // 
             // walkingGroupBox
             // 
@@ -768,6 +707,7 @@
             this.walkingGroupBox.Controls.Add(this.walkingRateUpDown);
             this.walkingGroupBox.Controls.Add(this.label14);
             this.walkingGroupBox.Controls.Add(this.label2);
+            this.walkingGroupBox.Controls.Add(this.swarmsGroupBox);
             this.walkingGroupBox.Controls.Add(this.label1);
             this.walkingGroupBox.Controls.Add(this.nightOneSecondComboBox);
             this.walkingGroupBox.Controls.Add(this.nightOneFirstComboBox);
@@ -831,7 +771,7 @@
             this.walkingGroupBox.Controls.Add(this.morningTwentyFirstComboBox);
             this.walkingGroupBox.Location = new System.Drawing.Point(12, 7);
             this.walkingGroupBox.Name = "walkingGroupBox";
-            this.walkingGroupBox.Size = new System.Drawing.Size(536, 432);
+            this.walkingGroupBox.Size = new System.Drawing.Size(536, 456);
             this.walkingGroupBox.TabIndex = 162;
             this.walkingGroupBox.TabStop = false;
             this.walkingGroupBox.Text = "Walking";
@@ -1520,6 +1460,59 @@
             this.waterTabPage.TabIndex = 1;
             this.waterTabPage.Text = "Water";
             this.waterTabPage.UseVisualStyleBackColor = true;
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.superRodSwarmComboBox);
+            this.groupBox2.Controls.Add(this.surfSwarmComboBox);
+            this.groupBox2.Controls.Add(this.label7);
+            this.groupBox2.Controls.Add(this.label18);
+            this.groupBox2.Location = new System.Drawing.Point(17, 450);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(350, 51);
+            this.groupBox2.TabIndex = 236;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Swarm";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label7.Location = new System.Drawing.Point(6, 22);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(26, 13);
+            this.label7.TabIndex = 47;
+            this.label7.Text = "Surf";
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label18.Location = new System.Drawing.Point(165, 22);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(48, 13);
+            this.label18.TabIndex = 51;
+            this.label18.Text = "Any Rod";
+            // 
+            // nightFishingGroupBox
+            // 
+            this.nightFishingGroupBox.Controls.Add(this.nightFishingComboBox);
+            this.nightFishingGroupBox.Location = new System.Drawing.Point(429, 450);
+            this.nightFishingGroupBox.Name = "nightFishingGroupBox";
+            this.nightFishingGroupBox.Size = new System.Drawing.Size(350, 51);
+            this.nightFishingGroupBox.TabIndex = 235;
+            this.nightFishingGroupBox.TabStop = false;
+            this.nightFishingGroupBox.Text = "Night Fishing";
+            // 
+            // nightFishingComboBox
+            // 
+            this.nightFishingComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.nightFishingComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.nightFishingComboBox.FormattingEnabled = true;
+            this.nightFishingComboBox.Location = new System.Drawing.Point(45, 19);
+            this.nightFishingComboBox.Name = "nightFishingComboBox";
+            this.nightFishingComboBox.Size = new System.Drawing.Size(154, 21);
+            this.nightFishingComboBox.TabIndex = 48;
             // 
             // surfPicture
             // 
@@ -2604,78 +2597,25 @@
             this.repairAllButton.UseVisualStyleBackColor = true;
             this.repairAllButton.Click += new System.EventHandler(this.repairAllButton_Click);
             // 
-            // nightFishingGroupBox
+            // surfSwarmComboBox
             // 
-            this.nightFishingGroupBox.Controls.Add(this.goodRodSwarmComboBox);
-            this.nightFishingGroupBox.Location = new System.Drawing.Point(429, 450);
-            this.nightFishingGroupBox.Name = "nightFishingGroupBox";
-            this.nightFishingGroupBox.Size = new System.Drawing.Size(350, 51);
-            this.nightFishingGroupBox.TabIndex = 235;
-            this.nightFishingGroupBox.TabStop = false;
-            this.nightFishingGroupBox.Text = "Night Fishing";
+            this.surfSwarmComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.surfSwarmComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.surfSwarmComboBox.FormattingEnabled = true;
+            this.surfSwarmComboBox.Location = new System.Drawing.Point(38, 19);
+            this.surfSwarmComboBox.Name = "surfSwarmComboBox";
+            this.surfSwarmComboBox.Size = new System.Drawing.Size(121, 21);
+            this.surfSwarmComboBox.TabIndex = 52;
             // 
-            // goodRodSwarmComboBox
+            // superRodSwarmComboBox
             // 
-            this.goodRodSwarmComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            this.goodRodSwarmComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-            this.goodRodSwarmComboBox.FormattingEnabled = true;
-            this.goodRodSwarmComboBox.Location = new System.Drawing.Point(45, 19);
-            this.goodRodSwarmComboBox.Name = "goodRodSwarmComboBox";
-            this.goodRodSwarmComboBox.Size = new System.Drawing.Size(154, 21);
-            this.goodRodSwarmComboBox.TabIndex = 48;
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.inputComboBox1);
-            this.groupBox2.Controls.Add(this.label7);
-            this.groupBox2.Controls.Add(this.inputComboBox2);
-            this.groupBox2.Controls.Add(this.label18);
-            this.groupBox2.Location = new System.Drawing.Point(17, 450);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(350, 51);
-            this.groupBox2.TabIndex = 236;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Swarm";
-            // 
-            // inputComboBox1
-            // 
-            this.inputComboBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            this.inputComboBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-            this.inputComboBox1.FormattingEnabled = true;
-            this.inputComboBox1.Location = new System.Drawing.Point(219, 19);
-            this.inputComboBox1.Name = "inputComboBox1";
-            this.inputComboBox1.Size = new System.Drawing.Size(121, 21);
-            this.inputComboBox1.TabIndex = 50;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label7.Location = new System.Drawing.Point(6, 22);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(26, 13);
-            this.label7.TabIndex = 47;
-            this.label7.Text = "Surf";
-            // 
-            // inputComboBox2
-            // 
-            this.inputComboBox2.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            this.inputComboBox2.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-            this.inputComboBox2.FormattingEnabled = true;
-            this.inputComboBox2.Location = new System.Drawing.Point(38, 19);
-            this.inputComboBox2.Name = "inputComboBox2";
-            this.inputComboBox2.Size = new System.Drawing.Size(121, 21);
-            this.inputComboBox2.TabIndex = 46;
-            // 
-            // label18
-            // 
-            this.label18.AutoSize = true;
-            this.label18.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label18.Location = new System.Drawing.Point(165, 22);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(48, 13);
-            this.label18.TabIndex = 51;
-            this.label18.Text = "Any Rod";
+            this.superRodSwarmComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.superRodSwarmComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.superRodSwarmComboBox.FormattingEnabled = true;
+            this.superRodSwarmComboBox.Location = new System.Drawing.Point(217, 19);
+            this.superRodSwarmComboBox.Name = "superRodSwarmComboBox";
+            this.superRodSwarmComboBox.Size = new System.Drawing.Size(121, 21);
+            this.superRodSwarmComboBox.TabIndex = 53;
             // 
             // WildEditorHGSS
             // 
@@ -2709,7 +2649,6 @@
             this.radioMusicComboBox.ResumeLayout(false);
             this.radioMusicComboBox.PerformLayout();
             this.swarmsGroupBox.ResumeLayout(false);
-            this.swarmsGroupBox.PerformLayout();
             this.walkingGroupBox.ResumeLayout(false);
             this.walkingGroupBox.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.walkingRateUpDown)).EndInit();
@@ -2726,6 +2665,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.twentySecondLevelUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.twentyFirstLevelUpDown)).EndInit();
             this.waterTabPage.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
+            this.nightFishingGroupBox.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.surfPicture)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox7)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).EndInit();
@@ -2782,9 +2724,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.surfThirtyMinLevelUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.surfSixtyMaxLevelUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.surfSixtyMinLevelUpDown)).EndInit();
-            this.nightFishingGroupBox.ResumeLayout(false);
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2973,12 +2912,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.GroupBox swarmsGroupBox;
-        private DSPRE.InputComboBox superRodSwarmComboBox;
-        private System.Windows.Forms.Label label5;
-        private DSPRE.InputComboBox surfSwarmComboBox;
-        private System.Windows.Forms.Label label6;
         private DSPRE.InputComboBox grassSwarmComboBox;
-        private System.Windows.Forms.Label label8;
         private System.Windows.Forms.GroupBox radioMusicComboBox;
         private DSPRE.InputComboBox sinnohSecondComboBox;
         private System.Windows.Forms.Label label10;
@@ -3005,11 +2939,12 @@
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.GroupBox groupBox2;
-        private InputComboBox inputComboBox1;
         private System.Windows.Forms.Label label7;
-        private InputComboBox inputComboBox2;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.GroupBox nightFishingGroupBox;
-        private InputComboBox goodRodSwarmComboBox;
+        private InputComboBox nightFishingComboBox;
+        private InputComboBox superRodSwarmComboBox;
+        private InputComboBox surfSwarmComboBox;
+        private System.Windows.Forms.ToolTip toolTip;
     }
 }
