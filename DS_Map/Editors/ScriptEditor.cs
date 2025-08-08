@@ -217,6 +217,11 @@ namespace DSPRE.Editors
             textArea.CaretForeColor = Color.White;
             textArea.SetSelectionBackColor(true, Color.FromArgb(0x114D9C));
             textArea.WrapIndentMode = WrapIndentMode.Same;
+
+            // Auto Completion
+            textArea.AutoCMaxHeight = 20;
+            textArea.AutoCIgnoreCase = true;
+            textArea.AutoCOrder = Order.PerformSort;
         }
 
         private void InitSyntaxColoring(Scintilla textArea)
@@ -311,12 +316,16 @@ namespace DSPRE.Editors
             HotKeyManager.AddHotKey(scintillaTb, () => ZoomOut(scintillaTb), Keys.OemMinus, true);
             HotKeyManager.AddHotKey(scintillaTb, () => ZoomDefault(scintillaTb), Keys.D0, true);
             HotKeyManager.AddHotKey(scintillaTb, sm.CloseSearch, Keys.Escape);
+            HotKeyManager.AddHotKey(scintillaTb, () => ShowAutoComplete(scintillaTb), Keys.R, true);
+            HotKeyManager.AddHotKey(scintillaTb, () => SaveScriptFile(scintillaTb, false), Keys.S, true);
+
             // remove conflicting hotkeys from scintilla
             scintillaTb.ClearCmdKey(Keys.Control | Keys.F);
             scintillaTb.ClearCmdKey(Keys.Control | Keys.R);
             scintillaTb.ClearCmdKey(Keys.Control | Keys.H);
             scintillaTb.ClearCmdKey(Keys.Control | Keys.L);
             scintillaTb.ClearCmdKey(Keys.Control | Keys.U);
+            scintillaTb.ClearCmdKey(Keys.Control | Keys.S);
         }
         private void Uppercase(Scintilla textArea)
         {
@@ -350,6 +359,84 @@ namespace DSPRE.Editors
         {
             textArea.Zoom = 0;
         }
+
+        private void ShowAutoComplete(Scintilla textArea)
+        {
+            if (textArea.AutoCActive)
+            {
+                return;
+            }
+            CompleteCurrent(textArea);
+        }
+
+        private void CompleteCurrent(Scintilla textArea)
+        {
+            int currentPos = textArea.CurrentPosition;
+            int wordStartPos = textArea.WordStartPosition(currentPos, true);
+            int wordLen = currentPos - wordStartPos;
+
+            string currentWord = textArea.GetTextRange(wordStartPos, wordLen);
+
+            // Use HashSet to avoid duplicate keywords and improve lookup
+            HashSet<string> keywordsSet = new HashSet<string>(cmdKeyWords.Split(' '), StringComparer.OrdinalIgnoreCase);
+
+            // Filter keywords based on the current word (case-insensitive)
+            List<string> filteredKeywords = new List<string>();
+
+            if (string.IsNullOrEmpty(currentWord))
+            {
+                currentWord = "";
+            }
+
+            foreach (string kw in keywordsSet)
+            {
+                if (!string.IsNullOrEmpty(kw) && kw.StartsWith(currentWord, StringComparison.OrdinalIgnoreCase))
+                {
+                    filteredKeywords.Add(kw);
+                }
+            }
+            
+
+            if (filteredKeywords.Count > 0)
+            {
+                textArea.AutoCShow(currentWord.Length, string.Join(" ", filteredKeywords));
+            }
+        }
+
+        private void SaveScriptFile(Scintilla textArea, bool showMessage)
+        {
+            /* Create new ScriptFile object using the values in the script editor */
+            int fileID = currentScriptFile.fileID;
+
+            ScriptTextArea.ReadOnly = true;
+            FunctionTextArea.ReadOnly = true;
+            ActionTextArea.ReadOnly = true;
+
+            ScriptFile userEdited = new ScriptFile(
+              scriptLines: ScriptTextArea.Lines.ToStringsList(trim: true),
+              functionLines: FunctionTextArea.Lines.ToStringsList(trim: true),
+              actionLines: ActionTextArea.Lines.ToStringsList(trim: true),
+              fileID
+            );
+
+            if (userEdited.hasNoScripts)
+            {
+                MessageBox.Show("This " + nameof(ScriptFile) + " couldn't be saved. A minimum of one script is required.", "Can't save", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            //check if ScriptFile instance was created successfully
+            if (userEdited.SaveToFileDefaultDir(fileID, showMessage))
+            {
+                currentScriptFile = userEdited;
+                ScriptEditorSetClean();
+            }
+
+            ScriptTextArea.ReadOnly = false;
+            FunctionTextArea.ReadOnly = false;
+            ActionTextArea.ReadOnly = false;
+        }
+
         private void ScriptEditorSetClean()
         {
             Helpers.DisableHandlers();
@@ -367,6 +454,11 @@ namespace DSPRE.Editors
             ScriptTextArea.Margins[NUMBER_MARGIN].Width = ScriptTextArea.Lines.Count.ToString().Length * 13;
             scriptsDirty = true;
             scriptsTabPage.Text = ScriptFile.ContainerTypes.Script.ToString() + "s" + "*";
+
+            if (ScriptTextArea.AutoCActive)
+            {
+                CompleteCurrent(ScriptTextArea);
+            }            
         }
 
         private void OnTextChangedFunction(object sender, EventArgs e)
@@ -374,6 +466,11 @@ namespace DSPRE.Editors
             FunctionTextArea.Margins[NUMBER_MARGIN].Width = FunctionTextArea.Lines.Count.ToString().Length * 13;
             functionsDirty = true;
             functionsTabPage.Text = ScriptFile.ContainerTypes.Function.ToString() + "s" + "*";
+
+            if (FunctionTextArea.AutoCActive)
+            {
+                CompleteCurrent(FunctionTextArea);
+            }
         }
 
         private void OnTextChangedAction(object sender, EventArgs e)
@@ -381,6 +478,11 @@ namespace DSPRE.Editors
             ActionTextArea.Margins[NUMBER_MARGIN].Width = ActionTextArea.Lines.Count.ToString().Length * 13;
             actionsDirty = true;
             actionsTabPage.Text = ScriptFile.ContainerTypes.Action.ToString() + "s" + "*";
+
+            if (ActionTextArea.AutoCActive)
+            {
+                CompleteCurrent(ActionTextArea);
+            }
         }
 
         private void ScriptTextArea_MarginClick(object sender, MarginClickEventArgs e)
@@ -690,28 +792,7 @@ namespace DSPRE.Editors
 
         private void saveScriptFileButton_Click(object sender, EventArgs e)
         {
-            /* Create new ScriptFile object using the values in the script editor */
-            int fileID = currentScriptFile.fileID;
-
-            ScriptFile userEdited = new ScriptFile(
-              scriptLines: ScriptTextArea.Lines.ToStringsList(trim: true),
-              functionLines: FunctionTextArea.Lines.ToStringsList(trim: true),
-              actionLines: ActionTextArea.Lines.ToStringsList(trim: true),
-              fileID
-            );
-
-            if (userEdited.hasNoScripts)
-            {
-                MessageBox.Show("This " + nameof(ScriptFile) + " couldn't be saved. A minimum of one script is required.", "Can't save", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            //check if ScriptFile instance was created successfully
-            if (userEdited.SaveToFileDefaultDir(fileID))
-            {
-                currentScriptFile = userEdited;
-                ScriptEditorSetClean();
-            }
+            SaveScriptFile(null, true);
         }
         private void exportScriptFileButton_Click(object sender, EventArgs e)
         {
