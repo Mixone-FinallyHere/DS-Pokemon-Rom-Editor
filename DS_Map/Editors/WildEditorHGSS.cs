@@ -862,6 +862,8 @@ namespace DSPRE {
                 return;
             }
 
+            Helpers.DisableHandlers();
+
             if (!ContinueUnsavedChanges()) {
                 selectEncounterComboBox.SelectedIndex = loadedEncounterFileIndex;
                 Helpers.EnableHandlers();
@@ -870,6 +872,7 @@ namespace DSPRE {
 
             currentFile = new EncounterFileHGSS(selectEncounterComboBox.SelectedIndex);
             SetupControls();
+            Helpers.EnableHandlers();
         }
         private void saveEncountersButton_Click(object sender, EventArgs e) 
         {
