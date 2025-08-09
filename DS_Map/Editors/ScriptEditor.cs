@@ -94,6 +94,7 @@ namespace DSPRE.Editors
             ScriptDatabase.InitializePokemonNames();
             ScriptDatabase.InitializeItemNames();
             ScriptDatabase.InitializeMoveNames();
+            ScriptDatabase.InitializeTrainerNames();
             SetupScriptEditorTextAreas();
             /* Extract essential NARCs sub-archives*/
             Helpers.statusLabelMessage("Setting up Script Editor...");
@@ -124,6 +125,7 @@ namespace DSPRE.Editors
                                 " " + String.Join(" ", ScriptDatabase.itemNames.Values) +
                                 " " + String.Join(" ", ScriptDatabase.moveNames.Values) +
                                 " " + String.Join(" ", ScriptDatabase.soundNames.Values) +
+                                " " + String.Join(" ", ScriptDatabase.trainerNames.Values) +
                                 " " + ScriptFile.ContainerTypes.Script.ToString() +
                                 " " + ScriptFile.ContainerTypes.Function.ToString() +
                                 " " + ScriptFile.ContainerTypes.Action.ToString() +
