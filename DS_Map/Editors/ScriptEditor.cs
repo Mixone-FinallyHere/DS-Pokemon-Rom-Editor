@@ -27,6 +27,7 @@ namespace DSPRE.Editors
         private bool actionsDirty = false;
         private string cmdKeyWords = "";
         private string secondaryKeyWords = "";
+        private string altCaseKeywords = "";
         private ScriptFile currentScriptFile;
         MainProgram _parent;
         /// <summary>
@@ -115,7 +116,7 @@ namespace DSPRE.Editors
             //PREPARE SCRIPT EDITOR KEYWORDS
             cmdKeyWords = String.Join(" ", RomInfo.ScriptCommandNamesDict.Values) +
                           " " + String.Join(" ", ScriptDatabase.movementsDictIDName.Values);
-            cmdKeyWords += " " + cmdKeyWords.ToUpper() + " " + cmdKeyWords.ToLower();
+
             secondaryKeyWords = String.Join(" ", RomInfo.ScriptComparisonOperatorsDict.Values) +
                                 " " + String.Join(" ", ScriptDatabase.specialOverworlds.Values) +
                                 " " + String.Join(" ", ScriptDatabase.overworldDirections.Values) +
@@ -128,7 +129,10 @@ namespace DSPRE.Editors
                                 " " + ScriptFile.ContainerTypes.Action.ToString() +
                                 " " + Event.EventType.Overworld +
                                 " " + Overworld.MovementCodeKW;
-            secondaryKeyWords += " " + secondaryKeyWords.ToUpper() + " " + secondaryKeyWords.ToLower();
+
+            altCaseKeywords += " " + cmdKeyWords.ToUpper() + " " + cmdKeyWords.ToLower();
+            altCaseKeywords += " " + secondaryKeyWords.ToUpper() + " " + secondaryKeyWords.ToLower();
+
             // CREATE CONTROLS
             ScriptTextArea = new Scintilla();
             scriptSearchManager = new SearchManager(EditorPanels.MainProgram, ScriptTextArea, panelFindScriptTextBox, PanelSearchScripts);
@@ -152,6 +156,10 @@ namespace DSPRE.Editors
             ScriptTextArea.TextChanged += (OnTextChangedScript);
             FunctionTextArea.TextChanged += (OnTextChangedFunction);
             ActionTextArea.TextChanged += (OnTextChangedAction);
+
+            ScriptTextArea.CharAdded += OnCharAdded;
+            FunctionTextArea.CharAdded += OnCharAdded;
+            ActionTextArea.CharAdded += OnCharAdded;
 
             // INITIAL VIEW CONFIG
             InitialViewConfig(ScriptTextArea);
@@ -218,7 +226,8 @@ namespace DSPRE.Editors
             // Auto Completion
             textArea.AutoCMaxHeight = 20;
             textArea.AutoCIgnoreCase = true;
-            textArea.AutoCOrder = Order.PerformSort;
+            textArea.AutoCOrder = Order.Custom;
+            textArea.AutoCCancelAtStart = false;
         }
 
         private void InitSyntaxColoring(Scintilla textArea)
@@ -245,6 +254,7 @@ namespace DSPRE.Editors
 
             textArea.SetKeywords(0, cmdKeyWords);
             textArea.SetKeywords(1, secondaryKeyWords);
+            textArea.SetKeywords(2, altCaseKeywords);
         }
 
         private void InitNumberMargin(Scintilla textArea, EventHandler<MarginClickEventArgs> textArea_MarginClick)
@@ -370,34 +380,12 @@ namespace DSPRE.Editors
         {
             int currentPos = textArea.CurrentPosition;
             int wordStartPos = textArea.WordStartPosition(currentPos, true);
-            int wordLen = currentPos - wordStartPos;
+
+            int wordLen = Math.Max(currentPos - wordStartPos, 0);
 
             string currentWord = textArea.GetTextRange(wordStartPos, wordLen);
 
-            // Use HashSet to avoid duplicate keywords and improve lookup
-            HashSet<string> keywordsSet = new HashSet<string>(cmdKeyWords.Split(' '), StringComparer.OrdinalIgnoreCase);
-
-            // Filter keywords based on the current word (case-insensitive)
-            List<string> filteredKeywords = new List<string>();
-
-            if (string.IsNullOrEmpty(currentWord))
-            {
-                currentWord = "";
-            }
-
-            foreach (string kw in keywordsSet)
-            {
-                if (!string.IsNullOrEmpty(kw) && kw.StartsWith(currentWord, StringComparison.OrdinalIgnoreCase))
-                {
-                    filteredKeywords.Add(kw);
-                }
-            }
-            
-
-            if (filteredKeywords.Count > 0)
-            {
-                textArea.AutoCShow(currentWord.Length, string.Join(" ", filteredKeywords));
-            }
+            textArea.AutoCShow(wordLen, cmdKeyWords);
         }
 
         private void SaveScriptFile(Scintilla textArea, bool showMessage)
@@ -450,12 +438,7 @@ namespace DSPRE.Editors
         {
             ScriptTextArea.Margins[NUMBER_MARGIN].Width = ScriptTextArea.Lines.Count.ToString().Length * 13;
             scriptsDirty = true;
-            scriptsTabPage.Text = ScriptFile.ContainerTypes.Script.ToString() + "s" + "*";
-
-            if (ScriptTextArea.AutoCActive)
-            {
-                CompleteCurrent(ScriptTextArea);
-            }            
+            scriptsTabPage.Text = ScriptFile.ContainerTypes.Script.ToString() + "s" + "*";           
         }
 
         private void OnTextChangedFunction(object sender, EventArgs e)
@@ -463,11 +446,6 @@ namespace DSPRE.Editors
             FunctionTextArea.Margins[NUMBER_MARGIN].Width = FunctionTextArea.Lines.Count.ToString().Length * 13;
             functionsDirty = true;
             functionsTabPage.Text = ScriptFile.ContainerTypes.Function.ToString() + "s" + "*";
-
-            if (FunctionTextArea.AutoCActive)
-            {
-                CompleteCurrent(FunctionTextArea);
-            }
         }
 
         private void OnTextChangedAction(object sender, EventArgs e)
@@ -475,11 +453,23 @@ namespace DSPRE.Editors
             ActionTextArea.Margins[NUMBER_MARGIN].Width = ActionTextArea.Lines.Count.ToString().Length * 13;
             actionsDirty = true;
             actionsTabPage.Text = ScriptFile.ContainerTypes.Action.ToString() + "s" + "*";
+        }
 
-            if (ActionTextArea.AutoCActive)
+        private void OnCharAdded(object sender, EventArgs e)
+        {
+            if (!(sender is Scintilla textArea))
             {
-                CompleteCurrent(ActionTextArea);
+                return;
             }
+
+            if (!textArea.AutoCActive)
+            {
+                // If the AutoComplete is active, we don't want to do anything else
+                return;
+            }
+
+            //CompleteCurrent(textArea);
+
         }
 
         private void ScriptTextArea_MarginClick(object sender, MarginClickEventArgs e)
