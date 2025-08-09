@@ -231,6 +231,7 @@ namespace DSPRE.Editors
             textArea.AutoCIgnoreCase = true;
             textArea.AutoCOrder = Order.Custom;
             textArea.AutoCCancelAtStart = false;
+            textArea.AutoCAutoHide = false;
         }
 
         private void InitSyntaxColoring(Scintilla textArea)
@@ -326,16 +327,26 @@ namespace DSPRE.Editors
             HotKeyManager.AddHotKey(scintillaTb, () => ZoomOut(scintillaTb), Keys.OemMinus, true);
             HotKeyManager.AddHotKey(scintillaTb, () => ZoomDefault(scintillaTb), Keys.D0, true);
             HotKeyManager.AddHotKey(scintillaTb, sm.CloseSearch, Keys.Escape);
-            HotKeyManager.AddHotKey(scintillaTb, () => ShowAutoComplete(scintillaTb), Keys.R, true);
+            HotKeyManager.AddHotKey(scintillaTb, () => ToggleAutoComplete(scintillaTb), Keys.Space, true);
             HotKeyManager.AddHotKey(scintillaTb, () => SaveScriptFile(scintillaTb, false), Keys.S, true);
 
             // remove conflicting hotkeys from scintilla
             scintillaTb.ClearCmdKey(Keys.Control | Keys.F);
-            scintillaTb.ClearCmdKey(Keys.Control | Keys.R);
+            scintillaTb.ClearCmdKey(Keys.Control | Keys.Space);
             scintillaTb.ClearCmdKey(Keys.Control | Keys.H);
             scintillaTb.ClearCmdKey(Keys.Control | Keys.L);
             scintillaTb.ClearCmdKey(Keys.Control | Keys.U);
             scintillaTb.ClearCmdKey(Keys.Control | Keys.S);
+
+            // remove ctrl + space
+            scintillaTb.KeyDown += (sender, e) =>
+            {
+                if (e.Control && e.KeyCode == Keys.Space)
+                {
+                    e.SuppressKeyPress = true; // Prevents the space from being inserted
+                }
+            };
+
         }
         private void Uppercase(Scintilla textArea)
         {
@@ -370,10 +381,11 @@ namespace DSPRE.Editors
             textArea.Zoom = 0;
         }
 
-        private void ShowAutoComplete(Scintilla textArea)
+        private void ToggleAutoComplete(Scintilla textArea)
         {
             if (textArea.AutoCActive)
             {
+                textArea.AutoCCancel();
                 return;
             }
             CompleteCurrent(textArea);
@@ -388,7 +400,7 @@ namespace DSPRE.Editors
 
             string currentWord = textArea.GetTextRange(wordStartPos, wordLen);
 
-            textArea.AutoCShow(wordLen, cmdKeyWords);
+            textArea.AutoCShow(wordLen, cmdKeyWords + secondaryKeyWords);
         }
 
         private void SaveScriptFile(Scintilla textArea, bool showMessage)
@@ -440,6 +452,12 @@ namespace DSPRE.Editors
         private void OnTextChangedScript(object sender, EventArgs e)
         {
             ScriptTextArea.Margins[NUMBER_MARGIN].Width = ScriptTextArea.Lines.Count.ToString().Length * 13;
+
+            if (scriptsDirty)
+            {
+                return;
+            }
+
             scriptsDirty = true;
             scriptsTabPage.Text = ScriptFile.ContainerTypes.Script.ToString() + "s" + "*";           
         }
@@ -447,6 +465,12 @@ namespace DSPRE.Editors
         private void OnTextChangedFunction(object sender, EventArgs e)
         {
             FunctionTextArea.Margins[NUMBER_MARGIN].Width = FunctionTextArea.Lines.Count.ToString().Length * 13;
+
+            if (functionsDirty)
+            {
+                return;
+            }
+
             functionsDirty = true;
             functionsTabPage.Text = ScriptFile.ContainerTypes.Function.ToString() + "s" + "*";
         }
@@ -454,6 +478,12 @@ namespace DSPRE.Editors
         private void OnTextChangedAction(object sender, EventArgs e)
         {
             ActionTextArea.Margins[NUMBER_MARGIN].Width = ActionTextArea.Lines.Count.ToString().Length * 13;
+
+            if (actionsDirty)
+            {
+                return;
+            }
+
             actionsDirty = true;
             actionsTabPage.Text = ScriptFile.ContainerTypes.Action.ToString() + "s" + "*";
         }
