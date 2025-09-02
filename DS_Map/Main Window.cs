@@ -103,7 +103,7 @@ namespace DSPRE
 
         /* ROM Information */
         public static string gameCode;
-        public static byte europeByte;
+        public static byte revisionByte;
         public RomInfo romInfo;
         public Dictionary<ushort /*evFile*/, ushort /*header*/> eventToHeader = new Dictionary<ushort, ushort>();
 
@@ -823,7 +823,7 @@ namespace DSPRE
 
             if (RomInfo.gameLanguage == GameLanguages.English)
             {
-                if (europeByte == 0x0A)
+                if (revisionByte == 0x0A)
                 {
                     languageLabel.Text += " [Europe]";
                 }
@@ -908,7 +908,7 @@ namespace DSPRE
             {
                 gameCode = Encoding.UTF8.GetString(br.ReadBytes(4));
                 br.BaseStream.Position = 0x1E;
-                europeByte = br.ReadByte();
+                revisionByte = br.ReadByte();
             }
         }
 
