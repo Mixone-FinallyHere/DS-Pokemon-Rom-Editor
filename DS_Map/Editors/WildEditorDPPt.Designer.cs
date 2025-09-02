@@ -123,8 +123,8 @@
             this.waterTabPage = new System.Windows.Forms.TabPage();
             this.waterTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.surfPanel = new System.Windows.Forms.Panel();
-            this.surfPicture = new System.Windows.Forms.PictureBox();
             this.surfGroupBox = new System.Windows.Forms.GroupBox();
+            this.surfPicture = new System.Windows.Forms.PictureBox();
             this.label68 = new System.Windows.Forms.Label();
             this.label67 = new System.Windows.Forms.Label();
             this.surfRateUpDown = new System.Windows.Forms.NumericUpDown();
@@ -150,8 +150,8 @@
             this.label66 = new System.Windows.Forms.Label();
             this.surfSixtyComboBox = new DSPRE.InputComboBox();
             this.superRodPanel = new System.Windows.Forms.Panel();
-            this.superRodPictureBox = new System.Windows.Forms.PictureBox();
             this.superRodGroupBox = new System.Windows.Forms.GroupBox();
+            this.superRodPictureBox = new System.Windows.Forms.PictureBox();
             this.label15 = new System.Windows.Forms.Label();
             this.label59 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
@@ -177,8 +177,8 @@
             this.superRodFirstFortyMinLevelUpDown = new System.Windows.Forms.NumericUpDown();
             this.superRodFirstFortyComboBox = new DSPRE.InputComboBox();
             this.goodRodPanel = new System.Windows.Forms.Panel();
-            this.pictureBox6 = new System.Windows.Forms.PictureBox();
             this.goodRodGroupBox = new System.Windows.Forms.GroupBox();
+            this.pictureBox6 = new System.Windows.Forms.PictureBox();
             this.label51 = new System.Windows.Forms.Label();
             this.label52 = new System.Windows.Forms.Label();
             this.goodRodRateUpDown = new System.Windows.Forms.NumericUpDown();
@@ -204,8 +204,8 @@
             this.label58 = new System.Windows.Forms.Label();
             this.goodRodFirstFortyComboBox = new DSPRE.InputComboBox();
             this.oldRodPanel = new System.Windows.Forms.Panel();
-            this.oldRodPictureBox = new System.Windows.Forms.PictureBox();
             this.oldRodGroupBox = new System.Windows.Forms.GroupBox();
+            this.oldRodPictureBox = new System.Windows.Forms.PictureBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -254,8 +254,8 @@
             this.waterTabPage.SuspendLayout();
             this.waterTableLayoutPanel.SuspendLayout();
             this.surfPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.surfPicture)).BeginInit();
             this.surfGroupBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.surfPicture)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.surfRateUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.surfOneMaxLevelUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.surfOneMinLevelUpDown)).BeginInit();
@@ -268,8 +268,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.surfSixtyMaxLevelUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.surfSixtyMinLevelUpDown)).BeginInit();
             this.superRodPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.superRodPictureBox)).BeginInit();
             this.superRodGroupBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.superRodPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.superRodRateUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.superRodOneMaxLevelUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.superRodOneMinLevelUpDown)).BeginInit();
@@ -282,8 +282,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.superRodFirstFortyMaxLevelUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.superRodFirstFortyMinLevelUpDown)).BeginInit();
             this.goodRodPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).BeginInit();
             this.goodRodGroupBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.goodRodRateUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.goodRodOneMaxLevelUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.goodRodOneMinLevelUpDown)).BeginInit();
@@ -296,8 +296,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.goodRodFirstFortyMaxLevelUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.goodRodFirstFortyMinLevelUpDown)).BeginInit();
             this.oldRodPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.oldRodPictureBox)).BeginInit();
             this.oldRodGroupBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.oldRodPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.oldRodRateUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.oldRodOneMaxLevelUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.oldRodOneMinLevelUpDown)).BeginInit();
@@ -1422,16 +1422,6 @@
             this.surfPanel.Size = new System.Drawing.Size(426, 320);
             this.surfPanel.TabIndex = 202;
             // 
-            // surfPicture
-            // 
-            this.surfPicture.Image = global::DSPRE.Properties.Resources.SurfIcon;
-            this.surfPicture.Location = new System.Drawing.Point(6, 19);
-            this.surfPicture.Name = "surfPicture";
-            this.surfPicture.Size = new System.Drawing.Size(42, 42);
-            this.surfPicture.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this.surfPicture.TabIndex = 198;
-            this.surfPicture.TabStop = false;
-            // 
             // surfGroupBox
             // 
             this.surfGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -1469,6 +1459,16 @@
             this.surfGroupBox.TabStop = false;
             this.surfGroupBox.Text = "Surfing";
             // 
+            // surfPicture
+            // 
+            this.surfPicture.Image = global::DSPRE.Properties.Resources.SurfIcon;
+            this.surfPicture.Location = new System.Drawing.Point(6, 19);
+            this.surfPicture.Name = "surfPicture";
+            this.surfPicture.Size = new System.Drawing.Size(42, 42);
+            this.surfPicture.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.surfPicture.TabIndex = 198;
+            this.surfPicture.TabStop = false;
+            // 
             // label68
             // 
             this.label68.AutoSize = true;
@@ -1490,11 +1490,6 @@
             // surfRateUpDown
             // 
             this.surfRateUpDown.Location = new System.Drawing.Point(265, 16);
-            this.surfRateUpDown.Maximum = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
             this.surfRateUpDown.Name = "surfRateUpDown";
             this.surfRateUpDown.Size = new System.Drawing.Size(42, 20);
             this.surfRateUpDown.TabIndex = 39;
@@ -1690,15 +1685,6 @@
             this.superRodPanel.Size = new System.Drawing.Size(427, 320);
             this.superRodPanel.TabIndex = 200;
             // 
-            // superRodPictureBox
-            // 
-            this.superRodPictureBox.Image = ((System.Drawing.Image)(resources.GetObject("superRodPictureBox.Image")));
-            this.superRodPictureBox.Location = new System.Drawing.Point(12, 19);
-            this.superRodPictureBox.Name = "superRodPictureBox";
-            this.superRodPictureBox.Size = new System.Drawing.Size(25, 26);
-            this.superRodPictureBox.TabIndex = 196;
-            this.superRodPictureBox.TabStop = false;
-            // 
             // superRodGroupBox
             // 
             this.superRodGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -1735,6 +1721,15 @@
             this.superRodGroupBox.TabIndex = 44;
             this.superRodGroupBox.TabStop = false;
             this.superRodGroupBox.Text = "Super Rod";
+            // 
+            // superRodPictureBox
+            // 
+            this.superRodPictureBox.Image = ((System.Drawing.Image)(resources.GetObject("superRodPictureBox.Image")));
+            this.superRodPictureBox.Location = new System.Drawing.Point(12, 19);
+            this.superRodPictureBox.Name = "superRodPictureBox";
+            this.superRodPictureBox.Size = new System.Drawing.Size(25, 26);
+            this.superRodPictureBox.TabIndex = 196;
+            this.superRodPictureBox.TabStop = false;
             // 
             // label15
             // 
@@ -1787,11 +1782,6 @@
             // superRodRateUpDown
             // 
             this.superRodRateUpDown.Location = new System.Drawing.Point(265, 16);
-            this.superRodRateUpDown.Maximum = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
             this.superRodRateUpDown.Name = "superRodRateUpDown";
             this.superRodRateUpDown.Size = new System.Drawing.Size(42, 20);
             this.superRodRateUpDown.TabIndex = 39;
@@ -1957,15 +1947,6 @@
             this.goodRodPanel.Size = new System.Drawing.Size(426, 320);
             this.goodRodPanel.TabIndex = 201;
             // 
-            // pictureBox6
-            // 
-            this.pictureBox6.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox6.Image")));
-            this.pictureBox6.Location = new System.Drawing.Point(6, 19);
-            this.pictureBox6.Name = "pictureBox6";
-            this.pictureBox6.Size = new System.Drawing.Size(25, 26);
-            this.pictureBox6.TabIndex = 195;
-            this.pictureBox6.TabStop = false;
-            // 
             // goodRodGroupBox
             // 
             this.goodRodGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -2003,6 +1984,15 @@
             this.goodRodGroupBox.TabStop = false;
             this.goodRodGroupBox.Text = "Good Rod";
             // 
+            // pictureBox6
+            // 
+            this.pictureBox6.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox6.Image")));
+            this.pictureBox6.Location = new System.Drawing.Point(6, 19);
+            this.pictureBox6.Name = "pictureBox6";
+            this.pictureBox6.Size = new System.Drawing.Size(25, 26);
+            this.pictureBox6.TabIndex = 195;
+            this.pictureBox6.TabStop = false;
+            // 
             // label51
             // 
             this.label51.AutoSize = true;
@@ -2024,11 +2014,6 @@
             // goodRodRateUpDown
             // 
             this.goodRodRateUpDown.Location = new System.Drawing.Point(265, 16);
-            this.goodRodRateUpDown.Maximum = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
             this.goodRodRateUpDown.Name = "goodRodRateUpDown";
             this.goodRodRateUpDown.Size = new System.Drawing.Size(42, 20);
             this.goodRodRateUpDown.TabIndex = 39;
@@ -2224,15 +2209,6 @@
             this.oldRodPanel.Size = new System.Drawing.Size(427, 320);
             this.oldRodPanel.TabIndex = 199;
             // 
-            // oldRodPictureBox
-            // 
-            this.oldRodPictureBox.Image = ((System.Drawing.Image)(resources.GetObject("oldRodPictureBox.Image")));
-            this.oldRodPictureBox.Location = new System.Drawing.Point(6, 19);
-            this.oldRodPictureBox.Name = "oldRodPictureBox";
-            this.oldRodPictureBox.Size = new System.Drawing.Size(25, 26);
-            this.oldRodPictureBox.TabIndex = 194;
-            this.oldRodPictureBox.TabStop = false;
-            // 
             // oldRodGroupBox
             // 
             this.oldRodGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -2269,6 +2245,15 @@
             this.oldRodGroupBox.TabIndex = 42;
             this.oldRodGroupBox.TabStop = false;
             this.oldRodGroupBox.Text = "Old Rod";
+            // 
+            // oldRodPictureBox
+            // 
+            this.oldRodPictureBox.Image = ((System.Drawing.Image)(resources.GetObject("oldRodPictureBox.Image")));
+            this.oldRodPictureBox.Location = new System.Drawing.Point(6, 19);
+            this.oldRodPictureBox.Name = "oldRodPictureBox";
+            this.oldRodPictureBox.Size = new System.Drawing.Size(25, 26);
+            this.oldRodPictureBox.TabIndex = 194;
+            this.oldRodPictureBox.TabStop = false;
             // 
             // label1
             // 
@@ -2341,11 +2326,6 @@
             // oldRodRateUpDown
             // 
             this.oldRodRateUpDown.Location = new System.Drawing.Point(265, 16);
-            this.oldRodRateUpDown.Maximum = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
             this.oldRodRateUpDown.Name = "oldRodRateUpDown";
             this.oldRodRateUpDown.Size = new System.Drawing.Size(42, 20);
             this.oldRodRateUpDown.TabIndex = 39;
@@ -2534,9 +2514,9 @@
             this.waterTabPage.ResumeLayout(false);
             this.waterTableLayoutPanel.ResumeLayout(false);
             this.surfPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.surfPicture)).EndInit();
             this.surfGroupBox.ResumeLayout(false);
             this.surfGroupBox.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.surfPicture)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.surfRateUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.surfOneMaxLevelUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.surfOneMinLevelUpDown)).EndInit();
@@ -2549,9 +2529,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.surfSixtyMaxLevelUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.surfSixtyMinLevelUpDown)).EndInit();
             this.superRodPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.superRodPictureBox)).EndInit();
             this.superRodGroupBox.ResumeLayout(false);
             this.superRodGroupBox.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.superRodPictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.superRodRateUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.superRodOneMaxLevelUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.superRodOneMinLevelUpDown)).EndInit();
@@ -2564,9 +2544,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.superRodFirstFortyMaxLevelUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.superRodFirstFortyMinLevelUpDown)).EndInit();
             this.goodRodPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).EndInit();
             this.goodRodGroupBox.ResumeLayout(false);
             this.goodRodGroupBox.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.goodRodRateUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.goodRodOneMaxLevelUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.goodRodOneMinLevelUpDown)).EndInit();
@@ -2579,9 +2559,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.goodRodFirstFortyMaxLevelUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.goodRodFirstFortyMinLevelUpDown)).EndInit();
             this.oldRodPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.oldRodPictureBox)).EndInit();
             this.oldRodGroupBox.ResumeLayout(false);
             this.oldRodGroupBox.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.oldRodPictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.oldRodRateUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.oldRodOneMaxLevelUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.oldRodOneMinLevelUpDown)).EndInit();

@@ -84,6 +84,7 @@ namespace DSPRE {
 
             currentFile = new EncounterFileDPPt(selectEncounterComboBox.SelectedIndex);
 
+            InitRanges();
             AddPokemonNamesBinding(names);
             RegisterMarkDirtyHandlers();
             SetupControls();
@@ -472,6 +473,16 @@ namespace DSPRE {
             unownComboBox.SelectedIndexChanged += MarkDirtyWalking;
 
         }
+
+        private void InitRanges()
+        {
+            walkingRateUpDown.Maximum = 255;
+            surfRateUpDown.Maximum = 255;
+            oldRodRateUpDown.Maximum = 255;
+            goodRodRateUpDown.Maximum = 255;
+            superRodRateUpDown.Maximum = 255;
+        }
+
 
         private void DrawConnectingLines()
         {
