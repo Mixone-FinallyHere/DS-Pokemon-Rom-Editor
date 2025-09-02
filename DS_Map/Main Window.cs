@@ -666,8 +666,6 @@ namespace DSPRE
             string workDir = DSUtils.WorkDirPathFromFile(openRom.FileName);
             AppLogger.Info(workDir + " will be used as the working directory for the ROM.");
 
-
-
             int userchoice = UnpackRomCheckUserChoice(workDir);
             switch (userchoice)
             {
@@ -893,6 +891,12 @@ namespace DSPRE
             gameIcon.Refresh();  // Paint game icon
             AppLogger.Debug("Game icon refreshed.");
 
+            if (!CheckAndDecompressARM9())
+            {
+                AppLogger.Error("ARM9 decompression failed. Aborting.");
+                return;
+            }
+
             ReadROMInitData();
             AppLogger.Info("ROM initialization data loaded.");
         }
@@ -908,22 +912,35 @@ namespace DSPRE
             }
         }
 
-        private void ReadROMInitData()
+        private bool CheckAndDecompressARM9()
         {
-            if (ARM9.CheckCompressionMark())
+            if (!ARM9.CheckCompressionMark())
             {
-                if (!RomInfo.gameFamily.Equals(GameFamilies.HGSS))
-                {
-                    MessageBox.Show("Unexpected compressed ARM9. It is advised that you double check the ARM9.");
-                }
-                if (!ARM9.Decompress(RomInfo.arm9Path))
-                {
-                    MessageBox.Show("ARM9 decompression failed. The program can't proceed.\nAborting.",
-                                "Error with ARM9 decompression", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+                return true; // ARM9 is not compressed, proceed normally
             }
 
+            if (!RomInfo.gameFamily.Equals(GameFamilies.HGSS))
+            {
+                MessageBox.Show("Unexpected compressed ARM9. It is advised that you double check the ARM9.");
+                return false;
+            }
+
+            ARM9.EditSize(-12); // Fix ARM9 size before decompression
+
+            if (!ARM9.Decompress(RomInfo.arm9Path))
+            {
+                MessageBox.Show("ARM9 decompression failed. The program can't proceed.\nAborting.",
+                            "Error with ARM9 decompression", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            AppLogger.Info("ARM9 decompressed and size fixed.");
+
+            return true;
+        }
+
+        private void ReadROMInitData()
+        {
             /* Setup essential editors */
             EditorPanels.headerEditor.SetupHeaderEditor(this);
 
