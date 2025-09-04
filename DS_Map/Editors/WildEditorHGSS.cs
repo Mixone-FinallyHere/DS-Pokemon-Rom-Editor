@@ -719,6 +719,10 @@ namespace DSPRE {
 
         private void AddTooltips() 
         {
+            // Encounter rates
+            SetToolTipsForControls(new Control[] { walkingRateUpDown, surfRateUpDown, oldRodRateUpDown, goodRodRateUpDown, superRodRateUpDown },
+                "The rate in percent from 0-100.\nA value above 100 may cause unintended behaviour when using things like the cleanse tag.");
+
             // Radio music encounters
             SetToolTipsForControls(new Control[] { hoennFirstComboBox, sinnohFirstComboBox },
                 "Replaces the first two 10% slots in the morning, day and night.");
