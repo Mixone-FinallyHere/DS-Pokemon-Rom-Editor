@@ -61,7 +61,7 @@ namespace DSPRE
             WireEditorsPopout();
 
             SetMenuLayout(SettingsManager.Settings.menuLayout); //Read user settings for menu layout
-            Text = "DS Pokémon Rom Editor Reloaded " + GetDSPREVersion() + " (Nømura, AdAstra/LD3005, Mixone)";
+            Text = "DS Pokémon Rom Editor Reloaded " + GetDSPREVersion();
 
             string romFolder = SettingsManager.Settings.openDefaultRom;
             if (romFolder != string.Empty)
@@ -103,7 +103,7 @@ namespace DSPRE
 
         /* ROM Information */
         public static string gameCode;
-        public static byte europeByte;
+        public static byte revisionByte;
         public RomInfo romInfo;
         public Dictionary<ushort /*evFile*/, ushort /*header*/> eventToHeader = new Dictionary<ushort, ushort>();
 
@@ -589,8 +589,8 @@ namespace DSPRE
         {
             unpackBuildingEditorNARCs();
 
-            using (BuildingEditor editor = new BuildingEditor(romInfo))
-                editor.ShowDialog();
+            BuildingEditor editor = new BuildingEditor(romInfo);
+            editor.Show();
         }
         private void unpackBuildingEditorNARCs(bool forceUnpack = false)
         {
@@ -635,11 +635,14 @@ namespace DSPRE
         }
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string message = "DS Pokémon ROM Editor Reloaded by AdAstra/LD3005" + Environment.NewLine + "version " + GetDSPREVersion() + Environment.NewLine
+            string message = "DS Pokémon ROM Editor Reloaded by AdAstra, Mixone, Kuha, Yako & Kalaay" 
+                + Environment.NewLine + "Version " + GetDSPREVersion() 
+                + Environment.NewLine
                 + Environment.NewLine + "Based on Nømura's DS Pokémon ROM Editor 1.0.4."
-                + Environment.NewLine + "Largely inspired by Markitus95's \"Spiky's DS Map Editor\" (SDSME), from which certain assets were also reused." +
-                "Credits go to Markitus, Ark, Zark, Florian, and everyone else who deserves credit for SDSME." + Environment.NewLine
-                + Environment.NewLine + "Special thanks to Trifindo, Mikelan98, Mixone, JackHack96, Pleonex and BagBoy."
+                + Environment.NewLine + "Largely inspired by Markitus95's \"Spiky's DS Map Editor\" (SDSME), from which certain assets were also reused." 
+                + Environment.NewLine + "Credits go to Markitus, Ark, Zark, Florian, and everyone else who deserves credit for SDSME." 
+                + Environment.NewLine
+                + Environment.NewLine + "Special thanks to Trifindo, Mikelan98, JackHack96, Pleonex and BagBoy."
                 + Environment.NewLine + "Their help, research and expertise in many fields of NDS ROM Hacking made the development of this tool possible.";
 
             MessageBox.Show(message, "About...", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -665,8 +668,6 @@ namespace DSPRE
 
             string workDir = DSUtils.WorkDirPathFromFile(openRom.FileName);
             AppLogger.Info(workDir + " will be used as the working directory for the ROM.");
-
-
 
             int userchoice = UnpackRomCheckUserChoice(workDir);
             switch (userchoice)
@@ -825,7 +826,7 @@ namespace DSPRE
 
             if (RomInfo.gameLanguage == GameLanguages.English)
             {
-                if (europeByte == 0x0A)
+                if (revisionByte == 0x0A)
                 {
                     languageLabel.Text += " [Europe]";
                 }
@@ -893,6 +894,12 @@ namespace DSPRE
             gameIcon.Refresh();  // Paint game icon
             AppLogger.Debug("Game icon refreshed.");
 
+            if (!CheckAndDecompressARM9())
+            {
+                AppLogger.Error("ARM9 decompression failed. Aborting.");
+                return;
+            }
+
             ReadROMInitData();
             AppLogger.Info("ROM initialization data loaded.");
         }
@@ -904,26 +911,39 @@ namespace DSPRE
             {
                 gameCode = Encoding.UTF8.GetString(br.ReadBytes(4));
                 br.BaseStream.Position = 0x1E;
-                europeByte = br.ReadByte();
+                revisionByte = br.ReadByte();
             }
+        }
+
+        private bool CheckAndDecompressARM9()
+        {
+            if (!ARM9.CheckCompressionMark())
+            {
+                return true; // ARM9 is not compressed, proceed normally
+            }
+
+            if (!RomInfo.gameFamily.Equals(GameFamilies.HGSS))
+            {
+                MessageBox.Show("Unexpected compressed ARM9. It is advised that you double check the ARM9.");
+                return false;
+            }
+
+            ARM9.EditSize(-12); // Fix ARM9 size before decompression
+
+            if (!ARM9.Decompress(RomInfo.arm9Path))
+            {
+                MessageBox.Show("ARM9 decompression failed. The program can't proceed.\nAborting.",
+                            "Error with ARM9 decompression", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            AppLogger.Info("ARM9 decompressed and size fixed.");
+
+            return true;
         }
 
         private void ReadROMInitData()
         {
-            if (ARM9.CheckCompressionMark())
-            {
-                if (!RomInfo.gameFamily.Equals(GameFamilies.HGSS))
-                {
-                    MessageBox.Show("Unexpected compressed ARM9. It is advised that you double check the ARM9.");
-                }
-                if (!ARM9.Decompress(RomInfo.arm9Path))
-                {
-                    MessageBox.Show("ARM9 decompression failed. The program can't proceed.\nAborting.",
-                                "Error with ARM9 decompression", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-            }
-
             /* Setup essential editors */
             EditorPanels.headerEditor.SetupHeaderEditor(this);
 
@@ -1035,12 +1055,6 @@ namespace DSPRE
 
             Update();
 
-            //for (int i = 0; i < 128; i++) {
-            //    if (!OverlayUtils.IsCompressed(i)) {
-            //        OverlayUtils.Compress(i);
-            //    }
-            //}
-
             bool success = DSUtils.RepackROM(saveRom.FileName);
 
             if (RomInfo.gameFamily != GameFamilies.DP && RomInfo.gameFamily != GameFamilies.Plat)
@@ -1146,9 +1160,10 @@ namespace DSPRE
             OpenCommandsDatabase(RomInfo.BuildCommandNamesDatabase(GameFamilies.HGSS), RomInfo.BuildCommandParametersDatabase(GameFamilies.HGSS),
                 RomInfo.BuildActionNamesDatabase(GameFamilies.HGSS), RomInfo.BuildComparisonOperatorsDatabase(GameFamilies.HGSS));
         }
-        private void manageDatabasesToolStripMenuItem_Click(object sender, EventArgs e) {
-            using (CustomScrcmdManager editor = new CustomScrcmdManager())
-                editor.ShowDialog();
+        private void manageDatabasesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CustomScrcmdManager editor = new CustomScrcmdManager();
+            editor.Show();
         }
         private void mainTabControl_SelectedIndexChanged(object sender, EventArgs e) 
         {
@@ -1240,12 +1255,14 @@ namespace DSPRE
             {
                 case GameFamilies.DP:
                 case GameFamilies.Plat:
-                    using (WildEditorDPPt editor = new WildEditorDPPt(wildPokeUnpackedPath, RomInfo.GetPokemonNames(), encToOpen, EditorPanels.headerEditor.internalNames.Count))
-                        editor.ShowDialog();
+                    WildEditorDPPt wildEditorDppt = new WildEditorDPPt(wildPokeUnpackedPath, RomInfo.GetPokemonNames(),
+                        encToOpen, EditorPanels.headerEditor.internalNames.Count);
+                        wildEditorDppt.Show();
                     break;
                 default:
-                    using (WildEditorHGSS editor = new WildEditorHGSS(wildPokeUnpackedPath, RomInfo.GetPokemonNames(), encToOpen, EditorPanels.headerEditor.internalNames.Count))
-                        editor.ShowDialog();
+                    WildEditorHGSS wildEditorHgss = new WildEditorHGSS(wildPokeUnpackedPath, RomInfo.GetPokemonNames(),
+                        encToOpen, EditorPanels.headerEditor.internalNames.Count);
+                        wildEditorHgss.Show();
                     break;
             }
             Helpers.statusLabelMessage();
@@ -1488,7 +1505,7 @@ namespace DSPRE
             ItemEditor itemEditor = new ItemEditor(
                 RomInfo.GetItemNames()
             );
-            itemEditor.ShowDialog();
+            itemEditor.Show();
 
             Helpers.statusLabelMessage();
             Update();
@@ -1671,7 +1688,7 @@ namespace DSPRE
             Helpers.statusLabelMessage("Setting up Overlay Editor...");
             Update();
             OverlayEditor ovlEditor = new OverlayEditor();
-            ovlEditor.ShowDialog();
+            ovlEditor.Show();
 
             Helpers.statusLabelMessage();
             Update();
@@ -1691,7 +1708,7 @@ namespace DSPRE
                 new TextArchive(RomInfo.moveNamesTextNumbers).messages.ToArray(),
                 moveDescriptions
             );
-            mde.ShowDialog();
+            mde.Show();
 
             Helpers.statusLabelMessage();
             Update();
@@ -1699,8 +1716,8 @@ namespace DSPRE
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (SettingsWindow editor = new SettingsWindow())
-                editor.ShowDialog();
+            SettingsWindow editor = new SettingsWindow();
+             editor.Show();
         }
 
         private void pokemonDataEditorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1719,7 +1736,7 @@ namespace DSPRE
             Helpers.statusLabelMessage();
             Update();
 
-            pde.ShowDialog();
+            pde.Show();
         }
 
 
@@ -1798,6 +1815,8 @@ namespace DSPRE
             Register(EditorPanels.levelScriptEditor, LSEditorPoppedOutLabel, popoutLevelScriptEditorButton);
             Register(EditorPanels.textEditor, textEditorPoppedOutLabel, popoutTextEditorButton);
             Register(EditorPanels.trainerEditor, trainerEditorPoppedOutLabel, popoutTrainerEditorButton);
+            Register(EditorPanels.nsbtxEditor, nsbtxEditorPopOutLabel, popoutNsbtxEditorButton);
+            Register(EditorPanels.eventEditor, eventEditorPopOutLabel, popoutEventEditorButton);
         }
 
         void Register(Control control, Label lbl, Button btn)
@@ -1809,10 +1828,16 @@ namespace DSPRE
 
         private void popoutEditorClickHandler(object sender, EventArgs e)
         {
-            var currentTabInfos = EditorPanels.mainTabControl.SelectedTab;
+            var currentTab = EditorPanels.mainTabControl.SelectedTab;
             if (sender is Button btn && _popouts.TryGetValue(btn, out var cfg))
-                Helpers.PopOutEditor(cfg.Control, currentTabInfos.Text, cfg.PlaceholderLabel, cfg.PopoutButton, mainTabImageList.Images[currentTabInfos.ImageIndex]);
+            {
+                Helpers.PopOutEditor(cfg.Control, currentTab.Text, cfg.PlaceholderLabel, cfg.PopoutButton,
+                    mainTabImageList.Images[currentTab.ImageIndex]);
+            }
         }
+
         #endregion
+
+ 
     }
 }
