@@ -496,12 +496,12 @@ namespace DSPRE {
                 // Loop through all rows
                 for (int row = 0; row < panel.RowCount; row++)
                 {
-                    // The updown is always in column 7
-                    Control updown = panel.GetControlFromPosition(7, row);
+                    // The updown is always in last column
+                    Control updown = panel.GetControlFromPosition(panel.ColumnCount - 1, row);
 
                     // The combo box is the rightmost control besides the updown
                     Control combo = null;
-                    for (int col = 6; col >= 0; col--)
+                    for (int col = panel.ColumnCount - 2; col >= 0; col--)
                     {
                         Control ctrl = panel.GetControlFromPosition(col, row);
                         if (ctrl is InputComboBox)
