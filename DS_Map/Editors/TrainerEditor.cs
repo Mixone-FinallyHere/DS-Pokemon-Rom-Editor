@@ -1115,7 +1115,7 @@ namespace DSPRE.Editors
         private void setTrainerPartyPokemonAbilities(int partyPokemonPosition)
         {
             (string ability1, string ability2) = getPokemonAbilityNames(partyPokemonComboboxList[partyPokemonPosition].SelectedIndex);
-            string noFlags = "No Flag";
+            string noFlags = "Default Ability";
 
             partyAbilityComboBoxList[partyPokemonPosition].Items.Clear();
 
