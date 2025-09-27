@@ -484,57 +484,6 @@ namespace DSPRE {
             superRodRateUpDown.Maximum = 255;
         }
 
-
-        private void DrawConnectingLines()
-        {
-            var panel = walkingTableLayoutPanel;
-            using (Graphics g = panel.CreateGraphics())
-            {
-                Pen dashedPen = new Pen(Color.Gray, 1.5f);
-                dashedPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-
-                // Loop through all rows
-                for (int row = 0; row < panel.RowCount; row++)
-                {
-                    // The updown is always in last column
-                    Control updown = panel.GetControlFromPosition(panel.ColumnCount - 1, row);
-
-                    // The combo box is the rightmost control besides the updown
-                    Control combo = null;
-                    for (int col = panel.ColumnCount - 2; col >= 0; col--)
-                    {
-                        Control ctrl = panel.GetControlFromPosition(col, row);
-                        if (ctrl is InputComboBox)
-                        {
-                            combo = ctrl;
-                            break;
-                        }
-                    }
-
-                    if (combo is InputComboBox && updown is NumericUpDown)
-                    {
-                        // Get the location of the controls relative to the panel
-                        Point comboPoint = panel.PointToClient(combo.Parent.PointToScreen(combo.Location));
-                        Point updownPoint = panel.PointToClient(updown.Parent.PointToScreen(updown.Location));
-
-                        // Calculate the Y center of each control
-                        int comboY = comboPoint.Y + combo.Height / 2;
-                        int updownY = updownPoint.Y + updown.Height / 2;
-
-                        // Draw from right edge of ComboBox to left edge of NumericUpDown
-                        int comboX = comboPoint.X + combo.Width + 5;
-                        int updownX = updownPoint.X - 5;
-
-                        if (updownX > comboX)
-                        {
-                            g.DrawLine(dashedPen, comboX, comboY, updownX, updownY);
-                        }
-                        
-                    }
-                }
-            }
-        }
-
         private void CalculateLabelWidths()
         {
             Label[] imageLabels = { pokeRadarLabel1, pokeRadarLabel2, rubyLabel, sapphireLabel, emeraldLabel, fireRedLabel, leafGreenLabel };
@@ -920,7 +869,6 @@ namespace DSPRE {
             {
                 return;
             }
-            DrawConnectingLines();
             CalculateLabelWidths();
         }
 
