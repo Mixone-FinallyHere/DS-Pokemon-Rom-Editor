@@ -105,8 +105,8 @@ namespace DSPRE {
             /* Walking encounters */
             walkingTwentyFirstComboBox.DataSource = new BindingSource(names, string.Empty);
             walkingTwentySecondComboBox.DataSource = new BindingSource(names, string.Empty);
-            walkingTenFirstComboBox.DataSource = new BindingSource(names, string.Empty);
-            walkingTenSecondComboBox.DataSource = new BindingSource(names, string.Empty);
+            morningFirstComboBox.DataSource = new BindingSource(names, string.Empty);
+            morningSecondComboBox.DataSource = new BindingSource(names, string.Empty);
             walkingTenThirdComboBox.DataSource = new BindingSource(names, string.Empty);
             walkingTenFourthComboBox.DataSource = new BindingSource(names, string.Empty);
             walkingFiveFirstComboBox.DataSource = new BindingSource(names, string.Empty);
@@ -193,9 +193,9 @@ namespace DSPRE {
             walkingTwentyFirstUpDown.Value = currentFile.walkingLevels[0];
             walkingTwentySecondComboBox.SelectedIndex = (int)currentFile.walkingPokemon[1];
             walkingTwentySecondUpDown.Value = currentFile.walkingLevels[1];
-            walkingTenFirstComboBox.SelectedIndex = (int)currentFile.walkingPokemon[2];
+            morningFirstComboBox.SelectedIndex = (int)currentFile.walkingPokemon[2];
             walkingTenFirstUpDown.Value = currentFile.walkingLevels[2];
-            walkingTenSecondComboBox.SelectedIndex = (int)currentFile.walkingPokemon[3];
+            morningSecondComboBox.SelectedIndex = (int)currentFile.walkingPokemon[3];
             walkingTenSecondUpDown.Value = currentFile.walkingLevels[3];
             walkingTenThirdComboBox.SelectedIndex = (int)currentFile.walkingPokemon[4];
             walkingTenThirdUpDown.Value = currentFile.walkingLevels[4];
@@ -341,8 +341,8 @@ namespace DSPRE {
             /*ComboBoxes*/
             walkingTwentyFirstComboBox.SelectedIndexChanged += MarkDirtyWalking;
             walkingTwentySecondComboBox.SelectedIndexChanged += MarkDirtyWalking;
-            walkingTenFirstComboBox.SelectedIndexChanged += MarkDirtyWalking;
-            walkingTenSecondComboBox.SelectedIndexChanged += MarkDirtyWalking;
+            morningFirstComboBox.SelectedIndexChanged += MarkDirtyWalking;
+            morningSecondComboBox.SelectedIndexChanged += MarkDirtyWalking;
             walkingTenThirdComboBox.SelectedIndexChanged += MarkDirtyWalking;
             walkingTenFourthComboBox.SelectedIndexChanged += MarkDirtyWalking;
             walkingFiveFirstComboBox.SelectedIndexChanged += MarkDirtyWalking;
@@ -559,8 +559,8 @@ namespace DSPRE {
             /* Encounters */
             currentFile.walkingPokemon[0] = (uint)walkingTwentyFirstComboBox.SelectedIndex;
             currentFile.walkingPokemon[1] = (uint)walkingTwentySecondComboBox.SelectedIndex;
-            currentFile.walkingPokemon[2] = (uint)walkingTenFirstComboBox.SelectedIndex;
-            currentFile.walkingPokemon[3] = (uint)walkingTenSecondComboBox.SelectedIndex;
+            currentFile.walkingPokemon[2] = (uint)morningFirstComboBox.SelectedIndex;
+            currentFile.walkingPokemon[3] = (uint)morningSecondComboBox.SelectedIndex;
             currentFile.walkingPokemon[4] = (uint)walkingTenThirdComboBox.SelectedIndex;
             currentFile.walkingPokemon[5] = (uint)walkingTenFourthComboBox.SelectedIndex;
             currentFile.walkingPokemon[6] = (uint)walkingFiveFirstComboBox.SelectedIndex;
@@ -718,6 +718,17 @@ namespace DSPRE {
             // Unown forms
             SetToolTipsForControls(new Control[] { unownComboBox },
                 "Sets which Unown forms can appear in this area.\nThe game offers these lists to choose from.");
+
+            // Default encounter slots
+            SetToolTipsForControls(new Control[] {
+                walkingTwentyFirstComboBox, walkingTwentySecondComboBox,
+                walkingTenThirdComboBox, walkingTenFourthComboBox,
+                walkingFiveFirstComboBox, walkingFiveSecondComboBox,
+                walkingFourFirstComboBox, walkingFourSecondComboBox,
+                walkingOneFirstComboBox, walkingOneSecondComboBox,
+                defaultLabel1, defaultLabel2, defaultLabel3, defaultLabel4
+            }, "Default encounter slots.\nThese will be replaced by conditional encounters if their conditions are met.");
+
         }
 
         private void SetToolTipsForControls(IEnumerable<Control> controls, string text)
