@@ -40,22 +40,11 @@ namespace DSPRE.Editors
         private static bool itemEntryDirty = false;
         private static readonly string formName = "Item Data Editor";
 
-        private ItemNarcTableEntry[] itemNarcTable;
         private uint itemNarcTableOffset;
-
-        private HashSet<uint> iconIdSet = new HashSet<uint>();
-        private HashSet<uint> paletteIdSet = new HashSet<uint>();
 
         public ItemEditor(string[] itemFileNames) //, string[] itemDescriptions)
          {      
             itemNarcTableOffset = GetNarcTableOffset();
-            itemNarcTable = new ItemNarcTableEntry[itemFileNames.Length];
-
-            for (int i = 0; i < itemFileNames.Length; i++)
-            {
-                ItemNarcTableEntry itemNarcTableEntry = ReadTableEntry(i);
-                itemNarcTable[i] = itemNarcTableEntry;
-            }
 
             this.itemNames = itemFileNames;
             //this.itemDescriptions = itemDescriptions;
@@ -416,7 +405,7 @@ namespace DSPRE.Editors
             AppLogger.Debug("ItemEditor: ChangeLoadedFile: toLoad = " + toLoad);
 
             currentLoadedId = toLoad;
-            currentLoadedEntry = itemNarcTable[toLoad];
+            currentLoadedEntry = ReadTableEntry(toLoad);
 
             string iconID = currentLoadedEntry.itemIcon.ToString("D4");
             string paletteID = currentLoadedEntry.itemPalette.ToString("D4");
@@ -1015,38 +1004,26 @@ namespace DSPRE.Editors
 
         private void saveItemButton_Click(object sender, EventArgs e)
         {
-            if(Helpers.HandlersDisabled)
+            if (Helpers.HandlersDisabled)
             {
                 return;
             }
 
-            if (currentLoadedEntry.itemData != itemNarcTable[currentLoadedId].itemData)
-            {
-                itemNarcTable[currentLoadedId].itemData = currentLoadedEntry.itemData;
-                byte[] bytes = BitConverter.GetBytes((ushort)currentLoadedEntry.itemData);
-                ARM9.WriteBytes(bytes, itemNarcTableOffset + (uint)(currentLoadedId * 8));
-            }
+            // Write itemData
+            byte[] bytes = BitConverter.GetBytes((ushort)currentLoadedEntry.itemData);
+            ARM9.WriteBytes(bytes, itemNarcTableOffset + (uint)(currentLoadedId * 8));
 
-            if (currentLoadedEntry.itemIcon != itemNarcTable[currentLoadedId].itemIcon)
-            {
-                itemNarcTable[currentLoadedId].itemIcon = currentLoadedEntry.itemIcon;
-                byte[] bytes = BitConverter.GetBytes((ushort)currentLoadedEntry.itemIcon);
-                ARM9.WriteBytes(bytes, itemNarcTableOffset + (uint)(currentLoadedId * 8 + 2));
-            }
-            
-            if (currentLoadedEntry.itemPalette != itemNarcTable[currentLoadedId].itemPalette)
-            {
-                itemNarcTable[currentLoadedId].itemPalette = currentLoadedEntry.itemPalette;
-                byte[] bytes = BitConverter.GetBytes((ushort)currentLoadedEntry.itemPalette);
-                ARM9.WriteBytes(bytes, itemNarcTableOffset + (uint)(currentLoadedId * 8 + 4));
-            }
+            // Write itemIcon
+            bytes = BitConverter.GetBytes((ushort)currentLoadedEntry.itemIcon);
+            ARM9.WriteBytes(bytes, itemNarcTableOffset + (uint)(currentLoadedId * 8 + 2));
 
-            if (currentLoadedEntry.itemAGB != itemNarcTable[currentLoadedId].itemAGB)
-            {
-                itemNarcTable[currentLoadedId].itemAGB = currentLoadedEntry.itemAGB;
-                byte[] bytes = BitConverter.GetBytes((ushort)currentLoadedEntry.itemAGB);
-                ARM9.WriteBytes(bytes, itemNarcTableOffset + (uint)(currentLoadedId * 8 + 6));
-            }
+            // Write itemPalette
+            bytes = BitConverter.GetBytes((ushort)currentLoadedEntry.itemPalette);
+            ARM9.WriteBytes(bytes, itemNarcTableOffset + (uint)(currentLoadedId * 8 + 4));
+
+            // Write itemAGB (Not currently editable, but write it anyway)
+            bytes = BitConverter.GetBytes((ushort)currentLoadedEntry.itemAGB);
+            ARM9.WriteBytes(bytes, itemNarcTableOffset + (uint)(currentLoadedId * 8 + 6));
 
             SetItemEntryDirty(false);
         }
