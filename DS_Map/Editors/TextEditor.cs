@@ -334,7 +334,16 @@ namespace DSPRE.Editors
             if (d.Equals(DialogResult.Yes))
             {
                 /* Delete Text Archive */
-                File.Delete(RomInfo.gameDirs[DirNames.textArchives].unpackedDir + "\\" + (selectTextFileComboBox.Items.Count - 1).ToString("D4"));
+                try
+                {
+                    File.Delete(TextArchive.GetFilePaths(selectTextFileComboBox.Items.Count - 1).txtPath);
+                    File.Delete(TextArchive.GetFilePaths(selectTextFileComboBox.Items.Count - 1).binPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to delete Text Archive files: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
                 /* Check if currently selected file is the last one, and in that case select the one before it */
                 int lastIndex = selectTextFileComboBox.Items.Count - 1;
@@ -709,13 +718,25 @@ namespace DSPRE.Editors
                 Task.Run(() =>
                 {
                     var time = DateTime.Now;
+                    int expandedCount = 0;
+
                     selectTextFileComboBox.Invoke((Action)(() => selectTextFileComboBox.Items.Clear()));
                     for (int i = 0; i < textCount; i++)
                     {
                         
                         try {
-                            var temp = new TextArchive(i);
-                            temp.SaveToExpandedDir(i, false);
+
+                            string expandedPath = TextArchive.GetFilePaths(i).txtPath;
+                            string binPath = TextArchive.GetFilePaths(i).binPath;
+
+                            // Skip if .txt is newer than .bin
+                            if (!File.Exists(expandedPath) || File.GetLastWriteTimeUtc(expandedPath) < File.GetLastWriteTimeUtc(binPath)) 
+                            {
+                                var temp = new TextArchive(i);
+                                temp.SaveToExpandedDir(i, false);
+                                expandedCount++;
+                            }                       
+                                                     
                         }
                         catch (Exception ex)
                         {
@@ -728,13 +749,15 @@ namespace DSPRE.Editors
 
                     _parent.Invoke((Action)(() =>
                     {
+                        loadingForm.UpdateProgress(textCount);
                         Helpers.DisableHandlers();
                         hexRadiobutton.Checked = SettingsManager.Settings.textEditorPreferHex;
                         Helpers.EnableHandlers();
                         selectTextFileComboBox.SelectedIndex = 0;
                         var elapsed = DateTime.Now - time;
                         Helpers.statusLabelMessage($"Loaded text archives in { elapsed.TotalSeconds.ToString("F2") } s");
-                        AppLogger.Info($"Loaded text archives in {elapsed.TotalMilliseconds} ms");
+                        AppLogger.Info($"Loaded text archives in {elapsed.TotalMilliseconds} ms. " +
+                            $"{expandedCount} of {textCount} total files converted to plain text.");
                         loadingForm.Close();
                     }));
                 });

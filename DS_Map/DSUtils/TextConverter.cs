@@ -264,7 +264,9 @@ namespace DSPRE
         {
             List<UInt16> encodedMessage = new List<UInt16>();
 
-            for (int i = 0; i < message.Length;)
+            int i = 0;
+
+            while (i < message.Length)
             {
                 // Regular characters
                 if (GetEncodingMap().ContainsKey(message[i].ToString()))
@@ -275,25 +277,25 @@ namespace DSPRE
                 // Escape sequences
                 else if (message[i] == '\\')
                 {
-                    // Handle single character escape sequences
-                    if (i + 1 < message.Length)
-                    {
-                        string escapeSeq = message.Substring(i, 2);
-                        if (GetEncodingMap().ContainsKey(escapeSeq))
-                        {
-                            encodedMessage.Add(GetEncodingMap()[escapeSeq]);
-                            i += 2;
-                            continue;
-                        }
-                    }
                     // Handle hex escape sequences like \x1234
-                    else if (i + 5 < message.Length && message[i + 1] == 'x')
+                    if (i + 5 < message.Length && message[i + 1] == 'x')
                     {
                         string hexSeq = message.Substring(i + 2, 4);
                         if (ushort.TryParse(hexSeq, System.Globalization.NumberStyles.HexNumber, null, out ushort hexValue))
                         {
                             encodedMessage.Add(hexValue);
                             i += 6;
+                            continue;
+                        }
+                    }
+                    // Handle single character escape sequences
+                    else if (i + 1 < message.Length)
+                    {
+                        string escapeSeq = message.Substring(i, 2);
+                        if (GetEncodingMap().ContainsKey(escapeSeq))
+                        {
+                            encodedMessage.Add(GetEncodingMap()[escapeSeq]);
+                            i += 2;
                             continue;
                         }
                     }

@@ -68,6 +68,48 @@ namespace DSPRE.ROMFiles
             return (binPath, txtPath);
         }
 
+        public static bool BuildRequiredBins()
+        {
+            var expandedTextFiles = Directory.GetFiles(Path.Combine(RomInfo.workDir, "expanded", "textArchives"), "*.txt", SearchOption.AllDirectories);
+            int newerBinCount = 0;
+
+            for (int i = 0; i < expandedTextFiles.Length; i++)
+            {
+                string expandedTextFile = expandedTextFiles[i];
+                string fileName = Path.GetFileNameWithoutExtension(expandedTextFile);
+
+                int archiveID;
+
+                try
+                {
+                    archiveID = int.Parse(fileName);
+                }
+                catch
+                {
+                    AppLogger.Error($"Skipping invalid text archive file name: {fileName}");
+                    continue;
+                }
+
+                string binPath = TextArchive.GetFilePaths(archiveID).binPath;
+
+                // Skip if .bin is newer than .txt
+                if (File.Exists(binPath) && File.GetLastWriteTimeUtc(binPath) > File.GetLastWriteTimeUtc(expandedTextFile))
+                {
+                    newerBinCount++;
+                    continue;
+                }
+
+                var textArchive = new TextArchive(archiveID);
+                textArchive.SaveToDefaultDir(archiveID, false);
+                // Update .txt last write time to prevent it being overwritten when reopening the ROM
+                File.SetLastWriteTimeUtc(expandedTextFile, DateTime.UtcNow);
+            }
+
+            AppLogger.Info($"Text Archive: {expandedTextFiles.Length - newerBinCount} .bin files built from .txt, {newerBinCount} .bin files skipped because they were newer than the .txt");
+
+            return true;
+        }
+
         private bool TryReadPlainTextFile()
         {
             string txtPath = GetFilePaths(ID).txtPath;
@@ -78,16 +120,40 @@ namespace DSPRE.ROMFiles
                 return false;
             }
 
+            // If the .txt file is older than the .bin file, ignore it and re-extract from .bin
             if (File.GetLastWriteTimeUtc(txtPath) < File.GetLastWriteTimeUtc(binPath))
             {
-                //AppLogger.Debug($"Skipped expanding {ID:D4} — already up to date.");
                 return false;
             }
 
             try
             {
-                string[] lines = File.ReadAllLines(txtPath);
-                messages = lines.ToList();
+                List<string> lines = File.ReadAllLines(txtPath).ToList();
+                if (lines.Count == 0)
+                {
+                    AppLogger.Error($"Text file {txtPath} is empty. Bin file will be reextracted.");
+                    return false;
+                }
+
+                // First line should be the key
+                string firstLine = lines[0];
+                if (!firstLine.StartsWith("# Key: "))
+                {
+                    AppLogger.Error($"Text file {txtPath} is missing the key in the first line. Bin file will be reextracted.");
+                    return false;
+                }
+
+                string keyHex = firstLine.Substring(7).Trim();
+                if (!UInt16.TryParse(keyHex.Replace("0x", ""), System.Globalization.NumberStyles.HexNumber, null, out key))
+                {
+                    AppLogger.Error($"Text file {txtPath} has an invalid key format. Bin file will be reextracted.");
+                    return false;
+                }
+
+                // Remove the first line (the key) from the messages
+                lines.RemoveAt(0);
+
+                messages = lines;
                 return true;
             }
             catch (Exception ex)
@@ -148,7 +214,11 @@ namespace DSPRE.ROMFiles
 
             var utf8WithoutBom = new UTF8Encoding(false);
 
-            File.WriteAllText(expandedPath, string.Join(Environment.NewLine, messages), utf8WithoutBom);
+            string firstLine = $"# Key: 0x{key:X4}";
+            string textToSave = string.Join(Environment.NewLine, messages);
+            textToSave = firstLine + Environment.NewLine + textToSave;
+
+            File.WriteAllText(expandedPath, textToSave, utf8WithoutBom);
         }
 
         public void SaveToDefaultDir(int IDtoReplace, bool showSuccessMessage = true)
