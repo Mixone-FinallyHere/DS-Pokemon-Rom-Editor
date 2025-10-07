@@ -144,7 +144,7 @@ namespace DSPRE.Editors
         private void addTextArchiveButton_Click(object sender, EventArgs e)
         {
             /* Add copy of message 0 to text archives folder */
-            new TextArchive(selectTextFileComboBox.Items.Count, new List<string>() { "Your text here." }, discardLines: true).SaveToFileDefaultDir(selectTextFileComboBox.Items.Count);
+            new TextArchive(selectTextFileComboBox.Items.Count, new List<string>() { "Your text here." }).SaveToExpandedDir(selectTextFileComboBox.Items.Count);
 
             /* Update ComboBox and select new file */
             selectTextFileComboBox.Items.Add("Text Archive " + selectTextFileComboBox.Items.Count);
@@ -153,7 +153,7 @@ namespace DSPRE.Editors
 
         private void locateCurrentTextArchive_Click(object sender, EventArgs e)
         {
-            Helpers.ExplorerSelect(Path.Combine(gameDirs[DirNames.textArchives].unpackedDir, EditorPanels.textEditor.currentTextArchive.initialKey.ToString("D4")));
+            Helpers.ExplorerSelect(Path.Combine(gameDirs[DirNames.textArchives].unpackedDir, EditorPanels.textEditor.currentTextArchive.ID.ToString("D4")));
         }
 
         private void addStringButton_Click(object sender, EventArgs e)
@@ -237,7 +237,7 @@ namespace DSPRE.Editors
 
         private void saveTextArchiveButton_Click(object sender, EventArgs e)
         {
-            currentTextArchive.SaveToFileDefaultDir(selectTextFileComboBox.SelectedIndex);
+            currentTextArchive.SaveToExpandedDir(selectTextFileComboBox.SelectedIndex);
             if (selectTextFileComboBox.SelectedIndex == RomInfo.locationNamesTextNumber)
             {
                 ReloadHeaderEditorLocationsList(currentTextArchive.messages, _parent);
@@ -497,7 +497,7 @@ namespace DSPRE.Editors
                         Helpers.DisableHandlers();
 
                         textSearchResultsListBox.Items.Add("Text archive (" + cur + ") - Succesfully edited");
-                        currentTextArchive.SaveToFileDefaultDir(cur, showSuccessMessage: false);
+                        currentTextArchive.SaveToExpandedDir(cur, showSuccessMessage: false);
 
                         if (cur == lastArchiveNumber)
                         {
@@ -708,10 +708,20 @@ namespace DSPRE.Editors
 
                 Task.Run(() =>
                 {
+                    var time = DateTime.Now;
                     selectTextFileComboBox.Invoke((Action)(() => selectTextFileComboBox.Items.Clear()));
                     for (int i = 0; i < textCount; i++)
                     {
-                        ExpandTextFile(i);
+                        
+                        try {
+                            var temp = new TextArchive(i);
+                            temp.SaveToExpandedDir(i, false);
+                        }
+                        catch (Exception ex)
+                        {
+                            AppLogger.Error($"Failed to load Text Archive {i}: {ex.Message}");
+                            continue;
+                        }                        
                         loadingForm.Invoke((Action)(() => loadingForm.UpdateProgress(i + 1)));
                         selectTextFileComboBox.Invoke((Action)(() => selectTextFileComboBox.Items.Add("Text Archive " + i)));
                     }
@@ -722,7 +732,9 @@ namespace DSPRE.Editors
                         hexRadiobutton.Checked = SettingsManager.Settings.textEditorPreferHex;
                         Helpers.EnableHandlers();
                         selectTextFileComboBox.SelectedIndex = 0;
-                        Helpers.statusLabelMessage();
+                        var elapsed = DateTime.Now - time;
+                        Helpers.statusLabelMessage($"Loaded text archives in { elapsed.TotalSeconds.ToString("F2") } s");
+                        AppLogger.Info($"Loaded text archives in {elapsed.TotalMilliseconds} ms");
                         loadingForm.Close();
                     }));
                 });
@@ -730,159 +742,7 @@ namespace DSPRE.Editors
                 // ShowDialog to keep the form modal while allowing background processing
                 loadingForm.ShowDialog();
             }
-        }
-
-        public static void ExpandTextFile(int ID)
-        {
-            string baseDir = RomInfo.gameDirs[DirNames.textArchives].unpackedDir;
-            string expandedDir = Path.Combine(RomInfo.workDir, "expanded", "textArchives");
-            string path = Path.Combine(baseDir, ID.ToString("D4"));
-            string expandedPath = Path.Combine(expandedDir, ID.ToString("D4") + ".txt");
-            string toolPath = Path.Combine(Application.StartupPath, "Tools", "msgenc.exe");
-            string charmapPath = Path.Combine("Tools", "charmap.txt");
-
-            if (!Directory.Exists(expandedDir))
-            {
-                try
-                {
-                    Directory.CreateDirectory(expandedDir);
-                    AppLogger.Info("Created expanded folder \"" + expandedDir + "\".");
-                }
-                catch (IOException)
-                {
-                    MessageBox.Show("Text File has not been extracted.\nCan't create directory: \n" + expandedDir + "\nThis might be a temporary issue.\nMake sure no other process is using it and try again.", "Creation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-            }
-
-            if (File.Exists(expandedPath) && File.GetLastWriteTimeUtc(expandedPath) >= File.GetLastWriteTimeUtc(path))
-            {
-                //AppLogger.Debug($"Skipped expanding {ID:D4} — already up to date.");
-                return;
-            }
-
-            Process expand = new Process();
-            expand.StartInfo.FileName = toolPath;
-            expand.StartInfo.Arguments = $"-d -c \"{charmapPath}\" \"{path}\" \"{expandedPath}\"";
-            expand.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            expand.StartInfo.CreateNoWindow = false;
-
-            try
-            {
-                expand.Start();
-                expand.WaitForExit();
-                AppLogger.Info($"Expanded {ID:D4}");
-            }
-            catch (Win32Exception ex)
-            {
-                MessageBox.Show($"Failed to start msgenc.exe: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            if (ID == RomInfo.trainerNamesMessageNumber)
-            {
-                try
-                {
-                    // Remove TRNAME from text files
-                    string[] lines = File.ReadAllLines(expandedPath);
-                    lines = lines.Select(line => line.Replace("{TRNAME}", "")).ToArray();
-                    File.WriteAllLines(expandedPath, lines, new UTF8Encoding(false));
-                    AppLogger.Info($"Removed {{TRNAME}} from trainer names in {ID:D4}.txt");
-                }
-                catch (IOException ex)
-                {
-                    MessageBox.Show($"Failed to process {expandedPath}: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-            }
-        }
-
-        public static bool CompressTextFile(int ID)
-        {
-            string baseDir = RomInfo.gameDirs[DirNames.textArchives].unpackedDir;
-            string expandedDir = Path.Combine(RomInfo.workDir, "expanded", "textArchives");
-            string path = Path.Combine(baseDir, ID.ToString("D4"));
-            string expandedPath = Path.Combine(expandedDir, ID.ToString("D4") + ".txt");
-            string toolPath = Path.Combine(Application.StartupPath, "Tools", "msgenc.exe");
-            string charmapPath = Path.Combine("Tools", "charmap.txt");
-            string tempPath = Path.Combine(expandedDir, ID.ToString("D4") + "-tmp.txt");
-
-            if (!Directory.Exists(expandedDir))
-            {
-                MessageBox.Show("No expanded files to compress.", "Creation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-
-            if (File.Exists(path) && File.GetLastWriteTimeUtc(path) >= File.GetLastWriteTimeUtc(expandedPath))
-            {
-                AppLogger.Info($"Skipped compressing {ID:D4} — already up to date.");
-                return false;
-            }
-
-            string inputPath = expandedPath;
-            if (ID == RomInfo.trainerNamesMessageNumber)
-            {
-                try
-                {
-                    // Add TRNAME to temp text file to make binary
-                    string[] lines = File.ReadAllLines(expandedPath);
-                    lines = lines.Select(line => string.IsNullOrEmpty(line) ? line : "{TRNAME}" + line).ToArray();
-                    File.WriteAllLines(tempPath, lines, new UTF8Encoding(false));
-                    inputPath = tempPath;
-                    AppLogger.Info($"Created temporary file {tempPath} with {{TRNAME}} added for {ID:D4}");
-                }
-                catch (IOException ex)
-                {
-                    MessageBox.Show($"Failed to create temporary file {tempPath}: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return false;
-                }
-            }
-
-            File.Delete(path);
-            Process expand = new Process();
-            expand.StartInfo.FileName = toolPath;
-            expand.StartInfo.Arguments = $"-e -c \"{charmapPath}\" \"{inputPath}\" \"{path}\"";
-            expand.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            expand.StartInfo.CreateNoWindow = false;
-
-            try
-            {
-                expand.Start();
-                expand.WaitForExit();
-                AppLogger.Info($"Compressed {ID:D4}");
-
-                // Clean up temporary file if it was created
-                if (ID == RomInfo.trainerNamesMessageNumber && File.Exists(tempPath))
-                {
-                    try
-                    {
-                        File.Delete(tempPath);
-                        AppLogger.Info($"Deleted temporary file {tempPath}");
-                    }
-                    catch (IOException ex)
-                    {
-                        AppLogger.Warn($"Failed to delete temporary file {tempPath}: {ex.Message}");
-                    }
-                }
-                return true;
-            }
-            catch (Win32Exception ex)
-            {
-                MessageBox.Show($"Failed to start msgenc.exe: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // Clean up temporary file on failure
-                if (ID == RomInfo.trainerNamesMessageNumber && File.Exists(tempPath))
-                {
-                    try
-                    {
-                        File.Delete(tempPath);
-                        AppLogger.Info($"Deleted temporary file {tempPath} after error");
-                    }
-                    catch (IOException ex2)
-                    {
-                        AppLogger.Warn($"Failed to delete temporary file {tempPath}: {ex2.Message}");
-                    }
-                }
-                return false;
-            }
-        }
+        }              
+         
     }
 }
