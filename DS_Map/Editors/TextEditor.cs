@@ -153,7 +153,11 @@ namespace DSPRE.Editors
 
         private void locateCurrentTextArchive_Click(object sender, EventArgs e)
         {
-            Helpers.ExplorerSelect(Path.Combine(gameDirs[DirNames.textArchives].unpackedDir, EditorPanels.textEditor.currentTextArchive.ID.ToString("D4")));
+            Helpers.ExplorerSelect(TextArchive.GetFilePaths(currentTextArchive.ID).txtPath);
+        }
+        private void openCurrentTxtButton_Click(object sender, EventArgs e)
+        {
+            Helpers.OpenFileWithDefaultApp(TextArchive.GetFilePaths(currentTextArchive.ID).txtPath);
         }
 
         private void addStringButton_Click(object sender, EventArgs e)
@@ -766,7 +770,8 @@ namespace DSPRE.Editors
                 // ShowDialog to keep the form modal while allowing background processing
                 loadingForm.ShowDialog();
             }
-        }              
-         
+        }
+
+        
     }
 }
