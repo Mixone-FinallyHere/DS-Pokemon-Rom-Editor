@@ -254,8 +254,8 @@ namespace DSPRE {
                 int classMessageID = BitConverter.ToUInt16(DSUtils.ReadFromFile(path, startOffset: 1, 2), 0);
                 string currentTrainerName;
 
-                if (i < trainerNames.messages.Count) {
-                    currentTrainerName = trainerNames.messages[i];
+                if (i < trainerNames.GetSimpleTrainerNames().Count) {
+                    currentTrainerName = trainerNames.GetSimpleTrainerNames()[i];
                 } else {
                     currentTrainerName = TrainerFile.NAME_NOT_FOUND;
                 }

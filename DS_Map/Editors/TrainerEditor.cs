@@ -892,14 +892,7 @@ namespace DSPRE.Editors
         {
             currentTrainerFile.name = newName;
             TextArchive trainerNames = new TextArchive(RomInfo.trainerNamesMessageNumber);
-            if (currentTrainerFile.trp.trainerID < trainerNames.messages.Count)
-            {
-                trainerNames.messages[currentTrainerFile.trp.trainerID] = newName;
-            }
-            else
-            {
-                trainerNames.messages.Add(newName);
-            }
+            trainerNames.SetSimpleTrainerName(currentTrainerFile.trp.trainerID, newName);
             trainerNames.SaveToExpandedDir(RomInfo.trainerNamesMessageNumber, showSuccessMessage: false);
         }
         private void UpdateCurrentTrainerClassName(string newName)
@@ -964,7 +957,7 @@ namespace DSPRE.Editors
 
             /* Update ComboBox and select new file */
             trainerComboBox.Items.Add(trainerClasses.messages[0]);
-            trainerNames.messages.Add("");
+            trainerNames.messages.Add("{TRAINER_NAME:}");
             trainerNames.SaveToExpandedDir(RomInfo.trainerNamesMessageNumber, showSuccessMessage: false);
 
             trainerComboBox.SelectedIndex = trainerComboBox.Items.Count - 1;

@@ -1026,7 +1026,6 @@ namespace DSPRE
                 }
             }
 
-
             if (ARM9.CheckCompressionMark())
             {
                 Helpers.statusLabelMessage("Awaiting user response...");

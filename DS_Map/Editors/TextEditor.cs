@@ -742,7 +742,8 @@ namespace DSPRE.Editors
                         {
                             AppLogger.Error($"Failed to load Text Archive {i}: {ex.Message}");
                             continue;
-                        }                        
+                        }
+
                         loadingForm.Invoke((Action)(() => loadingForm.UpdateProgress(i + 1)));
                         selectTextFileComboBox.Invoke((Action)(() => selectTextFileComboBox.Items.Add("Text Archive " + i)));
                     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -231,13 +232,16 @@ namespace DSPRE
         {
             StringBuilder decodedMessage = new StringBuilder();
 
-            for (int i = 0; i < message.Length; i++)
+            int i = 0;
+
+            while (i < message.Length)
             {
                 ushort code = message[i];
                 // Regular characters and escape sequences
                 if (GetDecodingMap().ContainsKey(code))
-                {                    
-                    decodedMessage.Append(GetDecodingMap()[code]);                   
+                {
+                    decodedMessage.Append(GetDecodingMap()[code]);
+                    i++;
                 }
                 // Commands
                 else if (code == 0xFFFE)
@@ -245,6 +249,15 @@ namespace DSPRE
                     var (command, toSkip) = DecodeCommand(message, i);
                     decodedMessage.Append(command);
                     i += toSkip;
+                    i++; // Initial 0xFFFE
+                }
+                // Trainer Name
+                else if (code == 0xF100)
+                {
+                    var (trainerName, toSkip) = DecodeTrainerName(message, i);
+                    decodedMessage.Append(trainerName);
+                    i += toSkip;
+                    i++; // Initial 0xF100
                 }
                 // String terminator
                 else if (code == 0xFFFF)
@@ -255,8 +268,10 @@ namespace DSPRE
                 else
                 {
                     decodedMessage.Append(ToHex(code));
+                    i++;
                 }
             }
+
             return decodedMessage.ToString();
         }
 
@@ -313,6 +328,16 @@ namespace DSPRE
                     if (endIndex != -1)
                     {
                         string command = message.Substring(i, endIndex - i + 1);
+
+                        // Trainer Name special case
+                        if (command.StartsWith("{TRAINER_NAME:") && command.EndsWith("}"))
+                        {
+                            encodedMessage.AddRange(EncodeTrainerName(command));
+                            i = endIndex + 1;
+                            continue;
+                        }
+
+                        // Regular command
                         encodedMessage.AddRange(EncodeCommand(command));
                         i = endIndex + 1;
                         continue;
@@ -321,9 +346,27 @@ namespace DSPRE
                     encodedMessage.Add(0);
                     i++;
                 }
+                // Multi character sequences
+                else if (message[i] == '[')
+                {
+                    int endIndex = message.IndexOf(']', i);
+                    if (endIndex != -1)
+                    {
+                        string multiCharSeq = message.Substring(i, endIndex - i + 1);
+                        if (GetEncodingMap().ContainsKey(multiCharSeq))
+                        {
+                            encodedMessage.Add(GetEncodingMap()[multiCharSeq]);
+                            i = endIndex + 1;
+                            continue;
+                        }
+                        // No match add null char
+                        encodedMessage.Add(0);
+                        i++;
+                    }
+                }
                 // No match
                 else
-                {                    
+                {
                     encodedMessage.Add(0);
                     i++;
                 }
@@ -341,7 +384,7 @@ namespace DSPRE
             // We need at least two more codes (command ID and param count)
             if (startIndex + 1 >= message.Length)
             {
-                return ("\\x0000", 0);
+                return (ToHex(0), 0);
             }
             else if (startIndex + 2 >= message.Length)
             {
@@ -369,12 +412,13 @@ namespace DSPRE
             }
 
             // Special case for string buffer vars that have 1 byte command ids
-            int? specialByte = null;
+            int specialByte = 0;
             
             if (!commandMap.ContainsKey(commandID) && commandMap.ContainsKey((ushort)(commandID & 0xFF00))) 
             {
+                specialByte = (ushort)(commandID & 0x00FF);
                 commandID = (ushort)(commandID & 0xFF00);
-                specialByte = (ushort)(commandID & 0x00FF);            
+                           
             }
 
             StringBuilder sb = new StringBuilder();
@@ -383,10 +427,8 @@ namespace DSPRE
             if (commandMap.ContainsKey(commandID))
             {
                 sb.Append($"{commandMap[commandID]}");
-                if (specialByte.HasValue)
-                {
-                    sb.Append($", {specialByte.Value}");
-                }
+                sb.Append($", {specialByte}");
+
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     sb.Append($", {parameters[i]}");
@@ -419,19 +461,27 @@ namespace DSPRE
             }
             
             string[] parts = command.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length == 0)
+
+            // parts[0] = command name or hex ID
+            // parts[1] = special byte (0 if none)
+            // parts[2..] = parameters
+
+            if (parts.Length < 2)
             {
-                AppLogger.Error($"Empty text command: {command}");
+                AppLogger.Error($"Empty text command: {command}. Replaced with null character.");
                 return new UInt16[] { 0 };
             }
 
             string commandName = parts[0].Trim();
-            ushort parameterCount = (ushort)(parts.Length - 1);
+            string specialByteStr = parts[1].Trim();
+            ushort parameterCount = (ushort)(parts.Length - 2);
 
             List<UInt16> encodedCommand = new List<UInt16>();
 
-            encodedCommand.Add(0xFFFE); // Command start
+            // Command start
+            encodedCommand.Add(0xFFFE);
 
+            // Get ID from name or parse hex
             if (commandMap.ContainsValue(commandName)) 
             {
                 encodedCommand.Add(commandMap.Reverse()[commandName]);
@@ -446,8 +496,17 @@ namespace DSPRE
                 return new UInt16[] { 0 };
             }
 
+            ushort specialByte;
+            if (!ushort.TryParse(specialByteStr, out specialByte))
+            {
+                AppLogger.Error($"Invalid special byte '{specialByteStr}' in command: {command}. Replaced with value '0'");
+                specialByte = 0;
+            }
+
+            encodedCommand[1] |= (ushort)(specialByte & 0x00FF);
             encodedCommand.Add(parameterCount);
-            for (int i = 1; i < parts.Length; i++)
+
+            for (int i = 2; i < parts.Length; i++)
             {
                 string paramStr = parts[i].Trim();
                 if (ushort.TryParse(paramStr, out ushort paramValue))
@@ -463,6 +522,145 @@ namespace DSPRE
 
             return encodedCommand.ToArray();
 
+        }
+
+        private static (string trainerName, int toSkip) DecodeTrainerName(UInt16[] message, int startIndex)
+        {
+            StringBuilder decoded = new StringBuilder();
+            int bit = 0;
+            int arrayIndex = startIndex + 1;
+            int codesConsumed = 1;
+
+            decoded.Append("{TRAINER_NAME:");
+
+            // This code is completely stole from pokeplatinum's msgenc
+            ushort curChar;
+            while (arrayIndex < message.Length)
+            {
+                curChar = (ushort)((message[arrayIndex] >> bit) & 0x1FF);
+                bit += 9;
+
+                if (bit >= 15)
+                {
+                    arrayIndex++;
+                    codesConsumed++;
+                    bit -= 15;
+                    if (bit != 0 && arrayIndex < message.Length)
+                    {
+                        curChar |= (ushort)(((message[arrayIndex] << (9 - bit)) & 0x1FF));
+                    }
+                }
+
+                if (curChar == 0x1FF)
+                    break;
+
+                if (GetDecodingMap().ContainsKey(curChar))
+                {
+                    decoded.Append(GetDecodingMap()[curChar]);
+                }
+                else
+                {
+                    decoded.Append(ToHex(curChar));
+                }
+
+            }
+
+            decoded.Append("}");
+
+            return (decoded.ToString(), codesConsumed);
+        }
+
+        private static UInt16[] EncodeTrainerName(string trainerName)
+        {
+            string nameContent = trainerName.Substring(14, trainerName.Length - 15); // Strip {TRAINER_NAME: and }
+            List<ushort> encodedChars = new List<ushort>();
+            List<ushort> packedCodes = new List<ushort>();
+
+            // Get list of characters to encode
+            foreach (char c in nameContent)
+            {
+                if (GetEncodingMap().ContainsKey(c.ToString()))
+                {
+                    var code = GetEncodingMap()[c.ToString()];
+
+                    // Ensure code fits in 9 bits
+                    if (code >> 9 != 0)
+                    {
+                        AppLogger.Error($"Character '{c}' in trainer name encodes to value larger than 9 bits. Replaced with null char.");
+                        encodedChars.Add(0);
+                    }
+                    else
+                    {
+                        encodedChars.Add(code);
+                    }
+                }
+                else
+                {
+                    AppLogger.Error($"Unknown character '{c}' in trainer name. Replaced with null char.");
+                    encodedChars.Add(0);
+                }
+            }
+
+            // Add trainer name special indicator
+            packedCodes.Add(0xF100);
+
+            int bitBuffer = 0;
+            int bitOffset = 0;
+
+            // Pack 9-bit codes into 15-bit ushort values. MSB is always 0 except for terminator
+            foreach (var code in encodedChars)
+            {
+                bitBuffer |= (code << bitOffset);
+                bitOffset += 9;
+
+                // Check for rollover
+                if (bitOffset >= 15)
+                {
+                    // We have enough bits to write a new ushort
+                    packedCodes.Add((ushort)(bitBuffer & 0x7FFF));
+                    bitBuffer >>= 15;
+                    bitOffset -= 15;
+                }
+            }
+
+            // Add terminator if required
+            // Side Note: All implementations of this that I've seen skip the terminator if there are no more bits to write
+            // This means that if the name length is a multiple of 5 characters, there is no terminator
+            // The regular message terminator (0xFFFF) is still added after the trainer name which ends up catching this but I am unsure whether this is intentional
+            if (bitOffset != 0)
+            {
+                // Shift the remaining 9‑bit terminator (0x1FF) into the buffer, then emit the last 15‑bit word
+                bitBuffer |= (0x1FF << bitOffset);
+                packedCodes.Add((ushort)(bitBuffer & 0x7FFF));
+            }
+
+            return packedCodes.ToArray();
+        }
+
+        public static string GetSimpleTrainerName(string message)
+        {
+            if (string.IsNullOrEmpty(message))
+                return "";
+
+            if (message.StartsWith("{TRAINER_NAME:") && message.EndsWith("}"))
+            {
+                return message.Substring(14, message.Length - 15);
+            }
+
+            return message;
+        }
+
+        public static string GetProperTrainerName(string message, string simpleName)
+        {
+            if (string.IsNullOrEmpty(message))
+                return message;
+
+            if (message.StartsWith("{TRAINER_NAME:") && message.EndsWith("}"))
+            {
+                return "{TRAINER_NAME:" + simpleName + "}";
+            }
+
+            return message;
         }
 
         private static string ToHex(params ushort[] codes)

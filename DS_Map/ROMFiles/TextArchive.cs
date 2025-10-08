@@ -110,6 +110,42 @@ namespace DSPRE.ROMFiles
             return true;
         }
 
+        public List<string> GetSimpleTrainerNames()
+        {
+            List<string> simpleMessages = new List<string>();
+            foreach (string msg in messages)
+            {
+                string simpleMsg = TextConverter.GetSimpleTrainerName(msg);
+                simpleMessages.Add(simpleMsg);
+            }
+            return simpleMessages;
+        }
+
+        public bool SetSimpleTrainerName(int messageIndex, string newSimpleName)
+        {
+            if (messageIndex < 0)
+            {
+                AppLogger.Error($"Invalid message index {messageIndex} for Text Archive ID {ID:D4}");
+                return false;
+            }
+
+            if (messageIndex >= messages.Count)
+            {
+                messages.Add("{TRAINER_NAME:" + newSimpleName + "}");
+                return true;
+            }
+
+            string currentMessage = messages[messageIndex];
+            string updatedMessage = TextConverter.GetProperTrainerName(currentMessage, newSimpleName);
+            if (updatedMessage == currentMessage)
+            {
+                // No change made
+                return false;
+            }
+            messages[messageIndex] = updatedMessage;
+            return true;
+        }
+
         private bool TryReadPlainTextFile()
         {
             string txtPath = GetFilePaths(ID).txtPath;
