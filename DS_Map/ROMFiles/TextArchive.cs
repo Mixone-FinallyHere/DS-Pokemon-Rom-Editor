@@ -186,6 +186,24 @@ namespace DSPRE.ROMFiles
                     return false;
                 }
 
+                // Check for newline character in last line and add a blank line if needed
+                // Since ReadAllLines() trims the newline, we read the last character of the file directly
+                // I hate this - Yako
+                using (FileStream fs = new FileStream(txtPath, FileMode.Open, FileAccess.Read))
+                {
+                    if (fs.Length > 0)
+                    {
+                        fs.Seek(-1, SeekOrigin.End);
+                        int lastByte = fs.ReadByte();
+                        if (lastByte == '\n' || lastByte == '\r')
+                        {
+                            AppLogger.Debug("Prevented last line from being trimmed");
+                            lines.Add(string.Empty);
+                        }
+                    }
+                    fs.Close();
+                }
+
                 // Remove the first line (the key) from the messages
                 lines.RemoveAt(0);
 
