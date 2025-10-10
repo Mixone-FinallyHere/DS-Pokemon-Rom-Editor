@@ -48,7 +48,8 @@ namespace DSPRE.ROMFiles
             // If not, extract from the .bin file
             if (!ReadFromBinFile())
             {
-                MessageBox.Show("Failed to read messages from .bin file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Failed to read messages from .bin file {ID:D4}. Contents were replaced with empty message!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                messages = new List<string> { "" };
                 return;
             }
 
@@ -197,7 +198,6 @@ namespace DSPRE.ROMFiles
                         int lastByte = fs.ReadByte();
                         if (lastByte == '\n' || lastByte == '\r')
                         {
-                            AppLogger.Debug("Prevented last line from being trimmed");
                             lines.Add(string.Empty);
                         }
                     }
@@ -236,7 +236,7 @@ namespace DSPRE.ROMFiles
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error reading .bin file {binPath}: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                AppLogger.Error($"Error reading .bin file {binPath}: {ex.Message}");
                 return false;
             }
         }
@@ -249,7 +249,10 @@ namespace DSPRE.ROMFiles
         public override byte[] ToByteArray()
         {
             Stream stream = new MemoryStream();
-            TextConverter.WriteMessagesToStream(ref stream, messages, key);
+            if (!TextConverter.WriteMessagesToStream(ref stream, messages, key))
+            {
+                AppLogger.Error($"Failed to convert Text Archive ID {ID:D4} to byte array.");
+            }
 
             return ((MemoryStream)stream).ToArray();
         }
