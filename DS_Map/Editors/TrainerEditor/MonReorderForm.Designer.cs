@@ -65,7 +65,7 @@
             this.moveUpButton.Image = global::DSPRE.Properties.Resources.arrowup;
             this.moveUpButton.Location = new System.Drawing.Point(227, 12);
             this.moveUpButton.Name = "moveUpButton";
-            this.moveUpButton.Size = new System.Drawing.Size(32, 23);
+            this.moveUpButton.Size = new System.Drawing.Size(75, 23);
             this.moveUpButton.TabIndex = 2;
             this.moveUpButton.UseVisualStyleBackColor = true;
             this.moveUpButton.Click += new System.EventHandler(this.moveUpButton_Click);
@@ -75,7 +75,7 @@
             this.moveDownButton.Image = global::DSPRE.Properties.Resources.arrowdown;
             this.moveDownButton.Location = new System.Drawing.Point(227, 41);
             this.moveDownButton.Name = "moveDownButton";
-            this.moveDownButton.Size = new System.Drawing.Size(32, 23);
+            this.moveDownButton.Size = new System.Drawing.Size(75, 23);
             this.moveDownButton.TabIndex = 3;
             this.moveDownButton.UseVisualStyleBackColor = true;
             this.moveDownButton.Click += new System.EventHandler(this.moveDownButton_Click);
