@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace DSPRE.Editors.TrainerEditor
+namespace DSPRE.Editors
 {
     public partial class MonReorderForm : Form
     {
@@ -33,35 +33,6 @@ namespace DSPRE.Editors.TrainerEditor
                 string monName = RomInfo.GetPokemonNames()[(int)trainerFile.party[i].pokeID];
                 monListBox.Items.Add($"[{i}] {monName} Lv. {trainerFile.party[i].level}");
             }
-        }
-
-        private void monListBox_DragDrop(object sender, DragEventArgs e)
-        {
-            // Make sure the object being dragged is part of the list box
-            if (!monListBox.Items.Contains(e.Data.GetData(typeof(string))))
-                return;
-
-            string draggedItem = (string)e.Data.GetData(typeof(string));
-
-            // Get the index of the item being dragged
-            int draggedIndex = monListBox.Items.IndexOf(draggedItem);
-
-            // Get the index of the item being dropped onto
-            Point point = monListBox.PointToClient(new Point(e.X, e.Y));
-            int dropIndex = monListBox.IndexFromPoint(point);
-
-            if (dropIndex == -1) dropIndex = monListBox.Items.Count - 1; // If dropped below all items, set to last index
-
-            // Remove the dragged item from its original position and insert it at the new position
-            monListBox.Items.RemoveAt(draggedIndex);
-            monListBox.Items.Insert(dropIndex, draggedItem);
-            monListBox.SelectedIndex = dropIndex; // Select the moved item
-            SetDirty(true);
-        }
-
-        private void saveButton_Click(object sender, EventArgs e)
-        {
-            SaveChanges();
         }
 
         private void SaveChanges()
@@ -122,13 +93,101 @@ namespace DSPRE.Editors.TrainerEditor
             }
             return true; // No unsaved changes, proceed with closing
         }
-
         private void MonReorderForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!CheckUnsavedChanges())
             {
                 e.Cancel = true; // Cancel the form closing
             }
+        }
+
+        private void MoveItem(bool up)
+        {
+            int selectedIndex = monListBox.SelectedIndex;
+            if (selectedIndex == -1) return;
+
+            int newIndex = up ? selectedIndex - 1 : selectedIndex + 1;
+
+            // Check bounds
+            if (newIndex < 0 || newIndex >= monListBox.Items.Count) return;
+
+            // Swap items
+            var item = monListBox.Items[selectedIndex];
+            monListBox.Items.RemoveAt(selectedIndex);
+            monListBox.Items.Insert(newIndex, item);
+            monListBox.SelectedIndex = newIndex; // Reselect the moved item
+
+            SetDirty(true);
+        }
+
+        private void UpdateButtonStates()
+        {
+            int selectedIndex = monListBox.SelectedIndex;
+            moveUpButton.Enabled = selectedIndex > 0;
+            moveDownButton.Enabled = selectedIndex != -1 && selectedIndex < monListBox.Items.Count - 1;
+        }
+
+        private void saveButton_Click(object sender, EventArgs e)
+        {
+            SaveChanges();
+        }
+
+        private void monListBox_DragDrop(object sender, DragEventArgs e)
+        {
+            // Make sure the object being dragged is part of the list box
+            if (!monListBox.Items.Contains(e.Data.GetData(typeof(string))))
+                return;
+
+            string draggedItem = (string)e.Data.GetData(typeof(string));
+
+            // Get the index of the item being dragged
+            int draggedIndex = monListBox.Items.IndexOf(draggedItem);
+
+            // Get the index of the item being dropped onto
+            Point point = monListBox.PointToClient(new Point(e.X, e.Y));
+            int dropIndex = monListBox.IndexFromPoint(point);
+
+            if (dropIndex == -1) dropIndex = monListBox.Items.Count - 1; // If dropped below all items, set to last index
+
+            // Remove the dragged item from its original position and insert it at the new position
+            monListBox.Items.RemoveAt(draggedIndex);
+            monListBox.Items.Insert(dropIndex, draggedItem);
+            monListBox.SelectedIndex = dropIndex; // Select the moved item
+            SetDirty(true);
+        }
+
+        private void monListBox_MouseDown(object sender, MouseEventArgs e)
+        {
+            // Start the drag-and-drop operation when an item is clicked
+            if (monListBox.SelectedItem == null) return;
+            monListBox.DoDragDrop(monListBox.SelectedItem, DragDropEffects.Move);
+        }
+
+        private void monListBox_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(string)))
+            {
+                e.Effect = DragDropEffects.Move;
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void moveUpButton_Click(object sender, EventArgs e)
+        {
+            MoveItem(true);
+        }
+
+        private void moveDownButton_Click(object sender, EventArgs e)
+        {
+            MoveItem(false);
+        }
+
+        private void monListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateButtonStates();
         }
     }
 }
