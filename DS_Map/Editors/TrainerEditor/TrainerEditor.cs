@@ -15,6 +15,7 @@ using System.Windows.Forms;
 using static DSPRE.RomInfo;
 using static DSPRE.ROMFiles.SpeciesFile;
 using Images;
+using DSPRE.Editors.TrainerEditor;
 
 namespace DSPRE.Editors
 {
@@ -1277,5 +1278,13 @@ namespace DSPRE.Editors
 
         }
 
+        private void reorderButton_Click(object sender, EventArgs e)
+        {
+            var reorderForm = new Editors.TrainerEditor.MonReorderForm(currentTrainerFile);
+            reorderForm.ShowDialog();
+
+            currentTrainerFile = reorderForm.trainerFile;
+            RefreshTrainerPartyGUI();
+        }
     }
 }
