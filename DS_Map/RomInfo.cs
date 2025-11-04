@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using Path = System.IO.Path;
 
@@ -20,6 +21,7 @@ namespace DSPRE
         public const string folderSuffix = "_DSPRE_contents"; // changed back to public static string
         private const string dataFolderName = @"data";
 
+        public static bool isHGE { get; private set; }
         public static string romID { get; private set; }
         public static string projectName { get; private set; }
         public static string workDir { get; private set; }
@@ -212,6 +214,28 @@ namespace DSPRE
             }
 
             romID = id;
+            if (gameVersion == GameVersions.HeartGold && gameLanguage == GameLanguages.English)
+            {
+                string ov129path = OverlayUtils.GetPath(129);
+                if (File.Exists(ov129path))
+                {
+                    using (DSUtils.EasyReader br = new DSUtils.EasyReader(ov129path))
+                    {
+                        string gameCode = Encoding.UTF8.GetString(br.ReadBytes(16));
+                        if (gameCode == "hg-engine rocks!")
+                        {
+                            isHGE = true;
+                        }
+                        else
+                        {
+                            isHGE = false;
+                        }
+                    }                    
+                } else
+                {
+                    isHGE = false;
+                }
+            }
             projectName = Path.GetFileNameWithoutExtension(romFolderName);
 
             LoadGameFamily();
@@ -256,64 +280,50 @@ namespace DSPRE
         public static void InitScriptDBs()
         {
             Helpers.InitializeScriptDatabase(projectName, gameFamily, gameVersion);
-            }
-
-        public static Dictionary<ushort, string> BuildCommandNamesDatabase(GameFamilies gameFam)
-        {
-            Dictionary<ushort, string> commonDictionaryNames;
-            Dictionary<ushort, string> specificDictionaryNames;
-
-            switch (gameFam)
-            {
-                case GameFamilies.DP:
-                    commonDictionaryNames = ScriptDatabase.DPScrCmdNames;
-                    specificDictionaryNames = new Dictionary<ushort, string>();
-                    break;
-
-                case GameFamilies.Plat:
-                    commonDictionaryNames = ScriptDatabase.PlatScrCmdNames;
-                    specificDictionaryNames = new Dictionary<ushort, string>();
-                    break;
-
-                default:
-                    commonDictionaryNames = ScriptDatabase.HGSSScrCmdNames;
-#if true
-                    specificDictionaryNames = new Dictionary<ushort, string>();
-#else
-                        specificDictionaryNames = ScriptDatabase.CustomScrCmdNames;
-#endif
-                    break;
-            }
-            return commonDictionaryNames.Concat(specificDictionaryNames).ToLookup(x => x.Key, x => x.Value).ToDictionary(x => x.Key, g => g.First());
         }
 
-        public static Dictionary<ushort, byte[]> BuildCommandParametersDatabase(GameFamilies gameFam)
+        public static void ReloadScriptCommandDictionaries()
         {
-            Dictionary<ushort, byte[]> commonDictionaryParams;
-            Dictionary<ushort, byte[]> specificDictionaryParams;
+            ScriptCommandParametersDict = BuildCommandParametersDatabase(gameFamily);
+            ScriptCommandNamesDict = BuildCommandNamesDatabase(gameFamily);
+            ScriptActionNamesDict = BuildActionNamesDatabase(gameFamily);
+            ScriptComparisonOperatorsDict = BuildComparisonOperatorsDatabase(gameFamily);
+            ScriptCommandNamesReverseDict = ScriptCommandNamesDict.Reverse();
+            ScriptActionNamesReverseDict = ScriptActionNamesDict.Reverse();
+            ScriptComparisonOperatorsReverseDict = ScriptComparisonOperatorsDict.Reverse();
+        }
 
-            switch (gameFam)
+        public static Dictionary<ushort, ScriptCommandInfo> GetScriptCommandInfoDict()
+        {
+            switch (gameFamily)
             {
                 case GameFamilies.DP:
-                    commonDictionaryParams = ScriptDatabase.DPScrCmdParameters;
-                    specificDictionaryParams = new Dictionary<ushort, byte[]>();
-                    break;
-
+                    return ScriptDatabase.DPScrCmdInfo;
                 case GameFamilies.Plat:
-                    commonDictionaryParams = ScriptDatabase.PlatScrCmdParameters;
-                    specificDictionaryParams = new Dictionary<ushort, byte[]>();
-                    break;
-
+                    return ScriptDatabase.PlatScrCmdInfo;
+                case GameFamilies.HGSS:
+                    return ScriptDatabase.HGSSScrCmdInfo;
                 default:
-                    commonDictionaryParams = ScriptDatabase.HGSSScrCmdParameters;
-#if true
-                    specificDictionaryParams = new Dictionary<ushort, byte[]>();
-#else
-                        specificDictionaryParams = ScriptDatabase.CustomScrCmdParameters;
-#endif
-                    break;
+                    return new Dictionary<ushort, ScriptCommandInfo>();
             }
-            return commonDictionaryParams.Concat(specificDictionaryParams).ToLookup(x => x.Key, x => x.Value).ToDictionary(x => x.Key, g => g.First());
+        }
+
+        /// <summary>
+        /// Builds the command names dictionary from ScriptCommandInfo objects.
+        /// </summary>
+        public static Dictionary<ushort, string> BuildCommandNamesDatabase(GameFamilies gameFam)
+        {
+            var cmdInfoDict = GetScriptCommandInfoDict();
+            return cmdInfoDict.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Name);
+        }
+
+        /// <summary>
+        /// Builds the command parameters dictionary from ScriptCommandInfo objects.
+        /// </summary>
+        public static Dictionary<ushort, byte[]> BuildCommandParametersDatabase(GameFamilies gameFam)
+        {
+            var cmdInfoDict = GetScriptCommandInfoDict();
+            return cmdInfoDict.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ParameterSizes);
         }
 
         public static Dictionary<ushort, string> BuildActionNamesDatabase(GameFamilies gameFam)
@@ -1118,8 +1128,10 @@ namespace DSPRE
                     break;
             }
         }
-        private static void SetMoveTextNumbers() {
-            switch (gameFamily) {
+        private static void SetMoveTextNumbers()
+        {
+            switch (gameFamily)
+            {
                 case GameFamilies.DP:
                     moveDescriptionsTextNumbers = 587;
                     moveNamesTextNumbers = 588;
@@ -1136,8 +1148,10 @@ namespace DSPRE
             }
         }
 
-        private static void SetTrainerFunnyScriptNumber() {
-            switch (gameFamily) {
+        private static void SetTrainerFunnyScriptNumber()
+        {
+            switch (gameFamily)
+            {
                 case GameFamilies.DP:
                     trainerFunnyScriptNumber = 851;
                     break;
@@ -1151,7 +1165,7 @@ namespace DSPRE
                     break;
             }
         }
-        
+
         private static void SetTypesTextNumber()
         {
             switch (gameFamily)
